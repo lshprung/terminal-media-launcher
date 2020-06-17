@@ -12,6 +12,9 @@ void draw_win(char *title, int x, int y, int width, int height);
 void fill_groups(GROUP **group_arr, int count, int startx, int starty, int maxx, int maxy);
 char *trim_group_name(GROUP *g, int max_len);
 
+int g_hover = 0;
+int e_hover = 0;
+
 int main(){
 	static int width;
 	static int height;
@@ -21,9 +24,14 @@ int main(){
 	int g_count;
 
 	initscr();
+	cbreak();
+	start_color();
 
 	width = getmaxx(stdscr);
 	height = getmaxy(stdscr);
+	init_pair(0, COLOR_WHITE, COLOR_BLACK);
+	init_pair(1, COLOR_BLACK, COLOR_WHITE);
+	attron(COLOR_PAIR(1));
 
 	//title at the top (Terminal Media Launcher) (23 chars)
 	draw_title(width);
@@ -46,6 +54,9 @@ int main(){
 	g = get_groups(); //retrieve results of previous function
 	g_count = get_gcount(g); //retrieve number of groups in g
 	fill_groups(g, g_count, 1, 5, ((width/3)-1), height);
+
+	//start with hover on the default group
+	
 
 	/*
 	//DEBUG
