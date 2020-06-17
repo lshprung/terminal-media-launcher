@@ -1,0 +1,146 @@
+#include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include "entry.h"
+#include "group.h"
+#define BUF_LEN 1024
+
+typedef struct group{
+	char name[BUF_LEN];
+	char path[BUF_LEN];
+	char program[BUF_LEN];
+	struct entry *head;
+	struct entry *tail;
+	struct group *next;
+	int entry_count;
+} GROUP;
+
+GROUP *create_group(char *new_path);
+void group_add(char *gname, ENTRY *addme);
+GROUP **get_groups();
+char *get_gname(GROUP *g);
+char *get_gpath(GROUP *g);
+char *get_gprog(GROUP *g);
+ENTRY *get_ghead(GROUP *g);
+int get_ecount(GROUP *g);
+int get_gcount();
+void group_debug(); //debug function to output all groups
+
+GROUP *groups_head;
+GROUP *gp; //pointer to remember last group that was looked at
+int group_count = 0;
+int total_count = 0;
+
+GROUP *create_group(char *new_path){
+	GROUP *new = malloc(sizeof(GROUP));
+
+	strcpy(new->name, new_path); //by default, group name is equivalent to the path
+	strcpy(new->path, new_path);
+	strcpy(new->program, "./"); //by default, launch an entry by executing it
+	new->head = NULL;
+	new->tail = NULL;
+	new->next = NULL;
+	new->entry_count = 0;
+
+	group_count++;
+	return new;
+}
+
+//FIXME maybe make this function part of a seperate file to handle a tree (AVL?)
+//for now, simple linked list implementation
+void group_add(char *gname, ENTRY *addme){
+	int i;
+	GROUP *new;
+	GROUP *last = NULL; //last element in an existing group list (NULL to start)
+
+	//The previous group is not the same as the new group to add to
+	if(!(gp != NULL && (!(strcmp(gp->name, gname)) || !(strcmp(gp->path, gname))))){
+		gp = groups_head;
+		while(gp != NULL){
+			//gname matches groups[i]'s name or path, add entry here
+			if(!(strcmp(gp->name, gname)) || !(strcmp(gp->path, gname))) break;
+
+			last = gp;
+			gp = gp->next;
+		}
+	}
+
+	//was unable to find a matching existing group
+	//need to create new group to insert the entry into
+	if(gp == NULL){
+		new = create_group(gname);
+
+		//first group
+		if(last == NULL) groups_head = new;
+
+		//add to the end of the groups
+		else last->next = new;
+
+		gp = new;
+	}
+
+	//add the entry to the list of entries in the group
+	gp->tail = entry_add_last(gp->tail, addme);
+	if(gp->head == NULL) gp->head = gp->tail; //first element of the new list
+
+	gp->entry_count++;
+	total_count++;
+	return;
+}
+
+GROUP **get_groups(){
+	GROUP **arr = malloc(sizeof(GROUP *) * group_count);
+	GROUP *trav = groups_head;
+	int i;
+
+	for(i = 0; i < group_count; i++){
+		arr[i] = trav;
+		trav = trav->next;
+	}
+
+	return arr;
+}
+
+char *get_gname(GROUP *g){
+	assert(g != NULL);
+	return g->name;
+}
+
+char *get_gpath(GROUP *g){
+	assert(g != NULL);
+	return g->path;
+}
+
+char *get_gprog(GROUP *g){
+	assert(g != NULL);
+	return g->program;
+}
+
+ENTRY *get_ghead(GROUP *g){
+	assert(g != NULL);
+	return g->head;
+}
+
+int get_ecount(GROUP *g){
+	assert(g != NULL);
+	return g->entry_count;
+}
+
+int get_gcount(){
+	return group_count;
+}
+
+void group_debug(){
+	GROUP *trav = groups_head;
+	
+	while(trav != NULL){
+		entry_debug(trav->head);
+		printf("\tfrom group %s\n", trav->name);
+		trav = trav->next;
+	}
+
+	return;
+}
