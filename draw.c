@@ -7,21 +7,35 @@
 #define MAX_LEN 6
 #define BUF_LEN 1024
 
-void draw_title(int width);
-void draw_win(char *title, int x, int y, int width, int height);
-void fill_groups(GROUP **group_arr, int count, int startx, int starty, int maxx, int maxy);
-char *trim_group_name(GROUP *g, int max_len);
+void draw_title();
+void draw_win(WINDOW *new, char *title);
+void fill_groups(GROUP **group_arr, int count);
+void fill_entries(ENTRY **entry_arr, int count);
+char *trim_name(char *name, char *path, int max_len);
+void update_entries();
+void switch_col();
+void arrowkey_handler(int c);
+void trav_col(int dir); //0 = down, 1 = up
 
+static int width;
+static int height;
+WINDOW *group_win;
+WINDOW *entry_win;
+WINDOW *info_win;
 int g_hover = 0;
 int e_hover = 0;
+int true_hover = 0;
+GROUP **g;
+ENTRY **e;
+int g_count;
+int e_count;
+
+//TODO consider figuring out where some refreshes are unecessary
 
 int main(){
-	static int width;
-	static int height;
 	bool tall = true; //is the window a certain height (tbd what the threshold should be TODO)
 	bool wide = true; //is the window a certain width (tbd what the threshold should be TODO)
-	GROUP **g;
-	int g_count;
+	char input;
 
 	initscr();
 	cbreak();
@@ -31,10 +45,11 @@ int main(){
 	height = getmaxy(stdscr);
 	init_pair(0, COLOR_WHITE, COLOR_BLACK);
 	init_pair(1, COLOR_BLACK, COLOR_WHITE);
-	attron(COLOR_PAIR(1));
+	init_pair(2, COLOR_BLACK, COLOR_YELLOW);
+	attron(COLOR_PAIR(0));
 
 	//title at the top (Terminal Media Launcher) (23 chars)
-	draw_title(width);
+	draw_title();
 
 	//Draw Search Bar 2 spaces (3 spaces if window is big enough) under the title
 	move(3, width/4);
@@ -45,32 +60,58 @@ int main(){
 
 	//Draw Columns 
 	//TODO create conditionals based on size of window)
-	draw_win("GROUP", 0, 4, width/3, height-4);
-	draw_win("ENTRY", (width/3), 4, width/3, height-4);
-	draw_win("INFO", (2*width/3), 4, width/3, height-4);
+	group_win = newwin(height-4, width/3, 4, 0);
+	entry_win = newwin(height-4, width/3, 4, width/3);
+	info_win = newwin(height-4, width/3, 4, (2*width)/3);
+	refresh();
+	draw_win(group_win, "GROUP");
+	draw_win(entry_win, "ENTRY");
+	draw_win(info_win, "INFO");
 
 	//Fill Groups
 	cfg_interp(); //read the contents of the cfg file
 	g = get_groups(); //retrieve results of previous function
 	g_count = get_gcount(g); //retrieve number of groups in g
-	fill_groups(g, g_count, 1, 5, ((width/3)-1), height);
+	fill_groups(g, g_count);
 
-	//start with hover on the default group
+	//start with hover on the first group, draw the entries from the selected group, true_hover is over the groups (rather than the entries)
+	mvwchgat(group_win, 1, 1, group_win->_maxx, A_DIM, 2, NULL);
+	wrefresh(group_win);
+	update_entries();
+	move(3, (width/4)+10);
+
+	//drawing is done, now run a while loop to receive input
+	while(1){
+		input = getch();
+
+		switch(input){
+			case '\t':
+				//switch true_hover to look at the other column (TODO this code could use some polish)
+				switch_col();
+				break;
+
+			case 27: //some arrow key was pressed
+				//TODO FIXME retarded issue here regarding key intake being dumped to screen (doesn't like arrow keys :()
+				//This may require a greater rewrite and a better understanding of keys in ncurses
+				getch();
+				arrowkey_handler(getch());
+				fflush(stdout);
+				break;
+
+			default:
+				endwin();
+				return 0;
+
+		}
+
+		move(3, (width/4)+10); //reset cursor location to the search bar after any action
+	}
 	
-
-	/*
-	//DEBUG
-	move(5, 1);
-	printw("This is test output to test the limits of a window");
-	//END DEBUG
-	*/
-
-	getch();
 	endwin();
 	return 0;
 }
 
-void draw_title(int width){
+void draw_title(){
 	WINDOW *title;
 
 	title = newwin(2, width, 0, 0);
@@ -85,14 +126,12 @@ void draw_title(int width){
 	return;
 }
 
-void draw_win(char *title, int x, int y, int width, int height){
-	WINDOW *new;
+//FIXME issue rendering boxes
+void draw_win(WINDOW *new, char *title){
 	int title_len = strlen(title);
 
-	new = newwin(height, width, y, x);
-	refresh();
 	attron(A_UNDERLINE);
-	move(y, x+(width-title_len)/2);
+	move(4, new->_begx+(new->_maxx-title_len)/2);
 	printw("%s", title);
 	attroff(A_UNDERLINE);
 	box(new, 0, 0);
@@ -101,32 +140,54 @@ void draw_win(char *title, int x, int y, int width, int height){
 	return;
 }
 
-void fill_groups(GROUP **group_arr, int count, int startx, int starty, int maxx, int maxy){
+void fill_groups(GROUP **group_arr, int count){
 	int i;
-	int max_len = maxx - startx; //longest possible string length that can be displayed in the window
+	int max_len = group_win->_maxx; //longest possible string length that can be displayed in the window
+	int ycoord = 1;
 	char *name;
 
 	for(i = 0; i < count; i++){
 		name = get_gname(group_arr[i]);
 
 		//the name is too long, take the group to the trimming function
-		if(strlen(name) > max_len) name = trim_group_name(group_arr[i], max_len);
-		move(starty, startx);
-		printw("%s", name);
-		starty++;
+		if(strlen(name) > max_len) name = trim_name(name, get_gpath(group_arr[i]), max_len);
+		wmove(group_win, ycoord, 1);
+		wprintw(group_win, "%s", name);
+		ycoord++;
 	}
 
+	wrefresh(group_win);
 	return;
 }
 
-char *trim_group_name(GROUP *g, int max_len){
-	char *name = get_gname(g);
+//very similar to the previous function, perhaps they can be combined... (TODO)
+void fill_entries(ENTRY **entry_arr, int count){
+	int i;
+	int max_len = entry_win->_maxx; //longest possible string length that can be displayed in the window
+	int ycoord = 1;
+	char *name;
+
+	for(i = 0; i < count; i++){
+		name = get_ename(entry_arr[i]);
+
+		//the name is too long, take the group to the trimming function
+		if(strlen(name) > max_len) name = trim_name(name, get_epath(entry_arr[i]), max_len);
+		wmove(entry_win, ycoord, 1);
+		wprintw(entry_win, "%s", name);
+		ycoord++;
+	}
+
+	wrefresh(entry_win);
+	return;
+}
+
+char *trim_name(char *name, char *path, int max_len){
 	char *tok; //for use in finding relative path name
 	char *tok_ahead;
 	char *delims = "/\t\n";
 
 	//group name and path are equivalent: special procedure
-	if(!(strcmp(name, get_gpath(g)))){
+	if(!(strcmp(name, path))){
 		//find relative path name
 		tok_ahead = strtok(name, delims);
 		while(tok_ahead != NULL){
@@ -139,4 +200,80 @@ char *trim_group_name(GROUP *g, int max_len){
 
 	name[max_len] = '\0';
 	return name;
+}
+
+void update_entries(){
+	//reset the entry window 
+	wclear(entry_win);
+	wrefresh(entry_win);
+
+	e_count = get_ecount(g[g_hover]);
+	e = get_entries(get_ghead(g[g_hover]), e_count);
+	fill_entries(e, e_count);
+	//FIXME weird box rendering issue after the previous function call
+	mvwchgat(entry_win, 1, 1, entry_win->_maxx, A_DIM, 1, NULL);
+
+	return;
+}
+
+void switch_col(){
+	true_hover = (true_hover+1) % 2;
+	if(true_hover){
+		mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx, A_DIM, 1, NULL); //adjust group light
+		mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx, A_DIM, 2, NULL); //adjust entry light
+	}
+	else{
+		mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx, A_DIM, 2, NULL); //adjust group light
+		mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx, A_DIM, 1, NULL); //adjust entry light
+	}
+	move(3, (width/4)+10);
+
+	wrefresh(group_win);
+	wrefresh(entry_win);
+	return;
+}
+
+void arrowkey_handler(int c){
+
+	switch(c){
+		case 66: //down arrow
+			trav_col(0);
+			break;
+
+		case 65: //up arrow (TODO combine the code with that for down arrow)
+			trav_col(1);
+			break;
+
+		default: //left or right arrow key
+			switch_col();
+			break;
+	}
+
+	return;
+}
+
+void trav_col(int dir){
+	int *focus = (true_hover ? &e_hover : &g_hover); //make it easy to know which column we are looking at
+	int count = (true_hover ? e_count : g_count);
+
+	//check if the traversal is valid (i.e. not at top/bottom), exit if not
+	//FIXME check that third parameter... might not be right (could cause issues)
+	if((dir && !(*focus)) || (!dir && (*focus == count-1)) || (!dir && (*focus == height))) return;
+
+	//reset previously highlighted entry and group, change focus
+	mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx, A_NORMAL, 0, NULL);
+	mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx, A_NORMAL, 0, NULL);
+	(dir ? (*focus)-- : (*focus)++);
+
+	//highlight newly hovered upon entry/group
+	mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx, A_DIM, (true_hover ? 2 : 1), NULL);
+	mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx, A_DIM, (true_hover ? 1 : 2), NULL);
+	if(!true_hover){ //a little extra work regarding group hover
+		update_entries();
+		e_hover = 0;
+	}
+
+	wrefresh(group_win);
+	wrefresh(entry_win);
+	return;
 }
