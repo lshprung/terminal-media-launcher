@@ -14,7 +14,6 @@ void fill_entries(ENTRY **entry_arr, int count);
 char *trim_name(char *name, char *path, int max_len);
 void update_entries();
 void switch_col();
-void arrowkey_handler(int c);
 void trav_col(int dir); //0 = down, 1 = up
 
 static int width;
@@ -35,10 +34,11 @@ int e_count;
 int main(){
 	bool tall = true; //is the window a certain height (tbd what the threshold should be TODO)
 	bool wide = true; //is the window a certain width (tbd what the threshold should be TODO)
-	char input;
+	int input;
 
 	initscr();
 	cbreak();
+	keypad(stdscr, true);
 	start_color();
 
 	width = getmaxx(stdscr);
@@ -85,17 +85,19 @@ int main(){
 		input = getch();
 
 		switch(input){
-			case '\t':
+			case 9: //tab key
+			case KEY_LEFT:
+			case KEY_RIGHT:
 				//switch true_hover to look at the other column (TODO this code could use some polish)
 				switch_col();
 				break;
 
-			case 27: //some arrow key was pressed
-				//TODO FIXME retarded issue here regarding key intake being dumped to screen (doesn't like arrow keys :()
-				//This may require a greater rewrite and a better understanding of keys in ncurses
-				getch();
-				arrowkey_handler(getch());
-				fflush(stdout);
+			case KEY_DOWN:
+				trav_col(0);
+				break;
+
+			case KEY_UP:
+				trav_col(1);
 				break;
 
 			default:
@@ -230,25 +232,6 @@ void switch_col(){
 
 	wrefresh(group_win);
 	wrefresh(entry_win);
-	return;
-}
-
-void arrowkey_handler(int c){
-
-	switch(c){
-		case 66: //down arrow
-			trav_col(0);
-			break;
-
-		case 65: //up arrow (TODO combine the code with that for down arrow)
-			trav_col(1);
-			break;
-
-		default: //left or right arrow key
-			switch_col();
-			break;
-	}
-
 	return;
 }
 
