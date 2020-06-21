@@ -75,7 +75,7 @@ int main(){
 	fill_groups(g, g_count);
 
 	//start with hover on the first group, draw the entries from the selected group, true_hover is over the groups (rather than the entries)
-	mvwchgat(group_win, 1, 1, group_win->_maxx, A_DIM, 2, NULL);
+	mvwchgat(group_win, 1, 1, group_win->_maxx-1, A_DIM, 2, NULL);
 	wrefresh(group_win);
 	update_entries();
 	move(3, (width/4)+10);
@@ -128,15 +128,14 @@ void draw_title(){
 	return;
 }
 
-//FIXME issue rendering boxes
 void draw_win(WINDOW *new, char *title){
 	int title_len = strlen(title);
 
-	attron(A_UNDERLINE);
-	move(4, new->_begx+(new->_maxx-title_len)/2);
-	printw("%s", title);
-	attroff(A_UNDERLINE);
 	box(new, 0, 0);
+	attron(A_UNDERLINE);
+	wmove(new, 0, (new->_maxx - title_len)/2);
+	wprintw(new, "%s", title);
+	attroff(A_UNDERLINE);
 	wrefresh(new);
 
 	return;
@@ -144,7 +143,7 @@ void draw_win(WINDOW *new, char *title){
 
 void fill_groups(GROUP **group_arr, int count){
 	int i;
-	int max_len = group_win->_maxx; //longest possible string length that can be displayed in the window
+	int max_len = group_win->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
 	char *name;
 
@@ -165,7 +164,7 @@ void fill_groups(GROUP **group_arr, int count){
 //very similar to the previous function, perhaps they can be combined... (TODO)
 void fill_entries(ENTRY **entry_arr, int count){
 	int i;
-	int max_len = entry_win->_maxx; //longest possible string length that can be displayed in the window
+	int max_len = entry_win->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
 	char *name;
 
@@ -183,6 +182,7 @@ void fill_entries(ENTRY **entry_arr, int count){
 	return;
 }
 
+//FIXME issue trimming entry
 char *trim_name(char *name, char *path, int max_len){
 	char *tok; //for use in finding relative path name
 	char *tok_ahead;
@@ -205,28 +205,31 @@ char *trim_name(char *name, char *path, int max_len){
 }
 
 void update_entries(){
-	//reset the entry window 
+	//reset the entry window (including reboxing and redrawing the title
 	wclear(entry_win);
+	box(entry_win, 0, 0);
+	wmove(entry_win, 0, (entry_win->_maxx - 5)/2);
+	wprintw(entry_win, "ENTRY");
 	wrefresh(entry_win);
 
 	e_count = get_ecount(g[g_hover]);
 	e = get_entries(get_ghead(g[g_hover]), e_count);
 	fill_entries(e, e_count);
-	//FIXME weird box rendering issue after the previous function call
-	mvwchgat(entry_win, 1, 1, entry_win->_maxx, A_DIM, 1, NULL);
+	mvwchgat(entry_win, 1, 1, entry_win->_maxx-1, A_DIM, 1, NULL);
 
+	wrefresh(entry_win);
 	return;
 }
 
 void switch_col(){
 	true_hover = (true_hover+1) % 2;
 	if(true_hover){
-		mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx, A_DIM, 1, NULL); //adjust group light
-		mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx, A_DIM, 2, NULL); //adjust entry light
+		mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx-1, A_DIM, 1, NULL); //adjust group light
+		mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx-1, A_DIM, 2, NULL); //adjust entry light
 	}
 	else{
-		mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx, A_DIM, 2, NULL); //adjust group light
-		mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx, A_DIM, 1, NULL); //adjust entry light
+		mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx-1, A_DIM, 2, NULL); //adjust group light
+		mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx-1, A_DIM, 1, NULL); //adjust entry light
 	}
 	move(3, (width/4)+10);
 
@@ -244,13 +247,13 @@ void trav_col(int dir){
 	if((dir && !(*focus)) || (!dir && (*focus == count-1)) || (!dir && (*focus == height))) return;
 
 	//reset previously highlighted entry and group, change focus
-	mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx, A_NORMAL, 0, NULL);
-	mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx, A_NORMAL, 0, NULL);
+	mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx-1, A_NORMAL, 0, NULL);
+	mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx-1, A_NORMAL, 0, NULL);
 	(dir ? (*focus)-- : (*focus)++);
 
 	//highlight newly hovered upon entry/group
-	mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx, A_DIM, (true_hover ? 2 : 1), NULL);
-	mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx, A_DIM, (true_hover ? 1 : 2), NULL);
+	mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
+	mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx-1, A_DIM, (true_hover ? 1 : 2), NULL);
 	if(!true_hover){ //a little extra work regarding group hover
 		update_entries();
 		e_hover = 0;
