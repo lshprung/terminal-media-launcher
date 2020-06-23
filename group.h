@@ -3,15 +3,13 @@
 
 typedef struct group GROUP;
 
-GROUP *create_group(char *new_path);
+GROUP *create_group(char *new_name);
 
 void group_add(char *gname, ENTRY *addme);
 
 GROUP **get_groups();
 
 char *get_gname(GROUP *g);
-
-char *get_gpath(GROUP *g);
 
 char *get_gprog(GROUP *g);
 

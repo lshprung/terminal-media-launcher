@@ -10,7 +10,6 @@
 
 typedef struct group{
 	char name[BUF_LEN];
-	char path[BUF_LEN];
 	char program[BUF_LEN];
 	struct entry *head;
 	struct entry *tail;
@@ -18,11 +17,10 @@ typedef struct group{
 	int entry_count;
 } GROUP;
 
-GROUP *create_group(char *new_path);
+GROUP *create_group(char *new_name);
 void group_add(char *gname, ENTRY *addme);
 GROUP **get_groups();
 char *get_gname(GROUP *g);
-char *get_gpath(GROUP *g);
 char *get_gprog(GROUP *g);
 ENTRY *get_ghead(GROUP *g);
 int get_ecount(GROUP *g);
@@ -34,12 +32,11 @@ GROUP *gp; //pointer to remember last group that was looked at
 int group_count = 0;
 int total_count = 0;
 
-GROUP *create_group(char *new_path){
+GROUP *create_group(char *new_name){
 	GROUP *new = malloc(sizeof(GROUP));
 
-	strcpy(new->name, new_path); //by default, group name is equivalent to the path
-	strcpy(new->path, new_path);
-	strcpy(new->program, "./"); //by default, launch an entry by executing it
+	strcpy(new->name, new_name); //by default, group name is equivalent to the path
+	strcpy(new->program, "./");  //by default, launch an entry by executing it
 	new->head = NULL;
 	new->tail = NULL;
 	new->next = NULL;
@@ -49,6 +46,7 @@ GROUP *create_group(char *new_path){
 	return new;
 }
 
+//add an entry to a group or add a new empty group
 //FIXME maybe make this function part of a seperate file to handle a tree (AVL?)
 //for now, simple linked list implementation
 void group_add(char *gname, ENTRY *addme){
@@ -56,12 +54,26 @@ void group_add(char *gname, ENTRY *addme){
 	GROUP *new;
 	GROUP *last = NULL; //last element in an existing group list (NULL to start)
 
-	//The previous group is not the same as the new group to add to
-	if(!(gp != NULL && (!(strcmp(gp->name, gname)) || !(strcmp(gp->path, gname))))){
+	//only adding a new group
+	if(addme == NULL){
 		gp = groups_head;
 		while(gp != NULL){
-			//gname matches groups[i]'s name or path, add entry here
-			if(!(strcmp(gp->name, gname)) || !(strcmp(gp->path, gname))) break;
+			if(!(strcmp(gp->name, gname))){
+				printf("config error: %s is already a group!\n", gname);
+				return;
+			}
+
+			last = gp;
+			gp = gp->next;
+		}
+	}
+
+	//The previous group is not the same as the new group to add to
+	if(!(gp != NULL && (!(strcmp(gp->name, gname))))){
+		gp = groups_head;
+		while(gp != NULL){
+			//gname matches groups[i]'s name, add entry here
+			if(!(strcmp(gp->name, gname))) break;
 
 			last = gp;
 			gp = gp->next;
@@ -83,11 +95,13 @@ void group_add(char *gname, ENTRY *addme){
 	}
 
 	//add the entry to the list of entries in the group
-	gp->tail = entry_add_last(gp->tail, addme);
-	if(gp->head == NULL) gp->head = gp->tail; //first element of the new list
+	if(addme != NULL){
+		gp->tail = entry_add_last(gp->tail, addme);
+		if(gp->head == NULL) gp->head = gp->tail; //first element of the new list
+		gp->entry_count++;
+		total_count++;
+	}
 
-	gp->entry_count++;
-	total_count++;
 	return;
 }
 
@@ -107,11 +121,6 @@ GROUP **get_groups(){
 char *get_gname(GROUP *g){
 	assert(g != NULL);
 	return g->name;
-}
-
-char *get_gpath(GROUP *g){
-	assert(g != NULL);
-	return g->path;
 }
 
 char *get_gprog(GROUP *g){

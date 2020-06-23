@@ -3,7 +3,7 @@
 
 typedef struct entry ENTRY;
 
-ENTRY *create_entry(char *new_path, char *new_group);
+ENTRY *create_entry(char *new_name, char *new_path);
 
 ENTRY *entry_add_last(ENTRY *tail, ENTRY *add);
 

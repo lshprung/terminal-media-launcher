@@ -53,40 +53,26 @@ void cfg_interp(){
 void check_line(char *buffer){
 	char *delims = " \t\n";
 	char *tok = strtok(buffer, delims);
-	DIR *dp;
-	struct dirent *d_entry;
 	ENTRY *new;
 
-	//add a path to the entry list
+	//add entry(ies) to a group: first arg is the file(s), second arg is the group to add to
 	//TODO add potential dash functions
 	//TODO account for spaces in file name
+	//TODO add regex support for adding patterns
+	//TODO allow adding directories (might fall into regex support)
 	if(!(strcmp(tok, "add"))){
-		tok = strtok(NULL, delims);
-		new = create_entry(tok, NULL);
+		//look at first arg
+		tok = strtok(NULL, delims); 
+		new = create_entry(tok, tok);
+		//look at second arg
+		tok = strtok(NULL, delims); 
 		if(new != NULL) group_add(tok, new);
 	}
 
-	//recursively add entries from a directory
-	if(!(strcmp(tok, "addDir"))){
+	//create a new group
+	if(!(strcmp(tok, "addGroup"))){
 		tok = strtok(NULL, delims);
-		dp = opendir(tok);
-
-		//check if the directory is valid
-		if(dp == NULL) printf("Error: Invalid Directory \"%s\"\n", tok);
-
-		else{
-			while((d_entry = readdir(dp))){
-				//only add if its a file (d_type = 8)
-				if(d_entry->d_type == 8){
-					new = create_entry(d_entry->d_name, tok);
-					if(new != NULL) group_add(tok, new);
-				}
-			}
-		}
-
-		//TODO add option to also add files from directories inside directory (-r)
-
-		closedir(dp);
+		group_add(tok, NULL);
 	}
 
 	return;

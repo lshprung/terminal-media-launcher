@@ -36,6 +36,11 @@ int main(){
 	bool wide = true; //is the window a certain width (tbd what the threshold should be TODO)
 	int input;
 
+	//Fill Groups
+	cfg_interp(); //read the contents of the cfg file
+	g = get_groups(); //retrieve results of previous function
+	g_count = get_gcount(g); //retrieve number of groups in g
+
 	initscr();
 	cbreak();
 	keypad(stdscr, true);
@@ -67,11 +72,6 @@ int main(){
 	draw_win(group_win, "GROUP");
 	draw_win(entry_win, "ENTRY");
 	draw_win(info_win, "INFO");
-
-	//Fill Groups
-	cfg_interp(); //read the contents of the cfg file
-	g = get_groups(); //retrieve results of previous function
-	g_count = get_gcount(g); //retrieve number of groups in g
 	fill_groups(g, g_count);
 
 	//start with hover on the first group, draw the entries from the selected group, true_hover is over the groups (rather than the entries)
@@ -151,7 +151,7 @@ void fill_groups(GROUP **group_arr, int count){
 		name = get_gname(group_arr[i]);
 
 		//the name is too long, take the group to the trimming function
-		if(strlen(name) > max_len) name = trim_name(name, get_gpath(group_arr[i]), max_len);
+		if(strlen(name) > max_len) name = trim_name(name, get_gname(group_arr[i]), max_len);
 		wmove(group_win, ycoord, 1);
 		wprintw(group_win, "%s", name);
 		ycoord++;
@@ -182,7 +182,7 @@ void fill_entries(ENTRY **entry_arr, int count){
 	return;
 }
 
-//FIXME issue trimming entry
+//FIXME issue trimming entries with path title
 char *trim_name(char *name, char *path, int max_len){
 	char *tok; //for use in finding relative path name
 	char *tok_ahead;

@@ -14,29 +14,25 @@ typedef struct entry{
 	struct entry *next;
 } ENTRY;
 
-ENTRY *create_entry(char *new_path, char *new_group);
+ENTRY *create_entry(char *new_name, char *new_path);
 ENTRY *entry_add_last(ENTRY *tail, ENTRY *add);
 ENTRY **get_entries(ENTRY *head, int count);
 char *get_ename(ENTRY *e);
 char *get_epath(ENTRY *e);
 
-ENTRY *create_entry(char *new_path, char *new_group){
+ENTRY *create_entry(char *new_name, char *new_path){
 	ENTRY *new;
-	char full_path[BUF_LEN] = "";
-
-	if(new_group != NULL) strcat(full_path, new_group);
-	strcat(full_path, new_path);
 
 	//check if file exists
-	if(access(full_path, F_OK) == -1){
-		printf("Error: Invalid File Name \"%s\"\n", full_path);
+	if(access(new_path, F_OK) == -1){
+		printf("Error: Invalid File Name \"%s\"\n", new_path);
 		return NULL;
 	}
 
 	new = malloc(sizeof(ENTRY));
 
-	strcpy(new->name, new_path);
-	strcpy(new->path, full_path);
+	strcpy(new->name, new_name);
+	strcpy(new->path, new_path);
 	new->next = NULL;
 
 	return new;
