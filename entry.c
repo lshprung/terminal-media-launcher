@@ -23,7 +23,7 @@ char *get_epath(ENTRY *e);
 ENTRY *create_entry(char *new_name, char *new_path){
 	ENTRY *new;
 
-	//check if file exists
+	//double check if file exists
 	if(access(new_path, F_OK) == -1){
 		printf("Error: Invalid File Name \"%s\"\n", new_path);
 		return NULL;
