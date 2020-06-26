@@ -17,6 +17,8 @@ void check_line(char *buffer);
 
 //private
 void handle_fname(char *path, char *group);
+int search_ch(char *str, char c);
+int wild_cmp(char *wild, char *literal);
 
 void cfg_interp(){
 	FILE *fp;
@@ -92,14 +94,17 @@ void check_line(char *buffer){
 	return;
 }
 
+//still needs polish in regards to wildcards, at the moment only works for something like "/home/john/Videos/*", won't work for "/home/john/Videos/*mp4"
 void handle_fname(char *path, char *group){
 	ENTRY *new;
+	char *search; //pointer for traversing path
 	char path_cpy[BUF_LEN];
+	char arg_cpy[BUF_LEN];
 	int plen = strlen(path);
 	char *dirname;
 	DIR *dp;
 	struct dirent *fname;
-	int i = 1;
+	int i;
 
 	if(path == NULL || group == NULL){
 		printf("Error: too few arguments for \"add\"\n");
@@ -107,14 +112,17 @@ void handle_fname(char *path, char *group){
 	}
 
 	//file is not recognized, perhaps it has a wildcard?
+	//TODO finish rewriting a more robust wildcard thingy, still doesn't work using regex
 	if(access(path, F_OK) == -1){
-		if(path[plen-i] == '*'){
+		i = search_ch(path, '*');
+		if(i > -1){
 			//look for a directory
-			while(path[plen-i] != '/' && (plen-i >= 0)){
-				i++;
+			while(path[i] != '/' && (i >= 0)){
+				i--;
 			}
 			dirname = path;
-			dirname[plen-i+1] = '\0';
+			strcpy(arg_cpy, path);
+			dirname[i+1] = '\0';
 			dp = opendir(dirname);
 
 			//the directory is real
@@ -124,14 +132,14 @@ void handle_fname(char *path, char *group){
 					strcat(path_cpy, dirname);
 					strcat(path_cpy, fname->d_name);
 
-					//check if path is a file (and not a directory/symlink/etc.)
-					if(fname->d_type == DT_REG){
+					//check if path is a file (and not a directory/symlink/etc.) and regex matches
+					if(fname->d_type == DT_REG && !(wild_cmp(&arg_cpy[i+1], fname->d_name))){
+
 						new = create_entry(path_cpy, path_cpy);
 						if(new != NULL) group_add(group, new);
 					}
 				}
 
-				//FIXME breaks if I close the dir (WHY?!?!?!?)
 				closedir(dp);
 			}
 
@@ -149,4 +157,54 @@ void handle_fname(char *path, char *group){
 	}
 
 	return;
+}
+
+int search_ch(char *str, char c){
+	int i = 0;
+
+	while(str[i] != '\0'){
+		if(str[i] == c) return i;
+		i++;
+	}
+
+	return -1;
+}
+
+//return 0 if match, 1 if not
+//TODO only supports one wildcard per entry
+int wild_cmp(char *wild, char *literal){
+	int i;
+	
+	while(*wild != '\0'){
+		//traverse until wildcard
+		if(*wild != '*'){
+			if(*wild != *literal) return 1;
+			wild++;
+			literal++;
+		}
+
+		//found wildcard, find the end of both names and comapre from the back
+		else{
+			i = 0;
+			wild++;
+			while(*wild != '\0'){
+				i++;
+				wild++;
+			}
+			while(*literal != '\0'){
+				literal++;
+			}
+
+			while(i > 0){
+				wild--;
+				literal--;
+				if(*wild != *literal) return 1;
+				i--;
+			}
+
+			return 0;
+		}
+	}
+
+	return 0;
 }
