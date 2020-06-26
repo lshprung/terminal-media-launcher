@@ -182,21 +182,14 @@ void fill_entries(ENTRY **entry_arr, int count){
 	return;
 }
 
-//FIXME issue trimming entries with path title
 char *trim_name(char *name, char *path, int max_len){
-	char *tok; //for use in finding relative path name
-	char *tok_ahead;
-	char *delims = "/\t\n";
+	char *relative;
 
 	//group name and path are equivalent: special procedure
 	if(!(strcmp(name, path))){
 		//find relative path name
-		tok_ahead = strtok(name, delims);
-		while(tok_ahead != NULL){
-			tok = tok_ahead;
-			tok_ahead = strtok(NULL, delims);
-		}
-		name = tok;
+		relative = strrchr(name, '/');
+		name = relative+1;
 		if(strlen(name) <= max_len) return name;
 	}
 
