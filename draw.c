@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 #include "entry.h"
 #include "group.h"
@@ -15,6 +16,7 @@ char *trim_name(char *name, char *path, int max_len);
 void update_entries();
 void switch_col();
 void trav_col(int dir); //0 = down, 1 = up
+void launch_entry();
 
 static int width;
 static int height;
@@ -98,6 +100,10 @@ int main(){
 
 			case KEY_UP:
 				trav_col(1);
+				break;
+
+			case 10: //enter key
+				launch_entry();
 				break;
 
 			default:
@@ -254,5 +260,25 @@ void trav_col(int dir){
 
 	wrefresh(group_win);
 	wrefresh(entry_win);
+	return;
+}
+
+//TODO add ability to use arguments with launcher programs (like -f for fullscreen and such)
+void launch_entry(){
+	char *program = get_gprog(g[g_hover]);
+	char *path = get_epath(e[e_hover]);
+
+	//if the entry is an executable file (doesn't have a launcher)
+	if(!(strcmp(program, "./"))) system(path);
+
+	else{
+		strcat(program, " ");
+		strcat(program, "\"");
+		strcat(program, path);
+		strcat(program, "\"");
+		printf("DEBUG: program = %s\n", program);
+		system(program);
+	}
+
 	return;
 }

@@ -62,6 +62,8 @@ void check_line(char *buffer){
 	char *delims = " \t\n";
 	char *tok = strtok(buffer, delims);
 	char *args[MAX_ARGS];
+	GROUP **g;
+	int g_count;
 	int i;
 
 	//initialize args to NULL
@@ -91,10 +93,26 @@ void check_line(char *buffer){
 	//create a new group
 	if(!(strcmp(args[0], "addGroup"))) group_add(args[1], NULL);
 
+	//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
+	if(!(strcmp(args[0], "setLauncher"))){
+		g = get_groups();
+		g_count = get_gcount();
+
+		//look for matching existing group
+		for(i = 0; i < g_count; i++){
+			if(!(strcmp(get_gname(g[i]), args[1]))){
+				set_gprog(g[i], args[2]);
+				return;
+			}
+		}
+
+		//couldn't find a match
+		printf("Error: Group \"%s\" does not exist\n", args[1]);
+	}
+
 	return;
 }
 
-//still needs polish in regards to wildcards, at the moment only works for something like "/home/john/Videos/*", won't work for "/home/john/Videos/*mp4"
 void handle_fname(char *path, char *group){
 	ENTRY *new;
 	char *search; //pointer for traversing path
