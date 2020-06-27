@@ -61,14 +61,14 @@ void cfg_interp(){
 void check_line(char *buffer){
 	char *delims = " \t\n";
 	char *tok = strtok(buffer, delims);
-	char *args[MAX_ARGS];
+	char args[MAX_ARGS][BUF_LEN];
 	GROUP **g;
 	int g_count;
 	int i;
 
-	//initialize args to NULL
+	//initialize args to 0
 	for(i = 0; i < MAX_ARGS; i++){
-		args[i] = NULL;
+		args[i][0] = '\0';
 	}
 
 	i = 0;
@@ -78,7 +78,16 @@ void check_line(char *buffer){
 			printf("Error: too many arguments\n");
 			return;
 		}
-		args[i] = tok;
+		strcpy(args[i], tok);
+		//handle if an argument has spaces and is wrapped in quotes
+		if(tok[0] == '"'){
+			while(tok[strlen(tok)-1] != '"'){
+				tok = strtok(NULL, delims);
+				strcat(args[i], " ");
+				strcat(args[i], tok);
+			}
+		}
+
 		tok = strtok(NULL, delims);
 		i++;
 	}
@@ -164,15 +173,17 @@ void handle_fname(char *path, char *group){
 			//directory is not real, report error to the user
 			else printf("Error: \"%s\" bad path\n", dirname);
 		}
-	}
 
-	//file name is okay
-	else{
-		new = create_entry(path, path);
-		if(new != NULL){
-			group_add(group, new);
+		//file name is okay
+		else{
+			new = create_entry(path, path);
+			if(new != NULL){
+				group_add(group, new);
+			}
 		}
 	}
+
+	else printf("Error: \"%s\" bad path\n", path);
 
 	return;
 }
