@@ -100,23 +100,29 @@ void check_line(char *buffer){
 	if(!(strcmp(args[0], "add"))) handle_fname(args[1], args[2]);
 
 	//create a new group
-	if(!(strcmp(args[0], "addGroup"))) group_add(args[1], NULL);
+	else if(!(strcmp(args[0], "addGroup"))) group_add(args[1], NULL);
 
-	//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
-	if(!(strcmp(args[0], "setLauncher"))){
+	else{
+		//remaining possibilities involve args[1] being a char* referring to a group
 		g = get_groups();
 		g_count = get_gcount();
 
 		//look for matching existing group
 		for(i = 0; i < g_count; i++){
-			if(!(strcmp(get_gname(g[i]), args[1]))){
-				set_gprog(g[i], args[2]);
-				return;
-			}
+			if(!(strcmp(get_gname(g[i]), args[1]))) break;
+		}
+
+		//assert that a matching group was found
+		if(i < g_count){
+			//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
+			if(!(strcmp(args[0], "setLauncher"))) set_gprog(g[i], args[2]);
+
+			//set a group's launcher flags (like ./program -f file for fullscreen)
+			if(!(strcmp(args[0], "setFlags"))) set_gflags(g[i], args[2]);
 		}
 
 		//couldn't find a match
-		printf("Error: Group \"%s\" does not exist\n", args[1]);
+		else printf("Error: Group \"%s\" does not exist\n", args[1]);
 	}
 
 	return;

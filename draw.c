@@ -266,17 +266,21 @@ void trav_col(int dir){
 //TODO add ability to use arguments with launcher programs (like -f for fullscreen and such)
 void launch_entry(){
 	char *program = get_gprog(g[g_hover]);
+	char *flags = get_gflags(g[g_hover]);
 	char *path = get_epath(e[e_hover]);
 
 	//if the entry is an executable file (doesn't have a launcher)
 	if(!(strcmp(program, "./"))) system(path);
 
 	else{
-		strcat(program, " ");
-		strcat(program, "\"");
+		strcat(program, " \"");
+		if(flags[0] !='\0'){
+			strcat(program, flags);
+			strcat(program, "\"");
+			strcat(program, " \"");
+		}
 		strcat(program, path);
 		strcat(program, "\"");
-		printf("DEBUG: program = %s\n", program);
 		system(program);
 	}
 

@@ -11,6 +11,7 @@
 typedef struct group{
 	char name[BUF_LEN];
 	char program[BUF_LEN];
+	char flags[BUF_LEN];
 	struct entry *head;
 	struct entry *tail;
 	struct group *next;
@@ -23,6 +24,8 @@ GROUP **get_groups();
 char *get_gname(GROUP *g);
 char *get_gprog(GROUP *g);
 void set_gprog(GROUP *g, char *p);
+char *get_gflags(GROUP *g);
+void set_gflags(GROUP *g, char *p);
 ENTRY *get_ghead(GROUP *g);
 int get_ecount(GROUP *g);
 int get_gcount();
@@ -38,6 +41,7 @@ GROUP *create_group(char *new_name){
 
 	strcpy(new->name, new_name); //by default, group name is equivalent to the path
 	strcpy(new->program, "./");  //by default, launch an entry by executing it
+	new->flags[0] = '\0';      //by default, no command line flags
 	new->head = NULL;
 	new->tail = NULL;
 	new->next = NULL;
@@ -132,6 +136,17 @@ char *get_gprog(GROUP *g){
 void set_gprog(GROUP *g, char *p){
 	assert(g != NULL);
 	strcpy(g->program, p);
+	return;
+}
+
+char *get_gflags(GROUP *g){
+	assert(g != NULL);
+	return g->flags;
+}
+
+void set_gflags(GROUP *g, char *p){
+	assert(g != NULL);
+	strcpy(g->flags, p);
 }
 
 ENTRY *get_ghead(GROUP *g){

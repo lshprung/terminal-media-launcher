@@ -15,6 +15,10 @@ char *get_gprog(GROUP *g);
 
 void set_gprog(GROUP *g, char *p);
 
+char *get_gflags(GROUP *g);
+
+void set_gflags(GROUP *g, char *p);
+
 ENTRY *get_ghead(GROUP *g);
 
 int get_ecount(GROUP *g);

@@ -42,8 +42,6 @@ ENTRY *create_entry(char *new_name, char *new_path){
 
 	strcpy(new->name, new_name);
 	strcpy(new->path, adjusted_path);
-	printf("1 DEBUG: %s\n", adjusted_path);
-	printf("2 DEBUG: %s\n", adjusted_path);
 	new->next = NULL;
 
 	return new;
