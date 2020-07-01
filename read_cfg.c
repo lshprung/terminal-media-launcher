@@ -66,63 +66,66 @@ void check_line(char *buffer){
 	int g_count;
 	int i;
 
-	//initialize args to 0
-	for(i = 0; i < MAX_ARGS; i++){
-		args[i][0] = '\0';
-	}
-
-	i = 0;
-	//record all arguments in the line
-	while(tok != NULL){
-		if(i >= MAX_ARGS){
-			printf("Error: too many arguments\n");
-			return;
+	//ensure line is not blank or commented out
+	if(tok != NULL && tok[0] != '#' && tok[0] != '\0'){
+		//initialize args to 0
+		for(i = 0; i < MAX_ARGS; i++){
+			args[i][0] = '\0';
 		}
-		strcpy(args[i], tok);
-		//handle if an argument has spaces and is wrapped in quotes
-		if(tok[0] == '"'){
-			while(tok[strlen(tok)-1] != '"'){
-				tok = strtok(NULL, delims);
-				strcat(args[i], " ");
-				strcat(args[i], tok);
+
+		i = 0;
+		//record all arguments in the line
+		while(tok != NULL){
+			if(i >= MAX_ARGS){
+				printf("Error: too many arguments\n");
+				return;
 			}
+			strcpy(args[i], tok);
+			//handle if an argument has spaces and is wrapped in quotes
+			if(tok[0] == '"'){
+				while(tok[strlen(tok)-1] != '"'){
+					tok = strtok(NULL, delims);
+					strcat(args[i], " ");
+					strcat(args[i], tok);
+				}
+			}
+
+			tok = strtok(NULL, delims);
+			i++;
 		}
 
-		tok = strtok(NULL, delims);
-		i++;
-	}
+		//add entry(ies) to a group: first arg is the file(s), second arg is the group to add to
+		//TODO add potential dash functions
+		//TODO account for spaces in file name
+		//TODO add support for "-R" recursive adding
+		//TODO add sorting functionality
+		if(!(strcmp(args[0], "add"))) handle_fname(args[1], args[2]);
 
-	//add entry(ies) to a group: first arg is the file(s), second arg is the group to add to
-	//TODO add potential dash functions
-	//TODO account for spaces in file name
-	//TODO add support for "-R" recursive adding
-	//TODO add sorting functionality
-	if(!(strcmp(args[0], "add"))) handle_fname(args[1], args[2]);
+		//create a new group
+		else if(!(strcmp(args[0], "addGroup"))) group_add(args[1], NULL);
 
-	//create a new group
-	else if(!(strcmp(args[0], "addGroup"))) group_add(args[1], NULL);
+		else{
+			//remaining possibilities involve args[1] being a char* referring to a group
+			g = get_groups();
+			g_count = get_gcount();
 
-	else{
-		//remaining possibilities involve args[1] being a char* referring to a group
-		g = get_groups();
-		g_count = get_gcount();
+			//look for matching existing group
+			for(i = 0; i < g_count; i++){
+				if(!(strcmp(get_gname(g[i]), args[1]))) break;
+			}
 
-		//look for matching existing group
-		for(i = 0; i < g_count; i++){
-			if(!(strcmp(get_gname(g[i]), args[1]))) break;
+			//assert that a matching group was found
+			if(i < g_count){
+				//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
+				if(!(strcmp(args[0], "setLauncher"))) set_gprog(g[i], args[2]);
+
+				//set a group's launcher flags (like ./program -f file for fullscreen)
+				if(!(strcmp(args[0], "setFlags"))) set_gflags(g[i], args[2]);
+			}
+
+			//couldn't find a match
+			else printf("Error: Group \"%s\" does not exist\n", args[1]);
 		}
-
-		//assert that a matching group was found
-		if(i < g_count){
-			//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
-			if(!(strcmp(args[0], "setLauncher"))) set_gprog(g[i], args[2]);
-
-			//set a group's launcher flags (like ./program -f file for fullscreen)
-			if(!(strcmp(args[0], "setFlags"))) set_gflags(g[i], args[2]);
-		}
-
-		//couldn't find a match
-		else printf("Error: Group \"%s\" does not exist\n", args[1]);
 	}
 
 	return;
