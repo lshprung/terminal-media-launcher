@@ -17,6 +17,7 @@ void update_entries();
 void switch_col();
 void trav_col(int dir); //0 = down, 1 = up
 void launch_entry();
+char *compat_convert(char *path, int mode);
 
 static int width;
 static int height;
@@ -263,16 +264,17 @@ void trav_col(int dir){
 	return;
 }
 
-//TODO add ability to use arguments with launcher programs (like -f for fullscreen and such)
 void launch_entry(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
 	char *path = get_epath(e[e_hover]);
+	int mode = get_compmode();
 
 	//if the entry is an executable file (doesn't have a launcher)
 	if(!(strcmp(program, "./"))) system(path);
 
 	else{
+		if(mode != 0) path = compat_convert(path, mode);
 		strcat(program, " \"");
 		if(flags[0] !='\0'){
 			strcat(program, flags);
@@ -285,4 +287,32 @@ void launch_entry(){
 	}
 
 	return;
+}
+
+char *compat_convert(char *path, int mode){
+	char *new = malloc(sizeof(char) * BUF_LEN);
+	char *trav = new;
+
+	//1 -> WSL: letter is in /mnt/, convert slashes to backslashes
+	if(mode == 1){
+		path = path+5;
+		*trav = *path - 32; //point at letter, make it uppercase
+		trav++;
+		*trav = ':';
+		path++;
+		trav++;
+
+		//convert each character
+		while(*path != '\0'){
+			if(*path == '/') *trav = '\\';
+			else *trav = *path;
+			path++;
+			trav++;
+		}
+		*trav = '\0';
+	}
+
+	else printf("Error: mode should not be %d\n", mode);
+
+	return new;
 }

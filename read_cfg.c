@@ -14,11 +14,18 @@
 //public
 void cfg_interp();
 void check_line(char *buffer);
+int get_compmode();
 
 //private
 void handle_fname(char *path, char *group);
 int search_ch(char *str, char c);
 int wild_cmp(char *wild, char *literal);
+
+//allow for compatability with compatability layers such as WSL
+int compmode = 0;
+//0 -> none
+//1 -> WSL
+//maybe more later?
 
 void cfg_interp(){
 	FILE *fp;
@@ -96,7 +103,6 @@ void check_line(char *buffer){
 
 		//add entry(ies) to a group: first arg is the file(s), second arg is the group to add to
 		//TODO add potential dash functions
-		//TODO account for spaces in file name
 		//TODO add support for "-R" recursive adding
 		//TODO add sorting functionality
 		if(!(strcmp(args[0], "add"))) handle_fname(args[1], args[2]);
@@ -104,6 +110,13 @@ void check_line(char *buffer){
 		//create a new group
 		else if(!(strcmp(args[0], "addGroup"))) group_add(args[1], NULL);
 
+		//set compatability mode
+		else if(!(strcmp(args[0], "compMode"))){
+			if(!(strcmp(args[1], "WSL"))) compmode = 1;
+			else printf("Error: Unknown Compatability Mode Argument \"%s\"\n", args[1]);
+		}
+
+		//TODO fix this so it can give an error that it doesn't recognize args[0]
 		else{
 			//remaining possibilities involve args[1] being a char* referring to a group
 			g = get_groups();
@@ -129,6 +142,10 @@ void check_line(char *buffer){
 	}
 
 	return;
+}
+
+int get_compmode(){
+	return compmode;
 }
 
 void handle_fname(char *path, char *group){
