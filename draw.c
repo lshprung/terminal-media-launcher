@@ -269,21 +269,24 @@ void launch_entry(){
 	char *flags = get_gflags(g[g_hover]);
 	char *path = get_epath(e[e_hover]);
 	int mode = get_compmode();
+	char full_command[BUF_LEN];
 
 	//if the entry is an executable file (doesn't have a launcher)
 	if(!(strcmp(program, "./"))) system(path);
 
 	else{
 		if(mode != 0) path = compat_convert(path, mode);
-		strcat(program, " \"");
+		full_command[0] = '\0';
+		strcat(full_command, program);
+		strcat(full_command, " \"");
 		if(flags[0] !='\0'){
-			strcat(program, flags);
-			strcat(program, "\"");
-			strcat(program, " \"");
+			strcat(full_command, flags);
+			strcat(full_command, "\"");
+			strcat(full_command, " \"");
 		}
-		strcat(program, path);
-		strcat(program, "\"");
-		system(program);
+		strcat(full_command, path);
+		strcat(full_command, "\"");
+		system(full_command);
 	}
 
 	return;
