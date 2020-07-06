@@ -18,6 +18,7 @@ int get_compmode();
 
 //private
 void handle_fname(char *path, char *group);
+char *autoAlias(char *path);
 int search_ch(char *str, char c);
 int wild_cmp(char *wild, char *literal);
 
@@ -26,6 +27,9 @@ int compmode = 0;
 //0 -> none
 //1 -> WSL
 //maybe more later?
+
+//set to true to automatically try to create a human readable name for an entry
+bool hr = false;
 
 void cfg_interp(){
 	FILE *fp;
@@ -101,6 +105,11 @@ void check_line(char *buffer){
 			i++;
 		}
 
+		if(!(strcmp(args[0], "autoAlias"))){
+			if(!(strcmp(args[1], "on"))) hr = true;
+			else if(!(strcmp(args[1], "off"))) hr = false;
+		}
+
 		//add entry(ies) to a group: first arg is the file(s), second arg is the group to add to
 		//TODO add potential dash functions
 		//TODO add support for "-R" recursive adding
@@ -153,6 +162,7 @@ void handle_fname(char *path, char *group){
 	char *search; //pointer for traversing path
 	char path_cpy[BUF_LEN];
 	char arg_cpy[BUF_LEN];
+	char auto_name[BUF_LEN];
 	int plen = strlen(path);
 	char *dirname;
 	DIR *dp;
@@ -188,7 +198,12 @@ void handle_fname(char *path, char *group){
 					//check if path is a file (and not a directory/symlink/etc.) and regex matches
 					if(fname->d_type == DT_REG && !(wild_cmp(&arg_cpy[i+1], fname->d_name))){
 
-						new = create_entry(path_cpy, path_cpy);
+						//check if autoAlias is on. If it is, go to the autoAlias function
+						if(hr){
+							strcpy(auto_name, autoAlias(path_cpy));
+							new = create_entry(auto_name, path_cpy);
+						}
+						else new = create_entry(path_cpy, path_cpy);
 						if(new != NULL) group_add(group, new);
 					}
 				}
@@ -202,7 +217,11 @@ void handle_fname(char *path, char *group){
 
 		//file name is okay
 		else{
-			new = create_entry(path, path);
+			if(hr){
+				strcpy(auto_name, autoAlias(path));
+				new = create_entry(auto_name, path);
+			}
+			else new = create_entry(path, path);
 			if(new != NULL){
 				group_add(group, new);
 			}
@@ -212,6 +231,37 @@ void handle_fname(char *path, char *group){
 	else printf("Error: \"%s\" bad path\n", path);
 
 	return;
+}
+
+//TODO figure out how to trim the extensions of files off
+char *autoAlias(char *path){
+	char *hr_name = malloc(sizeof(char) * BUF_LEN);
+	char *p = hr_name;
+	char *rpath; //necessary so as not to touch the actual path
+
+	//get to the relative path name
+	if(compmode) rpath = strrchr(path, '\\');
+	else rpath = strrchr(path, '/');
+	rpath++;
+
+	while(*rpath != '\0'){
+		switch(*rpath){
+			case '-':
+			case '_':
+				*p = ' ';
+				break;
+
+			default:
+				*p = *rpath;
+		}
+		*rpath++;
+		*p++;
+	}
+	
+	//close the name
+	*p = '\0';
+
+	return hr_name;
 }
 
 int search_ch(char *str, char c){
