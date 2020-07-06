@@ -310,12 +310,15 @@ void trav_col(int dir){
 	return;
 }
 
+//TODO clean up quotes
 void launch_entry(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
 	char *path = get_epath(e[e_hover]);
 	int mode = get_compmode();
 	char full_command[BUF_LEN];
+	bool quote_flag_f = (flags[0] == '"' ? false : true);
+	bool quote_flag_e = (path[0] == '"' ? false : true);
 
 	//if the entry is an executable file (doesn't have a launcher)
 	if(!(strcmp(program, "./"))) system(path);
@@ -324,14 +327,17 @@ void launch_entry(){
 		if(mode != 0) path = compat_convert(path, mode);
 		full_command[0] = '\0';
 		strcat(full_command, program);
-		strcat(full_command, " \"");
 		if(flags[0] !='\0'){
+			strcat(full_command, " ");
+			if(quote_flag_f) strcat(full_command, "\"");
 			strcat(full_command, flags);
-			strcat(full_command, "\"");
-			strcat(full_command, " \"");
+			if(quote_flag_f) strcat(full_command, "\"");
 		}
+		strcat(full_command, " ");
+		if(quote_flag_e) strcat(full_command, "\"");
 		strcat(full_command, path);
-		strcat(full_command, "\"");
+		if(quote_flag_e) strcat(full_command, "\"");
+		mvprintw(0, 0, "DEBUG: %s", full_command);
 		system(full_command);
 	}
 

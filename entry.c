@@ -78,7 +78,6 @@ char *get_ename(ENTRY *e){
 }
 char *get_epath(ENTRY *e){
 	assert(e != NULL);
-	return e->name;
 	return e->path;
 }
 
