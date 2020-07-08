@@ -10,11 +10,10 @@
 
 void draw_title();
 void draw_win(WINDOW *new, char *title);
-void fill_groups(GROUP **group_arr, int count);
-void fill_entries(ENTRY **entry_arr, int count);
+void fill_groups();
+void fill_entries();
 char *trim_name(char *name, char *path, int max_len);
-void update_groups(int hl_where); //0 = last, 1 = first
-void update_entries(int hl_where); //0 = last, 1 = first
+void update_col(int mode, int hl_where); //0 = last, 1 = first; 0 = GROUP, 1 = ENTRY, 2 = INFO
 void switch_col();
 void trav_col(int dir); //0 = down, 1 = up
 void launch_entry();
@@ -78,10 +77,11 @@ int main(){
 	draw_win(group_win, "GROUP");
 	draw_win(entry_win, "ENTRY");
 	draw_win(info_win, "INFO");
-	update_groups(1);
+	update_col(0, 1);
 
 	//start with hover on the first group, draw the entries from the selected group, true_hover is over the groups (rather than the entries)
-	update_entries(1);
+	update_col(1, 1);
+	update_col(2, 0);
 	move(3, (width/4)+10);
 
 	//drawing is done, now run a while loop to receive input
@@ -149,19 +149,20 @@ void draw_win(WINDOW *new, char *title){
 	return;
 }
 
-void fill_groups(GROUP **group_arr, int count){
+void fill_groups(){
 	int i;
 	int max_len = group_win->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
 	int max_y = height-5; //last possible slot to draw a group
 	char *name;
 
-	for(i = 0+g_offset; i < count; i++){
+	for(i = 0+g_offset; i < g_count; i++){
 		if(ycoord >= max_y) break; //already at bottom of terminal window, stop drawing
-		name = get_gname(group_arr[i]);
+		//TODO account for empty groups with a removal function
+		name = get_gname(g[i]);
 
 		//the name is too long, take the group to the trimming function
-		if(strlen(name) > max_len) name = trim_name(name, get_gname(group_arr[i]), max_len);
+		if(strlen(name) > max_len) name = trim_name(name, get_gname(g[i]), max_len);
 		wmove(group_win, ycoord, 1);
 		wprintw(group_win, "%s", name);
 		ycoord++;
@@ -172,19 +173,19 @@ void fill_groups(GROUP **group_arr, int count){
 }
 
 //very similar to the previous function, perhaps they can be combined... (TODO)
-void fill_entries(ENTRY **entry_arr, int count){
+void fill_entries(){
 	int i;
 	int max_len = entry_win->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
 	int max_y = height-5;
 	char *name;
 
-	for(i = 0+e_offset; i < count; i++){
+	for(i = 0+e_offset; i < e_count; i++){
 		if(ycoord >= max_y) break; //reached the bottom of the terminal window, stop drawing
-		name = get_ename(entry_arr[i]);
+		name = get_ename(e[i]);
 
 		//the name is too long, take the group to the trimming function
-		if(strlen(name) > max_len) name = trim_name(name, get_epath(entry_arr[i]), max_len);
+		if(strlen(name) > max_len) name = trim_name(name, get_epath(e[i]), max_len);
 		wmove(entry_win, ycoord, 1);
 		wprintw(entry_win, "%s", name);
 		ycoord++;
@@ -209,40 +210,68 @@ char *trim_name(char *name, char *path, int max_len){
 	return name;
 }
 
-//TODO think about combining this and update_groups
-void update_entries(int hl_where){
-	int y_hl = (hl_where ? 1 : entry_win->_maxy-1);
+//FIXME info printing (mode = 2) is not uniformally in the box
+void update_col(int mode, int hl_where){
+	//mode 0 = group
+	//mode 1 = entry
+	//mode 2 = info
 
-	//reset the entry window (including reboxing and redrawing the title)
-	wclear(entry_win);
-	box(entry_win, 0, 0);
-	wmove(entry_win, 0, (entry_win->_maxx - 5)/2);
-	wprintw(entry_win, "ENTRY");
-	wrefresh(entry_win);
+	WINDOW *col;
+	char *name;
+	int name_len;
+	int y_hl;
 
-	e_count = get_ecount(g[g_hover]);
-	e = get_entries(get_ghead(g[g_hover]), e_count);
-	fill_entries(e, e_count);
-	mvwchgat(entry_win, y_hl, 1, entry_win->_maxx-1, A_DIM, 1, NULL);
+	switch(mode){
+		case 0:
+			col = group_win;
+			name = "GROUP";
+			name_len = 5;
+			break;
 
-	wrefresh(entry_win);
-	return;
-}
+		case 1:
+			col = entry_win;
+			name = "ENTRY";
+			name_len = 5;
+			break;
 
-void update_groups(int hl_where){
-	int y_hl = (hl_where ? 1 : group_win->_maxy-1);
+		case 2:
+			col = info_win;
+			name = "INFO";
+			name_len = 4;
+			break;
 
-	//reset the group window (including reboxing and redrawing the title)
-	wclear(group_win);
-	box(group_win, 0, 0);
-	wmove(group_win, 0, (group_win->_maxx - 5)/2);
-	wprintw(entry_win, "GROUP");
-	wrefresh(group_win);
+		default:
+			return;
+	}
 
-	fill_groups(g, g_count);
-	mvwchgat(group_win, y_hl, 1, group_win->_maxx-1, A_DIM, 2, NULL);
+	y_hl = (hl_where ? 1 : col->_maxy-1);
 
-	wrefresh(group_win);
+	//reset the column window (including reboxing and redrawing the title)
+	wclear(col);
+	box(col, 0, 0);
+	wmove(col, 0, (group_win->_maxx - name_len)/2);
+	wprintw(col, name);
+	wrefresh(col);
+
+	switch(mode){
+		case 0:
+			fill_groups();
+			mvwchgat(group_win, y_hl, 1, group_win->_maxx-1, A_DIM, 2, NULL);
+			break;
+
+		case 1:
+			e_count = get_ecount(g[g_hover]);
+			e = get_entries(get_ghead(g[g_hover]), e_count);
+			fill_entries(e, e_count);
+			mvwchgat(entry_win, y_hl, 1, entry_win->_maxx-1, A_DIM, 1, NULL);
+			break;
+
+		default:
+			mvwprintw(info_win, 1, 1, "PROGRAM: %s\n\nPATH: %s", get_gprog(g[g_hover]), get_epath(e[e_hover]));
+
+	}
+
+	wrefresh(col);
 	return;
 }
 
@@ -263,7 +292,6 @@ void switch_col(){
 	return;
 }
 
-//FIXME some issues with cutting off too early
 void trav_col(int dir){
 	int *focus = (true_hover ? &e_hover : &g_hover); //make it easy to know which column we are looking at
 	int *offset = (true_hover ? &e_offset : &g_offset); //this variable is broken
@@ -273,7 +301,6 @@ void trav_col(int dir){
 	bool oob_flag = false;
 
 	//check if the traversal is valid (i.e. not at top/bottom), exit if not
-	//FIXME check that third parameter... might not be right (could cause issues)
 	if((dir && !(*focus)) || (!dir && (*focus == count-1))) return;
 
 	//reset previously highlighted entry and group, change focus
@@ -281,7 +308,7 @@ void trav_col(int dir){
 	mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_NORMAL, 0, NULL);
 	(dir ? (*focus)-- : (*focus)++);
 
-	//check offsets relating to new highlight, make sure nothing highlight did not go oob
+	//check offsets relating to new highlight, make sure highlight did not go oob
 	if(*focus+5 > max_hl){
 		*focus--;
 		(*offset)++;
@@ -293,24 +320,23 @@ void trav_col(int dir){
 		oob_flag = true;
 	}
 
-	//TODO rethink fill_groups (maybe make an update_groups function)
-	if(oob_flag) (true_hover ? update_entries(dir) : update_groups(dir));
+	if(oob_flag) (true_hover ? update_col(1, dir) : update_col(0, dir));
 
 	//highlight newly hovered upon entry/group
 	mvwchgat(entry_win, 1+e_hover-e_offset, 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
 	mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_DIM, (true_hover ? 1 : 2), NULL);
 	if(!true_hover){ //a little extra work regarding group hover
 		e_offset = 0;
-		update_entries(1);
+		update_col(1, 1);
 		e_hover = 0;
 	}
 
 	wrefresh(group_win);
 	wrefresh(entry_win);
+	update_col(2, 0);
 	return;
 }
 
-//TODO clean up quotes
 void launch_entry(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);

@@ -175,7 +175,7 @@ void handle_fname(char *path, char *group){
 	}
 
 	//file is not recognized, perhaps it has a wildcard?
-	//TODO finish rewriting a more robust wildcard thingy, still doesn't work using regex
+	//TODO finish rewriting a more robust wildcard thingy
 	if(access(path, F_OK) == -1){
 		i = search_ch(path, '*');
 		if(i > -1){
@@ -238,6 +238,7 @@ char *autoAlias(char *path){
 	char *hr_name = malloc(sizeof(char) * BUF_LEN);
 	char *p = hr_name;
 	char *rpath; //necessary so as not to touch the actual path
+	bool stop = false; //stop when you don't want to add a series of chars to the output
 
 	//get to the relative path name
 	if(compmode) rpath = strrchr(path, '\\');
@@ -246,16 +247,36 @@ char *autoAlias(char *path){
 
 	while(*rpath != '\0'){
 		switch(*rpath){
+			case '(':
+				stop = true;
+				break;
+
+			case ')':
+				stop = false;
+				break;
+
 			case '-':
 			case '_':
-				*p = ' ';
+				if(*(p-1) != ' ' && !stop){
+					*p = ' ';
+					*p++;
+				}
+				break;
+
+			case ' ':
+				if(*(p-1) != ' ' && !stop){
+					*p = *rpath;
+					*p++;
+				}
 				break;
 
 			default:
-				*p = *rpath;
+				if(!stop){
+					*p = *rpath;
+					*p++;
+				}
 		}
 		*rpath++;
-		*p++;
 	}
 	
 	//close the name
