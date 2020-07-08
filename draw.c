@@ -36,13 +36,17 @@ int e_offset = 0;
 
 //TODO consider figuring out where some refreshes are unecessary
 
-int main(){
+int main(int argc, char **argv){
+	char *cfg_path = "config";
 	bool tall = true; //is the window a certain height (tbd what the threshold should be TODO)
 	bool wide = true; //is the window a certain width (tbd what the threshold should be TODO)
 	int input;
 
+	//if a config path was given as an argument, set it accordingly
+	if(argc > 2 && (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cfg_path"))) cfg_path = argv[2];
+
 	//Fill Groups
-	cfg_interp(); //read the contents of the cfg file
+	cfg_interp(cfg_path); //read the contents of the cfg file
 	g = get_groups(); //retrieve results of previous function
 	g_count = get_gcount(g); //retrieve number of groups in g
 

@@ -12,7 +12,7 @@
 #define MAX_ARGS 5
 
 //public
-void cfg_interp();
+void cfg_interp(char *path);
 void check_line(char *buffer);
 int get_compmode();
 
@@ -31,7 +31,7 @@ int compmode = 0;
 //set to true to automatically try to create a human readable name for an entry
 bool hr = false;
 
-void cfg_interp(){
+void cfg_interp(char *path){
 	FILE *fp;
 	char buffer[BUF_LEN];
 	GROUP **g;
@@ -42,7 +42,7 @@ void cfg_interp(){
 	int j;
 
 	//TODO have this check in certain locations for a config file, give error message if "config" does not exist
-	fp = fopen("config", "r");
+	fp = fopen(path, "r");
 	assert(fp != NULL);
 
 	//Read each line of "config"
@@ -114,7 +114,7 @@ void check_line(char *buffer){
 		//TODO add potential dash functions
 		//TODO add support for "-R" recursive adding
 		//TODO add sorting functionality
-		if(!(strcmp(args[0], "add"))) handle_fname(args[1], args[2]);
+		else if(!(strcmp(args[0], "add"))) handle_fname(args[1], args[2]);
 
 		//create a new group
 		else if(!(strcmp(args[0], "addGroup"))) group_add(args[1], NULL);
@@ -136,17 +136,22 @@ void check_line(char *buffer){
 				if(!(strcmp(get_gname(g[i]), args[1]))) break;
 			}
 
-			//assert that a matching group was found
-			if(i < g_count){
-				//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
-				if(!(strcmp(args[0], "setLauncher"))) set_gprog(g[i], args[2]);
-
-				//set a group's launcher flags (like ./program -f file for fullscreen)
-				if(!(strcmp(args[0], "setFlags"))) set_gflags(g[i], args[2]);
+			//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
+			if(!(strcmp(args[0], "setLauncher"))){
+				//assert that a matching group was found
+				if(i < g_count) set_gprog(g[i], args[2]);
+				else printf("Error: Group \"%s\" does not exist\n", args[1]);
 			}
 
-			//couldn't find a match
-			else printf("Error: Group \"%s\" does not exist\n", args[1]);
+			//set a group's launcher flags (like ./program -f file for fullscreen)
+			else if(!(strcmp(args[0], "setFlags"))){
+				//assert that a matching group was found
+				if(i < g_count) set_gflags(g[i], args[2]);
+				else printf("Error: Group \"%s\" does not exist\n", args[1]);
+			}
+
+			//args[0] is not a valid config option
+			else printf("Error: Unknown config option \"%s\"\n", args[0]);
 		}
 	}
 
