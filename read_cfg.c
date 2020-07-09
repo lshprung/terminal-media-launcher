@@ -285,7 +285,8 @@ char *autoAlias(char *path){
 	}
 	
 	//close the name
-	*p = '\0';
+	if(*path == '"') *(p-1) = '\0'; //close early to avoid including closing quote
+	else *p = '\0';
 
 	return hr_name;
 }
