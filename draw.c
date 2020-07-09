@@ -16,7 +16,7 @@ char *trim_name(char *name, char *path, int max_len);
 void update_col(int mode, int hl_where); //0 = last, 1 = first; 0 = GROUP, 1 = ENTRY, 2 = INFO
 void switch_col();
 void trav_col(int dir); //0 = down, 1 = up
-void launch_entry();
+char *get_launch();
 char *compat_convert(char *path, int mode);
 
 static int width;
@@ -41,6 +41,7 @@ int main(int argc, char **argv){
 	bool tall = true; //is the window a certain height (tbd what the threshold should be TODO)
 	bool wide = true; //is the window a certain width (tbd what the threshold should be TODO)
 	int input;
+	char *full_command; //what will be executed
 
 	//if a config path was given as an argument, set it accordingly
 	if(argc > 2 && (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cfg_path"))) cfg_path = argv[2];
@@ -65,18 +66,21 @@ int main(int argc, char **argv){
 	//title at the top (Terminal Media Launcher) (23 chars)
 	draw_title();
 
+	//TODO the search bar is a shelved feature for now, might consider writing it...
 	//Draw Search Bar 2 spaces (3 spaces if window is big enough) under the title
+	/*
 	move(3, width/4);
 	printw("[ Search: ");
 	move(3, (width*3)/4);
 	printw("]");
 	move(3, (width/4)+10);
+	*/
 
 	//Draw Columns 
 	//TODO create conditionals based on size of window)
-	group_win = newwin(height-4, width/3, 4, 0);
-	entry_win = newwin(height-4, width/3, 4, width/3);
-	info_win = newwin(height-4, width/3, 4, (2*width)/3);
+	group_win = newwin(height-7, width/2, 4, 0);
+	entry_win = newwin(height-7, width/2, 4, width/2);
+	info_win = newwin(3, width, height-3, 0);
 	refresh();
 	draw_win(group_win, "GROUP");
 	draw_win(entry_win, "ENTRY");
@@ -86,7 +90,8 @@ int main(int argc, char **argv){
 	//start with hover on the first group, draw the entries from the selected group, true_hover is over the groups (rather than the entries)
 	update_col(1, 1);
 	update_col(2, 0);
-	move(3, (width/4)+10);
+	curs_set(0); //hide the cursor
+	//move(3, (width/4)+10);
 
 	//drawing is done, now run a while loop to receive input
 	while(1){
@@ -109,7 +114,8 @@ int main(int argc, char **argv){
 				break;
 
 			case 10: //enter key
-				launch_entry();
+				full_command = get_launch();
+				system(full_command);
 				break;
 
 			default:
@@ -118,7 +124,7 @@ int main(int argc, char **argv){
 
 		}
 
-		move(3, (width/4)+10); //reset cursor location to the search bar after any action
+		//move(3, (width/4)+10); //reset cursor location to the search bar after any action
 	}
 	
 	endwin();
@@ -157,7 +163,7 @@ void fill_groups(){
 	int i;
 	int max_len = group_win->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
-	int max_y = height-5; //last possible slot to draw a group
+	int max_y = height-8; //last possible slot to draw a group
 	char *name;
 
 	for(i = 0+g_offset; i < g_count; i++){
@@ -181,7 +187,7 @@ void fill_entries(){
 	int i;
 	int max_len = entry_win->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
-	int max_y = height-5;
+	int max_y = height-8;
 	char *name;
 
 	for(i = 0+e_offset; i < e_count; i++){
@@ -224,6 +230,7 @@ void update_col(int mode, int hl_where){
 	char *name;
 	int name_len;
 	int y_hl;
+	char *execution;
 
 	switch(mode){
 		case 0:
@@ -240,8 +247,8 @@ void update_col(int mode, int hl_where){
 
 		case 2:
 			col = info_win;
-			name = "INFO";
-			name_len = 4;
+			name = "EXECUTION";
+			name_len = 9;
 			break;
 
 		default:
@@ -253,7 +260,7 @@ void update_col(int mode, int hl_where){
 	//reset the column window (including reboxing and redrawing the title)
 	wclear(col);
 	box(col, 0, 0);
-	wmove(col, 0, (group_win->_maxx - name_len)/2);
+	wmove(col, 0, (col->_maxx - name_len)/2);
 	wprintw(col, name);
 	wrefresh(col);
 
@@ -271,7 +278,14 @@ void update_col(int mode, int hl_where){
 			break;
 
 		default:
-			mvwprintw(info_win, 1, 1, "PROGRAM: %s\n\nPATH: %s", get_gprog(g[g_hover]), get_epath(e[e_hover]));
+			execution = get_launch();
+			if(strlen(execution) >= info_win->_maxx){
+				execution[info_win->_maxx - 1] = '\0';
+				execution[info_win->_maxx - 2] = '.';
+				execution[info_win->_maxx - 3] = '.';
+				execution[info_win->_maxx - 4] = '.';
+			}
+			mvwprintw(info_win, 1, 1, execution);
 
 	}
 
@@ -300,7 +314,7 @@ void trav_col(int dir){
 	int *focus = (true_hover ? &e_hover : &g_hover); //make it easy to know which column we are looking at
 	int *offset = (true_hover ? &e_offset : &g_offset); //this variable is broken
 	int count = (true_hover ? e_count : g_count);
-	int max_hl = height-2+*offset; //for some reason, this works
+	int max_hl = height-5+*offset; //for some reason, this works
 	int min_hl = 5+*offset;
 	bool oob_flag = false;
 
@@ -341,17 +355,17 @@ void trav_col(int dir){
 	return;
 }
 
-void launch_entry(){
+char *get_launch(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
 	char *path = get_epath(e[e_hover]);
 	int mode = get_compmode();
-	char full_command[BUF_LEN];
+	char *full_command = malloc(sizeof(char) * BUF_LEN);
 	bool quote_flag_f = (flags[0] == '"' ? false : true);
 	bool quote_flag_e = (path[0] == '"' ? false : true);
 
 	//if the entry is an executable file (doesn't have a launcher)
-	if(!(strcmp(program, "./"))) system(path);
+	if(!(strcmp(program, "./"))) return path;
 
 	else{
 		if(mode != 0) path = compat_convert(path, mode);
@@ -367,11 +381,8 @@ void launch_entry(){
 		if(quote_flag_e) strcat(full_command, "\"");
 		strcat(full_command, path);
 		if(quote_flag_e) strcat(full_command, "\"");
-		mvprintw(0, 0, "DEBUG: %s", full_command);
-		system(full_command);
+		return full_command;
 	}
-
-	return;
 }
 
 char *compat_convert(char *path, int mode){
