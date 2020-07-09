@@ -165,7 +165,8 @@ int get_compmode(){
 void handle_fname(char *path, char *group){
 	ENTRY *new;
 	char *search; //pointer for traversing path
-	char path_cpy[BUF_LEN];
+	char full_path_cpy[BUF_LEN];
+	char relative_path_cpy[BUF_LEN];
 	char arg_cpy[BUF_LEN];
 	char auto_name[BUF_LEN];
 	int plen = strlen(path);
@@ -174,41 +175,50 @@ void handle_fname(char *path, char *group){
 	struct dirent *fname;
 	int i;
 
-	if(path == NULL || group == NULL){
+	assert(path != NULL && group != NULL);
+
+	if(path[0] == '\0' || group[0] == '\0'){
 		printf("Error: too few arguments for \"add\"\n");
 		return;
 	}
 
+	//address potential quotes
+	if(path[0] == '"'){
+		strcpy(full_path_cpy, &path[1]);
+		full_path_cpy[strlen(full_path_cpy) - 1] = '\0';
+	}
+	else strcpy(full_path_cpy, path);
+
 	//file is not recognized, perhaps it has a wildcard?
 	//TODO finish rewriting a more robust wildcard thingy
-	if(access(path, F_OK) == -1){
-		i = search_ch(path, '*');
+	if(access(full_path_cpy, F_OK) == -1){
+		i = search_ch(full_path_cpy, '*');
 		if(i > -1){
 			//look for a directory
-			while(path[i] != '/' && (i >= 0)){
+			while(full_path_cpy[i] != '/' && (i >= 0)){
 				i--;
 			}
-			dirname = path;
-			strcpy(arg_cpy, path);
+			dirname = full_path_cpy;
+			strcpy(arg_cpy, full_path_cpy);
 			dirname[i+1] = '\0';
 			dp = opendir(dirname);
 
 			//the directory is real
 			if(dp != NULL){ 
 				while(fname = readdir(dp)){
-					path_cpy[0] = '\0';
-					strcat(path_cpy, dirname);
-					strcat(path_cpy, fname->d_name);
+					relative_path_cpy[0] = '\0';
+					strcat(relative_path_cpy, dirname);
+					strcat(relative_path_cpy, fname->d_name);
 
 					//check if path is a file (and not a directory/symlink/etc.) and regex matches
 					if(fname->d_type == DT_REG && !(wild_cmp(&arg_cpy[i+1], fname->d_name))){
 
 						//check if autoAlias is on. If it is, go to the autoAlias function
 						if(hr){
-							strcpy(auto_name, autoAlias(path_cpy));
-							new = create_entry(auto_name, path_cpy);
+							strcpy(auto_name, autoAlias(relative_path_cpy));
+							new = create_entry(auto_name, relative_path_cpy);
 						}
-						else new = create_entry(path_cpy, path_cpy);
+						else new = create_entry(relative_path_cpy, relative_path_cpy);
 						if(new != NULL) group_add(group, new);
 					}
 				}
@@ -219,21 +229,20 @@ void handle_fname(char *path, char *group){
 			//directory is not real, report error to the user
 			else printf("Error: \"%s\" bad path\n", dirname);
 		}
-
-		//file name is okay
-		else{
-			if(hr){
-				strcpy(auto_name, autoAlias(path));
-				new = create_entry(auto_name, path);
-			}
-			else new = create_entry(path, path);
-			if(new != NULL){
-				group_add(group, new);
-			}
-		}
 	}
 
-	else printf("Error: \"%s\" bad path\n", path);
+	//file name is okay
+	//FIXME does not take into account whether the argument is a file (could be a directory, symlink, etc.)
+	else{
+		if(hr){
+			strcpy(auto_name, autoAlias(full_path_cpy));
+			new = create_entry(auto_name, full_path_cpy);
+		}
+		else new = create_entry(full_path_cpy, full_path_cpy);
+		if(new != NULL){
+			group_add(group, new);
+		}
+	}
 
 	return;
 }
