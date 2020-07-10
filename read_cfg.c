@@ -215,6 +215,7 @@ void handle_fname(char *path, char *group){
 
 						//check if autoAlias is on. If it is, go to the autoAlias function
 						if(hr){
+							printf("DEBUG: path = %s\n", relative_path_cpy);
 							strcpy(auto_name, autoAlias(relative_path_cpy));
 							new = create_entry(auto_name, relative_path_cpy);
 						}
@@ -255,9 +256,9 @@ char *autoAlias(char *path){
 	bool stop = false; //stop when you don't want to add a series of chars to the output
 
 	//get to the relative path name
-	if(compmode) rpath = strrchr(path, '\\');
-	else rpath = strrchr(path, '/');
-	rpath++;
+	rpath = strrchr(path, '/');
+	if(rpath == NULL) rpath = path;
+	else rpath++;
 
 	while(*rpath != '\0'){
 		switch(*rpath){
