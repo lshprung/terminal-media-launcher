@@ -215,7 +215,6 @@ void handle_fname(char *path, char *group){
 
 						//check if autoAlias is on. If it is, go to the autoAlias function
 						if(hr){
-							printf("DEBUG: path = %s\n", relative_path_cpy);
 							strcpy(auto_name, autoAlias(relative_path_cpy));
 							new = create_entry(auto_name, relative_path_cpy);
 						}
@@ -230,6 +229,9 @@ void handle_fname(char *path, char *group){
 			//directory is not real, report error to the user
 			else printf("Error: \"%s\" bad path\n", dirname);
 		}
+
+		//path is not real, report error to the user
+		else printf("Error: \"%s\" bad path\n", dirname);
 	}
 
 	//file name is okay
