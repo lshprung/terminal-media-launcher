@@ -17,7 +17,7 @@ void check_line(char *buffer);
 int get_compmode();
 
 //private
-void handle_fname(char *path, char *group);
+void handle_fname(char *path, char *group, bool recurs, bool force);
 char *autoAlias(char *path);
 int search_ch(char *str, char c);
 int wild_cmp(char *wild, char *literal);
@@ -69,6 +69,9 @@ void cfg_interp(char *path){
 	return;
 }
 
+//TODO add support for "addR" recursive adding
+//TODO add support for "alias" option
+//TODO add support for "hide" option
 void check_line(char *buffer){
 	char *delims = " \t\n";
 	char *tok = strtok(buffer, delims);
@@ -112,9 +115,9 @@ void check_line(char *buffer){
 
 		//add entry(ies) to a group: first arg is the file(s), second arg is the group to add to
 		//TODO add potential dash functions
-		//TODO add support for "-R" recursive adding
 		//TODO add sorting functionality
-		else if(!(strcmp(args[0], "add"))) handle_fname(args[1], args[2]);
+		else if(!(strcmp(args[0], "add"))) handle_fname(args[1], args[2], 0, 0);
+		else if(!(strcmp(args[0], "addF"))) handle_fname(args[1], args[2], 0, 1);
 
 		//create a new group
 		else if(!(strcmp(args[0], "addGroup"))) group_add(args[1], NULL);
@@ -162,7 +165,8 @@ int get_compmode(){
 	return compmode;
 }
 
-void handle_fname(char *path, char *group){
+//TODO augment to involve recurs
+void handle_fname(char *path, char *group, bool recurs, bool force){
 	ENTRY *new;
 	char *search; //pointer for traversing path
 	char full_path_cpy[BUF_LEN];
@@ -189,9 +193,20 @@ void handle_fname(char *path, char *group){
 	}
 	else strcpy(full_path_cpy, path);
 
+	//don't check that the path arg is valid
+	if(force){
+		if(hr){
+			strcpy(auto_name, autoAlias(full_path_cpy));
+			new = create_entry(auto_name, full_path_cpy);
+		}
+		else new = create_entry(full_path_cpy, full_path_cpy);
+		if(new != NULL) group_add(group, new);
+	}
+
+
 	//file is not recognized, perhaps it has a wildcard?
 	//TODO finish rewriting a more robust wildcard thingy
-	if(access(full_path_cpy, F_OK) == -1){
+	else if(access(full_path_cpy, F_OK) == -1){
 		i = search_ch(full_path_cpy, '*');
 		if(i > -1){
 			//look for a directory

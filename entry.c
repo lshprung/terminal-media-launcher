@@ -22,26 +22,11 @@ char *get_epath(ENTRY *e);
 
 ENTRY *create_entry(char *new_name, char *new_path){
 	ENTRY *new;
-	char adjusted_path[BUF_LEN];
-
-	//double check if file exists
-	if(access(new_path, F_OK) == -1){
-		//try to adjust the path, in case of lingering quotes
-		strcpy(adjusted_path, &new_path[1]);
-		adjusted_path[strlen(adjusted_path)-1] = '\0';
-
-		if(access(adjusted_path, F_OK) == -1){
-			printf("Error: Invalid File Name \"%s\"\n", new_path);
-			return NULL;
-		}
-	}
-
-	else strcpy(adjusted_path, new_path);
 
 	new = malloc(sizeof(ENTRY));
 
 	strcpy(new->name, new_name);
-	strcpy(new->path, adjusted_path);
+	strcpy(new->path, new_path);
 	new->next = NULL;
 
 	return new;
