@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <dirent.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,22 +12,24 @@
 typedef struct entry{
 	char name[BUF_LEN];
 	char path[BUF_LEN];
+	bool path_force;
 	struct entry *next;
 } ENTRY;
 
-ENTRY *create_entry(char *new_name, char *new_path);
+ENTRY *create_entry(char *new_name, char *new_path, bool force);
 ENTRY *entry_add_last(ENTRY *tail, ENTRY *add);
 ENTRY **get_entries(ENTRY *head, int count);
 char *get_ename(ENTRY *e);
 char *get_epath(ENTRY *e);
 
-ENTRY *create_entry(char *new_name, char *new_path){
+ENTRY *create_entry(char *new_name, char *new_path, bool force){
 	ENTRY *new;
 
 	new = malloc(sizeof(ENTRY));
 
 	strcpy(new->name, new_name);
 	strcpy(new->path, new_path);
+	new->path_force = force;
 	new->next = NULL;
 
 	return new;
@@ -64,6 +67,11 @@ char *get_ename(ENTRY *e){
 char *get_epath(ENTRY *e){
 	assert(e != NULL);
 	return e->path;
+}
+
+bool get_eforce(ENTRY *e){
+	assert(e != NULL);
+	return e->path_force;
 }
 
 void entry_debug(ENTRY *trav){

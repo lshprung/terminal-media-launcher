@@ -359,6 +359,7 @@ char *get_launch(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
 	char *path = get_epath(e[e_hover]);
+	bool force = get_eforce(e[e_hover]);
 	int mode = get_compmode();
 	char *full_command = malloc(sizeof(char) * BUF_LEN);
 	bool quote_flag_p = (program[0] == '"' ? false : true);
@@ -376,7 +377,8 @@ char *get_launch(){
 	}
 
 	else{
-		if(mode != 0) path = compat_convert(path, mode);
+		//if the entry is not forced and compatability mode is on, run it through the converter function
+		if(mode != 0 && !force) path = compat_convert(path, mode);
 		if(quote_flag_p) strcat(full_command, "\"");
 		strcat(full_command, program);
 		if(quote_flag_p) strcat(full_command, "\"");

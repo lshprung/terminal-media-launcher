@@ -202,12 +202,12 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 
 	//don't check that the path arg is valid
 	if(force){
-		if(name != NULL) new = create_entry(name, full_path_cpy);
+		if(name != NULL) new = create_entry(name, full_path_cpy, force);
 		else if(hr){
 			strcpy(auto_name, autoAlias(full_path_cpy));
-			new = create_entry(auto_name, full_path_cpy);
+			new = create_entry(auto_name, full_path_cpy, force);
 		}
-		else new = create_entry(full_path_cpy, full_path_cpy);
+		else new = create_entry(full_path_cpy, full_path_cpy, force);
 		if(new != NULL) group_add(group, new);
 	}
 
@@ -237,13 +237,13 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 					if(fname->d_type == DT_REG && !(wild_cmp(&arg_cpy[i+1], fname->d_name))){
 
 						//check if a name was given as argument
-						if(name != NULL) new = create_entry(name, relative_path_cpy);
+						if(name != NULL) new = create_entry(name, relative_path_cpy, force);
 						//check if autoAlias is on. If it is, go to the autoAlias function
 						else if(hr){
 							strcpy(auto_name, autoAlias(relative_path_cpy));
-							new = create_entry(auto_name, relative_path_cpy);
+							new = create_entry(auto_name, relative_path_cpy, force);
 						}
-						else new = create_entry(relative_path_cpy, relative_path_cpy);
+						else new = create_entry(relative_path_cpy, relative_path_cpy, force);
 						if(new != NULL) group_add(group, new);
 					}
 				}
@@ -262,12 +262,12 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 	//file name is okay
 	//FIXME does not take into account whether the argument is a file (could be a directory, symlink, etc.)
 	else{
-		if(name != NULL) new = create_entry(name, full_path_cpy);
+		if(name != NULL) new = create_entry(name, full_path_cpy, force);
 		else if(hr){
 			strcpy(auto_name, autoAlias(full_path_cpy));
-			new = create_entry(auto_name, full_path_cpy);
+			new = create_entry(auto_name, full_path_cpy, force);
 		}
-		else new = create_entry(full_path_cpy, full_path_cpy);
+		else new = create_entry(full_path_cpy, full_path_cpy, force);
 		if(new != NULL){
 			group_add(group, new);
 		}
