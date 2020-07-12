@@ -48,8 +48,11 @@ int main(int argc, char **argv){
 
 	//Fill Groups
 	cfg_interp(cfg_path); //read the contents of the cfg file
-	g = get_groups(); //retrieve results of previous function
-	g_count = get_gcount(g); //retrieve number of groups in g
+
+	//Remove Empty Groups from the Array
+	clean_groups();
+	g = get_groups(); //retrieve results of cfg_interp
+	g_count = get_gcount(g); //retrieve number of groups in g (only do this after removing empty groups)
 
 	initscr();
 	cbreak();

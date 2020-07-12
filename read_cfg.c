@@ -134,7 +134,6 @@ void check_line(char *buffer){
 			else printf("Error: Unknown Compatability Mode Argument \"%s\"\n", args[1]);
 		}
 
-		//TODO fix this so it can give an error that it doesn't recognize args[0]
 		else{
 			//remaining possibilities involve args[1] being a char* referring to a group
 			g = get_groups();

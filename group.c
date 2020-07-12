@@ -20,6 +20,8 @@ typedef struct group{
 
 GROUP *create_group(char *new_name);
 void group_add(char *gname, ENTRY *addme);
+void group_rm(GROUP *g);
+void clean_groups(); //remove empty groups from linked list
 GROUP **get_groups();
 char *get_gname(GROUP *g);
 char *get_gprog(GROUP *g);
@@ -109,6 +111,53 @@ void group_add(char *gname, ENTRY *addme){
 
 	return;
 }
+
+void group_rm(GROUP *g){
+	ENTRY **e = get_entries(g->head, g->entry_count);
+	int i;
+
+	for(i = 0; i < g->entry_count; i++){
+		entry_rm(e[i]);
+	}
+
+	free(e);
+	free(g);
+	group_count--;
+	return;
+}
+
+void clean_groups(){
+	GROUP *dummy_head;
+	GROUP *trav;
+	GROUP *hold;
+
+	if(group_count == 0){
+		printf("Error: no groups!\n");
+		exit(0);
+	}
+
+	else{
+		dummy_head = create_group("dummy");
+		dummy_head->next = groups_head;
+		trav = dummy_head;
+
+		while(trav != NULL){
+			//found empty group for removal
+			if(trav->next != NULL && trav->next->entry_count < 1){
+				printf("Omitting empty group \"%s\"\n", trav->next->name);
+				hold = trav->next;
+				trav->next = trav->next->next;
+				group_rm(hold);
+			}
+			else trav = trav->next;
+		}
+	}
+
+	group_rm(dummy_head);
+	return;
+
+}
+
 
 GROUP **get_groups(){
 	GROUP **arr = malloc(sizeof(GROUP *) * group_count);

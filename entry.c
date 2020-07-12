@@ -17,10 +17,13 @@ typedef struct entry{
 } ENTRY;
 
 ENTRY *create_entry(char *new_name, char *new_path, bool force);
+void entry_rm(ENTRY *e);
 ENTRY *entry_add_last(ENTRY *tail, ENTRY *add);
 ENTRY **get_entries(ENTRY *head, int count);
 char *get_ename(ENTRY *e);
 char *get_epath(ENTRY *e);
+bool get_eforce(ENTRY *e);
+void entry_debug(ENTRY *trav);
 
 ENTRY *create_entry(char *new_name, char *new_path, bool force){
 	ENTRY *new;
@@ -33,6 +36,11 @@ ENTRY *create_entry(char *new_name, char *new_path, bool force){
 	new->next = NULL;
 
 	return new;
+}
+
+void entry_rm(ENTRY *e){
+	assert(e != NULL);
+	free(e);
 }
 
 ENTRY *entry_add_last(ENTRY *tail, ENTRY *add){

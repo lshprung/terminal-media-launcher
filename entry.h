@@ -5,6 +5,8 @@ typedef struct entry ENTRY;
 
 ENTRY *create_entry(char *new_name, char *new_path, bool force);
 
+void entry_rm(ENTRY *e);
+
 ENTRY *entry_add_last(ENTRY *tail, ENTRY *add);
 
 ENTRY **get_entries(ENTRY *head, int count);

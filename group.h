@@ -7,6 +7,10 @@ GROUP *create_group(char *new_name);
 
 void group_add(char *gname, ENTRY *addme);
 
+void group_rm(GROUP *g);
+
+void clean_groups();
+
 GROUP **get_groups();
 
 char *get_gname(GROUP *g);
