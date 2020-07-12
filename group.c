@@ -153,6 +153,8 @@ void clean_groups(){
 		}
 	}
 
+	//ensure groups->head is still correct
+	groups_head = dummy_head->next;
 	group_rm(dummy_head);
 	return;
 
