@@ -69,8 +69,8 @@ void cfg_interp(char *path){
 	return;
 }
 
+//TODO consider implementing binary tree search instead of if, elseif, elseif, etc.
 //TODO add support for "addR" recursive adding
-//TODO add support for "addName" option for adding and aliasing on the same line
 //TODO add support for "alias" option
 //TODO add support for "hide" option
 void check_line(char *buffer){
@@ -118,10 +118,16 @@ void check_line(char *buffer){
 		//TODO add potential dash functions
 		//TODO add sorting functionality
 		else if(!(strcmp(args[0], "add"))) handle_fname(args[1], args[2], 0, 0, NULL);
+
 		//force add entry to a group: first arg is the file(s), second arg is the group to add to
 		else if(!(strcmp(args[0], "addF"))) handle_fname(args[1], args[2], 0, 1, NULL);
+
+		//recursively add: that is, also search directories in the given path
+		else if(!(strcmp(args[0], "addR"))) handle_fname(args[1], args[2], 1, 0, NULL);
+
 		//add entry to a group: first arg is the name, second arg is the file, and third arg is the group to add to
 		else if(!(strcmp(args[0], "addName"))) handle_fname(args[2], args[3], 0, 0, args[1]);
+
 		//same as addName, but with force on
 		else if(!(strcmp(args[0], "addNameF"))) handle_fname(args[2], args[3], 0, 1, args[1]);
 
@@ -244,6 +250,13 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 						}
 						else new = create_entry(relative_path_cpy, relative_path_cpy, force);
 						if(new != NULL) group_add(group, new);
+					}
+
+					//if the recursive option was specified and the path is a directory, run handle_fname on this directory, but for security reasons, do not consider directories that start with a '.'
+					//FIXME this may still need some work...
+					else if(recurs && fname->d_type == DT_DIR && fname->d_name[0] != '.'){
+						strcat(relative_path_cpy, "/*");
+						handle_fname(relative_path_cpy, group, 1, 0, NULL);
 					}
 				}
 

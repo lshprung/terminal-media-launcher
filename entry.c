@@ -17,7 +17,8 @@ typedef struct entry{
 } ENTRY;
 
 ENTRY *create_entry(char *new_name, char *new_path, bool force);
-void entry_rm(ENTRY *e);
+void entry_rm(ENTRY *e, ENTRY *prev);
+void clear_entries(ENTRY *head);
 ENTRY *entry_add_last(ENTRY *tail, ENTRY *add);
 ENTRY **get_entries(ENTRY *head, int count);
 char *get_ename(ENTRY *e);
@@ -38,9 +39,22 @@ ENTRY *create_entry(char *new_name, char *new_path, bool force){
 	return new;
 }
 
-void entry_rm(ENTRY *e){
+void entry_rm(ENTRY *e, ENTRY *prev){
 	assert(e != NULL);
+	if(prev != NULL) prev->next = e->next; //maintain linked structure
 	free(e);
+}
+
+void clear_entries(ENTRY *head){
+	ENTRY *temp;
+	
+	while(head != NULL){
+		temp = head;
+		head = head->next;
+		free(temp);
+	}
+
+	return;
 }
 
 ENTRY *entry_add_last(ENTRY *tail, ENTRY *add){

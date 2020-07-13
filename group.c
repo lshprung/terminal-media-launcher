@@ -113,14 +113,9 @@ void group_add(char *gname, ENTRY *addme){
 }
 
 void group_rm(GROUP *g){
-	ENTRY **e = get_entries(g->head, g->entry_count);
-	int i;
 
-	for(i = 0; i < g->entry_count; i++){
-		entry_rm(e[i]);
-	}
+	clear_entries(g->head);
 
-	free(e);
 	free(g);
 	group_count--;
 	return;
