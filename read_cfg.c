@@ -21,6 +21,7 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name);
 char *autoAlias(char *path);
 int search_ch(char *str, char c);
 int wild_cmp(char *wild, char *literal);
+char *strip_quotes(char *str);
 
 //allow for compatability with compatability layers such as WSL
 int compmode = 0;
@@ -123,6 +124,7 @@ void check_line(char *buffer){
 		else if(!(strcmp(args[0], "addF"))) handle_fname(args[1], args[2], 0, 1, NULL);
 
 		//recursively add: that is, also search directories in the given path
+		//NOTE: experimental
 		else if(!(strcmp(args[0], "addR"))) handle_fname(args[1], args[2], 1, 0, NULL);
 
 		//add entry to a group: first arg is the name, second arg is the file, and third arg is the group to add to
@@ -132,7 +134,7 @@ void check_line(char *buffer){
 		else if(!(strcmp(args[0], "addNameF"))) handle_fname(args[2], args[3], 0, 1, args[1]);
 
 		//create a new group
-		else if(!(strcmp(args[0], "addGroup"))) group_add(args[1], NULL);
+		else if(!(strcmp(args[0], "addGroup"))) group_add(strip_quotes(args[1]), NULL);
 
 		//set compatability mode
 		else if(!(strcmp(args[0], "compMode"))){
@@ -199,15 +201,15 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 	}
 
 	//address potential quotes
-	if(path[0] == '"'){
-		strcpy(full_path_cpy, &path[1]);
-		full_path_cpy[strlen(full_path_cpy) - 1] = '\0';
-	}
-	else strcpy(full_path_cpy, path);
+	strcpy(full_path_cpy, strip_quotes(path));
 
 	//don't check that the path arg is valid
 	if(force){
-		if(name != NULL) new = create_entry(name, full_path_cpy, force);
+		if(name != NULL){
+			//strip quotes from the name
+			name = strip_quotes(name);
+			new = create_entry(name, full_path_cpy, force);
+		}
 		else if(hr){
 			strcpy(auto_name, autoAlias(full_path_cpy));
 			new = create_entry(auto_name, full_path_cpy, force);
@@ -242,7 +244,11 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 					if(fname->d_type == DT_REG && !(wild_cmp(&arg_cpy[i+1], fname->d_name))){
 
 						//check if a name was given as argument
-						if(name != NULL) new = create_entry(name, relative_path_cpy, force);
+						if(name != NULL){
+							//strip quotes from the name
+							name = strip_quotes(name);
+							new = create_entry(name, relative_path_cpy, force);
+						}
 						//check if autoAlias is on. If it is, go to the autoAlias function
 						else if(hr){
 							strcpy(auto_name, autoAlias(relative_path_cpy));
@@ -274,7 +280,11 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 	//file name is okay
 	//FIXME does not take into account whether the argument is a file (could be a directory, symlink, etc.)
 	else{
-		if(name != NULL) new = create_entry(name, full_path_cpy, force);
+		if(name != NULL){
+			//strip quotes from the name
+			name = strip_quotes(name);
+			new = create_entry(name, full_path_cpy, force);
+		}
 		else if(hr){
 			strcpy(auto_name, autoAlias(full_path_cpy));
 			new = create_entry(auto_name, full_path_cpy, force);
@@ -389,4 +399,16 @@ int wild_cmp(char *wild, char *literal){
 	}
 
 	return 0;
+}
+
+char *strip_quotes(char *str){
+	char *stripped_str = malloc(sizeof(char) * BUF_LEN);
+	
+	if(str[0] == '"'){
+		stripped_str = &str[1];
+		stripped_str[strlen(stripped_str) - 1] = '\0';
+		return stripped_str;
+	}
+
+	return str;
 }
