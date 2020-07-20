@@ -18,6 +18,7 @@ int get_compmode();
 
 //private
 void handle_fname(char *path, char *group, bool recurs, bool force, char *name);
+void addme(char *path, char *group, bool force, char *name);
 char *autoAlias(char *path);
 int search_ch(char *str, char c);
 int wild_cmp(char *wild, char *literal);
@@ -203,21 +204,8 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 	//address potential quotes
 	strcpy(full_path_cpy, strip_quotes(path));
 
-	//don't check that the path arg is valid
-	if(force){
-		if(name != NULL){
-			//strip quotes from the name
-			name = strip_quotes(name);
-			new = create_entry(name, full_path_cpy, force);
-		}
-		else if(hr){
-			strcpy(auto_name, autoAlias(full_path_cpy));
-			new = create_entry(auto_name, full_path_cpy, force);
-		}
-		else new = create_entry(full_path_cpy, full_path_cpy, force);
-		if(new != NULL) group_add(group, new);
-	}
-
+	//don't check that the path arg is valid when forced
+	if(force) addme(full_path_cpy, group, force, name);
 
 	//file is not recognized, perhaps it has a wildcard?
 	//TODO finish rewriting a more robust wildcard thingy
@@ -241,22 +229,7 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 					strcat(relative_path_cpy, fname->d_name);
 
 					//check if path is a file (and not a directory/symlink/etc.) and regex matches
-					if(fname->d_type == DT_REG && !(wild_cmp(&arg_cpy[i+1], fname->d_name))){
-
-						//check if a name was given as argument
-						if(name != NULL){
-							//strip quotes from the name
-							name = strip_quotes(name);
-							new = create_entry(name, relative_path_cpy, force);
-						}
-						//check if autoAlias is on. If it is, go to the autoAlias function
-						else if(hr){
-							strcpy(auto_name, autoAlias(relative_path_cpy));
-							new = create_entry(auto_name, relative_path_cpy, force);
-						}
-						else new = create_entry(relative_path_cpy, relative_path_cpy, force);
-						if(new != NULL) group_add(group, new);
-					}
+					if(fname->d_type == DT_REG && !(wild_cmp(&arg_cpy[i+1], fname->d_name))) addme(relative_path_cpy, group, force, name);
 
 					//if the recursive option was specified and the path is a directory, run handle_fname on this directory, but for security reasons, do not consider directories that start with a '.'
 					//FIXME this may still need some work...
@@ -279,24 +252,34 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 
 	//file name is okay
 	//FIXME does not take into account whether the argument is a file (could be a directory, symlink, etc.)
-	else{
-		if(name != NULL){
-			//strip quotes from the name
-			name = strip_quotes(name);
-			new = create_entry(name, full_path_cpy, force);
-		}
-		else if(hr){
-			strcpy(auto_name, autoAlias(full_path_cpy));
-			new = create_entry(auto_name, full_path_cpy, force);
-		}
-		else new = create_entry(full_path_cpy, full_path_cpy, force);
-		if(new != NULL){
-			group_add(group, new);
-		}
-	}
+	else addme(full_path_cpy, group, force, name);
 
 	return;
 }
+
+void addme(char *path, char *group, bool force, char *name){
+	ENTRY *new;
+	char auto_name[BUF_LEN];
+
+	//check if a name was given as argument
+	if(name != NULL){
+		//strip quotes from the name
+		name = strip_quotes(name);
+		new = create_entry(name, path, force);
+	}
+
+	//check if autoAlias is on. If it is, go to the autoAlias function
+	else if(hr){
+		strcpy(auto_name, autoAlias(path));
+		new = create_entry(auto_name, path, force);
+	}
+
+	else new = create_entry(path, path, force);
+	if(new != NULL) group_add(group, new);
+
+	return;
+}
+
 
 //TODO figure out how to trim the extensions of files off
 char *autoAlias(char *path){
