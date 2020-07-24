@@ -1,7 +1,14 @@
+//Windows Compatability
+#if defined _WIN32 || defined _WIN64
+#include <ncurses/ncurses.h>
+#else
 #include <ncurses.h>
+#endif
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "entry.h"
 #include "group.h"
 #include "read_cfg.h"
@@ -17,6 +24,7 @@ void update_col(int mode, int hl_where); //0 = last, 1 = first; 0 = GROUP, 1 = E
 void switch_col();
 void trav_col(int dir); //0 = down, 1 = up
 char *get_launch();
+void win_launch();
 char *compat_convert(char *path, int mode);
 
 static int width;
@@ -116,12 +124,18 @@ int main(int argc, char **argv){
 				trav_col(1);
 				break;
 
+			//FIXME Windows issue calling system() while in an ncurses instance. For Windows, call execl() instead
 			case 10: //enter key
+#if defined _WIN32 || defined _WIN64
+				win_launch();
+#else
 				full_command = get_launch();
 				system(full_command);
+#endif
+				refresh();
 				break;
 
-			default:
+			case 'q':
 				endwin();
 				return 0;
 
@@ -358,6 +372,8 @@ void trav_col(int dir){
 	return;
 }
 
+//TODO this looks ugly with all the #ifdefs...
+//FIXME account for how Windows does things: ""program.exe" [flags] "file""
 char *get_launch(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
@@ -365,38 +381,70 @@ char *get_launch(){
 	bool force = get_eforce(e[e_hover]);
 	int mode = get_compmode();
 	char *full_command = malloc(sizeof(char) * BUF_LEN);
-	bool quote_flag_p = (program[0] == '"' ? false : true);
-	bool quote_flag_f = (flags[0] == '"' ? false : true);
-	bool quote_flag_e = (path[0] == '"' ? false : true);
 
 	full_command[0] = '\0';
 
+#if defined _WIN32 || defined _WIN64
+	//format correctly for Windows
+	strcat(full_command, "\"");
+#endif
+
 	//if the entry is an executable file (doesn't have a launcher)
 	if(!(strcmp(program, "./"))){
-		if(quote_flag_e) strcat(full_command, "\"");
+		strcat(full_command, "\"");
 		strcat(full_command, path);
-		if(quote_flag_e) strcat(full_command, "\"");
-		return full_command;
+		strcat(full_command, "\"");
 	}
 
 	else{
 		//if the entry is not forced and compatability mode is on, run it through the converter function
 		if(mode != 0 && !force) path = compat_convert(path, mode);
-		if(quote_flag_p) strcat(full_command, "\"");
+		strcat(full_command, "\"");
 		strcat(full_command, program);
-		if(quote_flag_p) strcat(full_command, "\"");
+		strcat(full_command, "\"");
 		if(flags[0] !='\0'){
 			strcat(full_command, " ");
-			if(quote_flag_f) strcat(full_command, "\"");
+			strcat(full_command, "\"");
 			strcat(full_command, flags);
-			if(quote_flag_f) strcat(full_command, "\"");
+			strcat(full_command, "\"");
 		}
 		strcat(full_command, " ");
-		if(quote_flag_e) strcat(full_command, "\"");
+		strcat(full_command, "\"");
 		strcat(full_command, path);
-		if(quote_flag_e) strcat(full_command, "\"");
-		return full_command;
+		strcat(full_command, "\"");
 	}
+
+#if defined _WIN32 || defined _WIN64
+	//format correctly for Windows
+	strcat(full_command, "\"");
+#endif
+
+	return full_command;
+
+}
+
+//FIXME issue with flags, some flags simply do not work (yet!)
+void win_launch(){
+	char *program = get_gprog(g[g_hover]);
+	char *flags = get_gflags(g[g_hover]);
+	char *path = get_epath(e[e_hover]);
+	char quoted_path[BUF_LEN];
+	char quoted_program[BUF_LEN];
+	
+	quoted_path[0] = '\0';
+	strcat(quoted_path, "\"");
+	strcat(quoted_path, path);
+	strcat(quoted_path, "\"");
+
+	quoted_program[0] = '\0';
+	strcat(quoted_program, "\"");
+	strcat(quoted_program, program);
+	strcat(quoted_program, "\"");
+
+	if(!(strcmp(program, "./"))) execl(path, quoted_path, NULL);
+	else execl(program, quoted_program, flags, quoted_path, NULL);
+
+	return;
 }
 
 char *compat_convert(char *path, int mode){

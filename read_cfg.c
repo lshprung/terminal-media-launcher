@@ -33,6 +33,13 @@ int compmode = 0;
 //set to true to automatically try to create a human readable name for an entry
 bool hr = false;
 
+#if defined _WIN32 || defined _WIN64
+//for Windows Compatability, this will be '\\' (otherwise '/')
+char sep = '\\';
+#else
+char sep = '/';
+#endif
+
 void cfg_interp(char *path){
 	FILE *fp;
 	char buffer[BUF_LEN];
@@ -156,14 +163,14 @@ void check_line(char *buffer){
 			//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
 			if(!(strcmp(args[0], "setLauncher"))){
 				//assert that a matching group was found
-				if(i < g_count) set_gprog(g[i], args[2]);
+				if(i < g_count) set_gprog(g[i], strip_quotes(args[2]));
 				else printf("Error: Group \"%s\" does not exist\n", args[1]);
 			}
 
 			//set a group's launcher flags (like ./program -f file for fullscreen)
 			else if(!(strcmp(args[0], "setFlags"))){
 				//assert that a matching group was found
-				if(i < g_count) set_gflags(g[i], args[2]);
+				if(i < g_count) set_gflags(g[i], strip_quotes(args[2]));
 				else printf("Error: Group \"%s\" does not exist\n", args[1]);
 			}
 
@@ -213,7 +220,7 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 		i = search_ch(full_path_cpy, '*');
 		if(i > -1){
 			//look for a directory
-			while(full_path_cpy[i] != '/' && (i >= 0)){
+			while(full_path_cpy[i] != sep && (i >= 0)){
 				i--;
 			}
 			dirname = full_path_cpy;
@@ -228,6 +235,11 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 					strcat(relative_path_cpy, dirname);
 					strcat(relative_path_cpy, fname->d_name);
 
+#if defined _WIN32 || defined _WIN64
+					//Windows cannot tell file types (TODO), so just add relatively indiscriminantly
+					if(!(wild_cmp(&arg_cpy[i+1], fname->d_name))) addme(relative_path_cpy, group, force, name);
+
+#else
 					//check if path is a file (and not a directory/symlink/etc.) and regex matches
 					if(fname->d_type == DT_REG && !(wild_cmp(&arg_cpy[i+1], fname->d_name))) addme(relative_path_cpy, group, force, name);
 
@@ -237,6 +249,8 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 						strcat(relative_path_cpy, "/*");
 						handle_fname(relative_path_cpy, group, 1, 0, NULL);
 					}
+#endif
+
 				}
 
 				closedir(dp);
@@ -289,7 +303,7 @@ char *autoAlias(char *path){
 	bool stop = false; //stop when you don't want to add a series of chars to the output
 
 	//get to the relative path name
-	rpath = strrchr(path, '/');
+	rpath = strrchr(path, sep);
 	if(rpath == NULL) rpath = path;
 	else rpath++;
 
