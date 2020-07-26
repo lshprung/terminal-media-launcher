@@ -10,13 +10,15 @@
 #include "group.h"
 #define BUF_LEN 1024 //maybe move this line to the header file
 #define MAX_ARGS 5
+#define OPTION_CNT 10
 
 //public
 void cfg_interp(char *path);
-void check_line(char *buffer);
 int get_compmode();
 
 //private
+void check_line(char *buffer, char **options);
+int check_option(char *arg, char **options);
 void handle_fname(char *path, char *group, bool recurs, bool force, char *name);
 void addme(char *path, char *group, bool force, char *name);
 char *autoAlias(char *path);
@@ -54,10 +56,26 @@ void cfg_interp(char *path){
 	fp = fopen(path, "r");
 	assert(fp != NULL);
 
+	//build the options array
+	char **options = malloc(sizeof(char *) * OPTION_CNT);
+	options[0] = "add";
+	options[1] = "addF";
+	options[2] = "addGroup";
+	options[3] = "addName";
+	options[4] = "addNameF";
+	options[5] = "addR";
+	options[6] = "autoAlias";
+	options[7] = "compMode";
+	options[8] = "setFlags";
+	options[9] = "setLauncher";
+
 	//Read each line of "config"
 	while(fgets(buffer, BUF_LEN, fp)){
-		check_line(buffer);
+		check_line(buffer, options);
 	}
+
+	//cleanup
+	free(options);
 
 	/*
 	//DEBUG: test to see if the list was added to properly
@@ -78,16 +96,20 @@ void cfg_interp(char *path){
 	return;
 }
 
-//TODO consider implementing binary tree search instead of if, elseif, elseif, etc.
+int get_compmode(){
+	return compmode;
+}
+
 //TODO add support for "addR" recursive adding
 //TODO add support for "alias" option
 //TODO add support for "hide" option
-void check_line(char *buffer){
+void check_line(char *buffer, char **options){
 	char *delims = " \t\n";
 	char *tok = strtok(buffer, delims);
 	char args[MAX_ARGS][BUF_LEN];
 	GROUP **g;
 	int g_count;
+	int search_res;
 	int i;
 
 	//ensure line is not blank or commented out
@@ -118,72 +140,115 @@ void check_line(char *buffer){
 			i++;
 		}
 
-		if(!(strcmp(args[0], "autoAlias"))){
-			if(!(strcmp(args[1], "on"))) hr = true;
-			else if(!(strcmp(args[1], "off"))) hr = false;
-		}
+		//optimally check which option was specified
+		search_res = check_option(args[0], options);
 
-		//add entry(ies) to a group: first arg is the file(s), second arg is the group to add to
-		//TODO add potential dash functions
-		//TODO add sorting functionality
-		else if(!(strcmp(args[0], "add"))) handle_fname(args[1], args[2], 0, 0, NULL);
+		switch(search_res){
 
-		//force add entry to a group: first arg is the file(s), second arg is the group to add to
-		else if(!(strcmp(args[0], "addF"))) handle_fname(args[1], args[2], 0, 1, NULL);
+			case 0: //add
+				//add entry(ies) to a group: first arg is the file(s), second arg is the group to add to
+				//TODO add potential dash functions
+				//TODO add sorting functionality
+				handle_fname(args[1], args[2], 0, 0, NULL);
+				break;
+				
+			case 1: //addF
+				//force add entry to a group: first arg is the file(s), second arg is the group to add to
+				handle_fname(args[1], args[2], 0, 1, NULL);
+				break;
 
-		//recursively add: that is, also search directories in the given path
-		//NOTE: experimental
-		else if(!(strcmp(args[0], "addR"))) handle_fname(args[1], args[2], 1, 0, NULL);
+			case 2: //addGroup
+				//create a new group
+				group_add(strip_quotes(args[1]), NULL);
+				break;
 
-		//add entry to a group: first arg is the name, second arg is the file, and third arg is the group to add to
-		else if(!(strcmp(args[0], "addName"))) handle_fname(args[2], args[3], 0, 0, args[1]);
+			case 3: //addName
+				//add entry to a group: first arg is the name, second arg is the file, and third arg is the group to add to
+				handle_fname(args[2], args[3], 0, 0, args[1]);
+				break;
 
-		//same as addName, but with force on
-		else if(!(strcmp(args[0], "addNameF"))) handle_fname(args[2], args[3], 0, 1, args[1]);
+			case 4: //addNameF
+				//same as addName, but with force on
+				handle_fname(args[2], args[3], 0, 1, args[1]);
+				break;
 
-		//create a new group
-		else if(!(strcmp(args[0], "addGroup"))) group_add(strip_quotes(args[1]), NULL);
+			case 5: //addR
+				//recursively add: that is, also search directories in the given path
+				//NOTE: experimental
+				handle_fname(args[1], args[2], 1, 0, NULL);
+				break;
+				
+			case 6: //autoAlias
+				if(!(strcmp(args[1], "on"))) hr = true;
+				else if(!(strcmp(args[1], "off"))) hr = false;
+				break;
 
-		//set compatability mode
-		else if(!(strcmp(args[0], "compMode"))){
-			if(!(strcmp(args[1], "WSL"))) compmode = 1;
-			else printf("Error: Unknown Compatability Mode Argument \"%s\"\n", args[1]);
-		}
+			case 7: //compMode
+				if(!(strcmp(args[1], "WSL"))) compmode = 1;
+				else printf("Error: Unknown Compatability Mode Argument \"%s\"\n", strip_quotes(args[1]));
+				break;
 
-		else{
-			//remaining possibilities involve args[1] being a char* referring to a group
-			g = get_groups();
-			g_count = get_gcount();
+			case 8: //setFlags
+				//args[1] is referring to a group
+				g = get_groups();
+				g_count = get_gcount();
 
-			//look for matching existing group
-			for(i = 0; i < g_count; i++){
-				if(!(strcmp(get_gname(g[i]), args[1]))) break;
-			}
+				//look for matching existing group
+				for(i = 0; i < g_count; i++){
+					if(!(strcmp(get_gname(g[i]), args[1]))) break;
+				}
 
-			//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
-			if(!(strcmp(args[0], "setLauncher"))){
-				//assert that a matching group was found
-				if(i < g_count) set_gprog(g[i], strip_quotes(args[2]));
-				else printf("Error: Group \"%s\" does not exist\n", args[1]);
-			}
-
-			//set a group's launcher flags (like ./program -f file for fullscreen)
-			else if(!(strcmp(args[0], "setFlags"))){
+				//set a group's launcher flags (like ./program -f file for fullscreen)
 				//assert that a matching group was found
 				if(i < g_count) set_gflags(g[i], strip_quotes(args[2]));
 				else printf("Error: Group \"%s\" does not exist\n", args[1]);
-			}
+				break;
 
-			//args[0] is not a valid config option
-			else printf("Error: Unknown config option \"%s\"\n", args[0]);
+			case 9: //setLauncher
+				//args[1] is referring to a group
+				g = get_groups();
+				g_count = get_gcount();
+
+				//look for matching existing group
+				for(i = 0; i < g_count; i++){
+					if(!(strcmp(get_gname(g[i]), args[1]))) break;
+				}
+
+				//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
+				//assert that a matching group was found
+				if(i < g_count) set_gprog(g[i], strip_quotes(args[2]));
+				else printf("Error: Group \"%s\" does not exist\n", args[1]);
+				break;
+
+			default:
+				printf("Error: Unknown config option \"%s\"\n", args[0]);
+
 		}
+
 	}
 
 	return;
 }
 
-int get_compmode(){
-	return compmode;
+int check_option(char *arg, char **options){
+	int min = 0;
+	int max = OPTION_CNT-1;
+	int hover;
+	int comp_res;
+
+	while(max - min > 1){
+		hover = min + (max-min)/2;
+		comp_res = strcmp(arg, options[hover]);
+
+		if(comp_res > 0) min = hover;
+		else if(comp_res < 0) max = hover;
+		else return hover;
+	}
+
+	if(max == OPTION_CNT-1 && strcmp(arg, options[max]) == 0) return max;
+	else if(min == 0 && strcmp(arg, options[min]) == 0) return min;
+
+	return -1;
 }
 
 //TODO augment to involve recurs

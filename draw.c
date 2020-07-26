@@ -424,6 +424,7 @@ char *get_launch(){
 }
 
 //FIXME issue with flags, some flags simply do not work (yet!)
+//TODO execl() sends an exit signal. An alternative function may be fork or popen...
 void win_launch(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
