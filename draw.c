@@ -1,6 +1,7 @@
 //Windows Compatability
 #if defined _WIN32 || defined _WIN64
 #include <ncurses/ncurses.h>
+#include <windows.h>
 #else
 #include <ncurses.h>
 #endif
@@ -24,7 +25,6 @@ void update_col(int mode, int hl_where); //0 = last, 1 = first; 0 = GROUP, 1 = E
 void switch_col();
 void trav_col(int dir); //0 = down, 1 = up
 char *get_launch();
-void win_launch();
 char *compat_convert(char *path, int mode);
 
 static int width;
@@ -126,10 +126,17 @@ int main(int argc, char **argv){
 
 			//FIXME Windows issue calling system() while in an ncurses instance. For Windows, call execl() instead
 			case 10: //enter key
-#if defined _WIN32 || defined _WIN64
-				win_launch();
-#else
 				full_command = get_launch();
+
+#if defined _WIN32 || defined _WIN64
+				STARTUPINFO si;
+				PROCESS_INFORMATION pi;
+				ZeroMemory(&si, sizeof(si));
+				si.cb = sizeof(si);
+				ZeroMemory(&pi, sizeof(pi));
+				if(!CreateProcess(NULL, full_command, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) printf("Windows CreateProcess Failed: %d\n", GetLastError());
+
+#else
 				system(full_command);
 #endif
 				refresh();
@@ -384,11 +391,6 @@ char *get_launch(){
 
 	full_command[0] = '\0';
 
-#if defined _WIN32 || defined _WIN64
-	//format correctly for Windows
-	strcat(full_command, "\"");
-#endif
-
 	//if the entry is an executable file (doesn't have a launcher)
 	if(!(strcmp(program, "./"))){
 		strcat(full_command, "\"");
@@ -414,38 +416,8 @@ char *get_launch(){
 		strcat(full_command, "\"");
 	}
 
-#if defined _WIN32 || defined _WIN64
-	//format correctly for Windows
-	strcat(full_command, "\"");
-#endif
-
 	return full_command;
 
-}
-
-//FIXME issue with flags, some flags simply do not work (yet!)
-//TODO execl() sends an exit signal. An alternative function may be fork or popen...
-void win_launch(){
-	char *program = get_gprog(g[g_hover]);
-	char *flags = get_gflags(g[g_hover]);
-	char *path = get_epath(e[e_hover]);
-	char quoted_path[BUF_LEN];
-	char quoted_program[BUF_LEN];
-	
-	quoted_path[0] = '\0';
-	strcat(quoted_path, "\"");
-	strcat(quoted_path, path);
-	strcat(quoted_path, "\"");
-
-	quoted_program[0] = '\0';
-	strcat(quoted_program, "\"");
-	strcat(quoted_program, program);
-	strcat(quoted_program, "\"");
-
-	if(!(strcmp(program, "./"))) execl(path, quoted_path, NULL);
-	else execl(program, quoted_program, flags, quoted_path, NULL);
-
-	return;
 }
 
 char *compat_convert(char *path, int mode){
