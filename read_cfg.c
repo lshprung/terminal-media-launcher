@@ -108,6 +108,8 @@ void check_line(char *buffer, char **options){
 	char *tok = strtok(buffer, delims);
 	char args[MAX_ARGS][BUF_LEN];
 	GROUP **g;
+	char *tok_p;
+	char *arg_p;
 	int g_count;
 	int search_res;
 	int i;
@@ -129,11 +131,33 @@ void check_line(char *buffer, char **options){
 			strcpy(args[i], tok);
 			//handle if an argument has spaces and is wrapped in quotes
 			if(tok[0] == '"'){
-				while(tok[strlen(tok)-1] != '"'){
-					tok = strtok(NULL, delims);
-					strcat(args[i], " ");
-					strcat(args[i], tok);
+				arg_p = &args[i][0];
+				tok_p = &tok[1];
+
+				while(*tok_p != '"'){
+					switch(*tok_p){
+
+
+						case '\0':
+							tok = strtok(NULL, delims);
+							tok_p = &tok[0];
+							*arg_p = ' ';
+							arg_p++;
+							break;
+
+						case '\\':
+							if(*(tok_p+1) == '"') tok_p++;
+
+						default:
+							*arg_p = *tok_p;
+							tok_p++;
+							arg_p++;
+
+					}
 				}
+
+				*arg_p = '\0';
+					
 			}
 
 			tok = strtok(NULL, delims);

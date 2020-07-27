@@ -26,6 +26,9 @@ void switch_col();
 void trav_col(int dir); //0 = down, 1 = up
 char *get_launch();
 char *compat_convert(char *path, int mode);
+#if defined _WIN32 || defined _WIN64
+void win_launch();
+#endif
 
 static int width;
 static int height;
@@ -124,19 +127,12 @@ int main(int argc, char **argv){
 				trav_col(1);
 				break;
 
-			//FIXME Windows issue calling system() while in an ncurses instance. For Windows, call execl() instead
 			case 10: //enter key
-				full_command = get_launch();
 
 #if defined _WIN32 || defined _WIN64
-				STARTUPINFO si;
-				PROCESS_INFORMATION pi;
-				ZeroMemory(&si, sizeof(si));
-				si.cb = sizeof(si);
-				ZeroMemory(&pi, sizeof(pi));
-				if(!CreateProcess(NULL, full_command, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) printf("Windows CreateProcess Failed: %d\n", GetLastError());
-
+				win_launch();
 #else
+				full_command = get_launch();
 				system(full_command);
 #endif
 				refresh();
@@ -379,8 +375,8 @@ void trav_col(int dir){
 	return;
 }
 
-//TODO this looks ugly with all the #ifdefs...
 //FIXME account for how Windows does things: ""program.exe" [flags] "file""
+	//There is an issue with flags: needs to be able to have quotation marks
 char *get_launch(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
@@ -406,9 +402,7 @@ char *get_launch(){
 		strcat(full_command, "\"");
 		if(flags[0] !='\0'){
 			strcat(full_command, " ");
-			strcat(full_command, "\"");
 			strcat(full_command, flags);
-			strcat(full_command, "\"");
 		}
 		strcat(full_command, " ");
 		strcat(full_command, "\"");
@@ -447,3 +441,41 @@ char *compat_convert(char *path, int mode){
 
 	return new;
 }
+
+#if defined _WIN32 || defined _WIN64
+void win_launch(){
+	char *program = get_gprog(g[g_hover]);
+	char *flags = get_gflags(g[g_hover]);
+	char *path = get_epath(e[e_hover]);
+	char file[BUF_LEN];
+	char params[BUF_LEN];
+
+	file[0] = '\0';
+
+	if(!(strcmp(program, "./"))){
+		strcat(file, "\"");
+		strcat(file, path);
+		strcat(file, "\"");
+		ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOW);
+	}
+
+	else{
+		strcat(file, "\"");
+		strcat(file, program);
+		strcat(file, "\"");
+
+		params[0] = '\0';
+		if(flags[0] != '\0'){
+			strcat(params, flags);
+			strcat(params, " ");
+		}
+		strcat(params, "\"");
+		strcat(params, path);
+		strcat(params, "\"");
+		
+		ShellExecute(NULL, NULL, file, params, NULL, SW_SHOW);
+	}
+
+	return;
+}
+#endif
