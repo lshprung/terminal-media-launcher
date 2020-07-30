@@ -48,7 +48,7 @@ int e_offset = 0;
 //TODO consider figuring out where some refreshes are unecessary
 
 int main(int argc, char **argv){
-	char *cfg_path = "config";
+	char *cfg_path;
 	bool tall = true; //is the window a certain height (tbd what the threshold should be TODO)
 	bool wide = true; //is the window a certain width (tbd what the threshold should be TODO)
 	int input;
@@ -56,6 +56,7 @@ int main(int argc, char **argv){
 
 	//if a config path was given as an argument, set it accordingly
 	if(argc > 2 && (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cfg_path"))) cfg_path = argv[2];
+	else cfg_path = find_config();
 
 	//Fill Groups
 	cfg_interp(cfg_path); //read the contents of the cfg file

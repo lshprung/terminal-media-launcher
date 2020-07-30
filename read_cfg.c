@@ -13,6 +13,7 @@
 #define OPTION_CNT 10
 
 //public
+char *find_config();
 void cfg_interp(char *path);
 int get_compmode();
 
@@ -41,6 +42,29 @@ char sep = '\\';
 #else
 char sep = '/';
 #endif
+
+char *find_config(){
+	char *home = getenv("HOME");
+	char *path = malloc(sizeof(char) * BUF_LEN);
+	char choices[2][BUF_LEN];
+	int check_count = 2;
+	int i;
+
+	sprintf(choices[0], "%s%c.config%ctml%cconfig", home, sep, sep, sep);
+	sprintf(choices[1], "%s%c.tml%cconfig", home, sep, sep);
+
+	//TODO where do we want the Windows config to be?
+
+	for(i = 0; i < check_count; i++){
+		path = choices[i];
+		if(access(path, R_OK) == 0){
+			printf("Using config \"%s\"\n", path);
+			return path;
+		}
+	}
+
+	return "config";
+}
 
 void cfg_interp(char *path){
 	FILE *fp;
@@ -146,7 +170,7 @@ void check_line(char *buffer, char **options){
 							break;
 
 						case '\\':
-							if(*(tok_p+1) == '"') tok_p++;
+							tok_p++;
 
 						default:
 							*arg_p = *tok_p;
