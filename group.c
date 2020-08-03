@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include "entry.h"
 #include "group.h"
+#include "read_cfg.h"
 #define BUF_LEN 1024
 
 typedef struct group{
@@ -103,8 +104,30 @@ void group_add(char *gname, ENTRY *addme){
 
 	//add the entry to the list of entries in the group
 	if(addme != NULL){
-		gp->tail = entry_add_last(gp->tail, addme);
-		if(gp->head == NULL) gp->head = gp->tail; //first element of the new list
+		if(get_sort()){
+			i = entry_add_sorted(gp->head, gp->tail, addme);
+			switch(i){
+				case 1:
+					gp->head = addme;
+					break;
+
+				case 2:
+					gp->tail = addme;
+					break;
+
+				case 3:
+					gp->head = addme;
+					gp->tail = addme;
+					break;
+
+			}
+		}
+
+		else{
+			gp->tail = entry_add_last(gp->tail, addme);
+			if(gp->head == NULL) gp->head = gp->tail; //first element of the new list
+		}
+
 		gp->entry_count++;
 		total_count++;
 	}

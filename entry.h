@@ -11,6 +11,8 @@ void clear_entries(ENTRY *head);
 
 ENTRY *entry_add_last(ENTRY *tail, ENTRY *add);
 
+int entry_add_sorted(ENTRY *head, ENTRY *tail, ENTRY *add);
+
 ENTRY **get_entries(ENTRY *head, int count);
 
 char *get_ename(ENTRY *e);

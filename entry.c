@@ -20,6 +20,7 @@ ENTRY *create_entry(char *new_name, char *new_path, bool force);
 void entry_rm(ENTRY *e, ENTRY *prev);
 void clear_entries(ENTRY *head);
 ENTRY *entry_add_last(ENTRY *tail, ENTRY *add);
+int entry_add_sorted(ENTRY *head, ENTRY *tail, ENTRY *add);
 ENTRY **get_entries(ENTRY *head, int count);
 char *get_ename(ENTRY *e);
 char *get_epath(ENTRY *e);
@@ -57,6 +58,7 @@ void clear_entries(ENTRY *head){
 	return;
 }
 
+//TODO consider joining entry_add_last and entry_add_sorted
 ENTRY *entry_add_last(ENTRY *tail, ENTRY *add){
 	assert(add != NULL);
 
@@ -67,6 +69,41 @@ ENTRY *entry_add_last(ENTRY *tail, ENTRY *add){
 	}
 
 	return tail;
+}
+
+//returns 0 if in the middle, 1 if new head, 2 if new tail, or 3 if both new head and tail
+//TODO this is kind of a stupid way of handling things
+int entry_add_sorted(ENTRY *head, ENTRY *tail, ENTRY *add){
+	assert(add != NULL);
+	ENTRY *ahead;
+
+	//Empty group (no need to sort)
+	if(head == NULL) return 3;
+
+	//add is the new tail
+	if(strcmp(tail->name, add->name) <= 0){
+		tail->next = add;
+		return 2;
+	}
+
+	//add is the new head
+	if(strcmp(add->name, head->name) <= 0){
+		add->next = head;
+		return 1;
+	}
+
+	ahead = head->next;
+
+	while(ahead != NULL){
+		if(strcmp(head->name, add->name) <= 0 && strcmp(add->name, ahead->name) <= 0) break;
+		head = head->next;
+		ahead = ahead->next;
+	}
+
+	head->next = add;
+	add->next = ahead;
+
+	return 0;
 }
 
 ENTRY **get_entries(ENTRY *head, int count){

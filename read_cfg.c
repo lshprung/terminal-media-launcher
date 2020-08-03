@@ -10,12 +10,13 @@
 #include "group.h"
 #define BUF_LEN 1024 //maybe move this line to the header file
 #define MAX_ARGS 5
-#define OPTION_CNT 10
+#define OPTION_CNT 11
 
 //public
 char *find_config();
 void cfg_interp(char *path);
 int get_compmode();
+bool get_sort();
 
 //private
 void check_line(char *buffer, char **options);
@@ -32,6 +33,9 @@ int compmode = 0;
 //0 -> none
 //1 -> WSL
 //maybe more later?
+
+//turn on or off sorting (A-Z)
+bool sort = 0;
 
 //set to true to automatically try to create a human readable name for an entry
 bool hr = false;
@@ -76,7 +80,6 @@ void cfg_interp(char *path){
 	int i;
 	int j;
 
-	//TODO have this check in certain locations for a config file, give error message if "config" does not exist
 	fp = fopen(path, "r");
 	assert(fp != NULL);
 
@@ -92,6 +95,7 @@ void cfg_interp(char *path){
 	options[7] = "compMode";
 	options[8] = "setFlags";
 	options[9] = "setLauncher";
+	options[10] = "sort";
 
 	//Read each line of "config"
 	while(fgets(buffer, BUF_LEN, fp)){
@@ -124,7 +128,11 @@ int get_compmode(){
 	return compmode;
 }
 
-//TODO add support for "addR" recursive adding
+bool get_sort(){
+	return sort;
+}
+
+//TODO add support for "addR" recursive adding (still needs work...)
 //TODO add support for "alias" option
 //TODO add support for "hide" option
 void check_line(char *buffer, char **options){
@@ -195,7 +203,6 @@ void check_line(char *buffer, char **options){
 
 			case 0: //add
 				//add entry(ies) to a group: first arg is the file(s), second arg is the group to add to
-				//TODO add potential dash functions
 				//TODO add sorting functionality
 				handle_fname(args[1], args[2], 0, 0, NULL);
 				break;
@@ -266,6 +273,11 @@ void check_line(char *buffer, char **options){
 				//assert that a matching group was found
 				if(i < g_count) set_gprog(g[i], strip_quotes(args[2]));
 				else printf("Error: Group \"%s\" does not exist\n", args[1]);
+				break;
+
+			case 10: //sort
+				if(!(strcmp(args[1], "on"))) sort = true;
+				else if(!(strcmp(args[1], "off"))) sort = false;
 				break;
 
 			default:

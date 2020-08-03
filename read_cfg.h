@@ -7,4 +7,6 @@ void cfg_interp();
 
 int get_compmode();
 
+bool get_sort();
+
 #endif
