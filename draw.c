@@ -295,7 +295,6 @@ void update_col(int mode, int hl_where){
 		case 1:
 			e_count = get_ecount(g[g_hover]);
 			e = get_entries(get_ghead(g[g_hover]), e_count);
-	system("touch log");
 			fill_entries(e, e_count);
 			mvwchgat(entry_win, y_hl, 1, entry_win->_maxx-1, A_DIM, 1, NULL);
 			break;
