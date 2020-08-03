@@ -9,9 +9,7 @@ void entry_rm(ENTRY *e, ENTRY *prev);
 
 void clear_entries(ENTRY *head);
 
-ENTRY *entry_add_last(ENTRY *tail, ENTRY *add);
-
-int entry_add_sorted(ENTRY *head, ENTRY *tail, ENTRY *add);
+int entry_add(ENTRY *head, ENTRY *tail, ENTRY *add);
 
 ENTRY **get_entries(ENTRY *head, int count);
 

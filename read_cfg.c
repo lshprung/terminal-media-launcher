@@ -34,8 +34,8 @@ int compmode = 0;
 //1 -> WSL
 //maybe more later?
 
-//turn on or off sorting (A-Z)
-bool sort = 0;
+//turn on or off sorting (A-Z); On by default
+bool sort = 1;
 
 //set to true to automatically try to create a human readable name for an entry
 bool hr = false;

@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "entry.h"
 #include "group.h"
+#include "read_cfg.h"
 #define BUF_LEN 1024
 
 typedef struct entry{
@@ -19,8 +20,7 @@ typedef struct entry{
 ENTRY *create_entry(char *new_name, char *new_path, bool force);
 void entry_rm(ENTRY *e, ENTRY *prev);
 void clear_entries(ENTRY *head);
-ENTRY *entry_add_last(ENTRY *tail, ENTRY *add);
-int entry_add_sorted(ENTRY *head, ENTRY *tail, ENTRY *add);
+int entry_add(ENTRY *head, ENTRY *tail, ENTRY *add);
 ENTRY **get_entries(ENTRY *head, int count);
 char *get_ename(ENTRY *e);
 char *get_epath(ENTRY *e);
@@ -58,22 +58,9 @@ void clear_entries(ENTRY *head){
 	return;
 }
 
-//TODO consider joining entry_add_last and entry_add_sorted
-ENTRY *entry_add_last(ENTRY *tail, ENTRY *add){
-	assert(add != NULL);
-
-	if(tail == NULL) tail = add;
-	else{
-		tail->next = add;
-		tail = add;
-	}
-
-	return tail;
-}
-
 //returns 0 if in the middle, 1 if new head, 2 if new tail, or 3 if both new head and tail
 //TODO this is kind of a stupid way of handling things
-int entry_add_sorted(ENTRY *head, ENTRY *tail, ENTRY *add){
+int entry_add(ENTRY *head, ENTRY *tail, ENTRY *add){
 	assert(add != NULL);
 	ENTRY *ahead;
 
@@ -81,7 +68,7 @@ int entry_add_sorted(ENTRY *head, ENTRY *tail, ENTRY *add){
 	if(head == NULL) return 3;
 
 	//add is the new tail
-	if(strcmp(tail->name, add->name) <= 0){
+	if(!get_sort() || strcmp(tail->name, add->name) <= 0){
 		tail->next = add;
 		return 2;
 	}
