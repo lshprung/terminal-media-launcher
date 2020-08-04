@@ -27,6 +27,8 @@ ENTRY *get_ghead(GROUP *g);
 
 int get_ecount(GROUP *g);
 
+void set_ecount(GROUP *g, int new_count);
+
 int get_gcount();
 
 void group_debug();

@@ -30,6 +30,7 @@ char *get_gflags(GROUP *g);
 void set_gflags(GROUP *g, char *p);
 ENTRY *get_ghead(GROUP *g);
 int get_ecount(GROUP *g);
+void set_ecount(GROUP *g, int new_count); //for use in hiding entries
 int get_gcount();
 void group_debug(); //debug function to output all groups
 
@@ -218,6 +219,11 @@ ENTRY *get_ghead(GROUP *g){
 int get_ecount(GROUP *g){
 	assert(g != NULL);
 	return g->entry_count;
+}
+
+void set_ecount(GROUP *g, int new_count){
+	assert(g != NULL);
+	g->entry_count = new_count;
 }
 
 int get_gcount(){

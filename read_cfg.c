@@ -10,7 +10,7 @@
 #include "group.h"
 #define BUF_LEN 1024 //maybe move this line to the header file
 #define MAX_ARGS 5
-#define OPTION_CNT 11
+#define OPTION_CNT 12
 
 //public
 char *find_config();
@@ -93,9 +93,10 @@ void cfg_interp(char *path){
 	options[5] = "addR";
 	options[6] = "autoAlias";
 	options[7] = "compMode";
-	options[8] = "setFlags";
-	options[9] = "setLauncher";
-	options[10] = "sort";
+	options[8] = "hide";
+	options[9] = "setFlags";
+	options[10] = "setLauncher";
+	options[11] = "sort";
 
 	//Read each line of "config"
 	while(fgets(buffer, BUF_LEN, fp)){
@@ -140,11 +141,13 @@ void check_line(char *buffer, char **options){
 	char *tok = strtok(buffer, delims);
 	char args[MAX_ARGS][BUF_LEN];
 	GROUP **g;
+	ENTRY **e;
 	char *tok_p;
 	char *arg_p;
 	int g_count;
+	int e_count;
 	int search_res;
-	int i;
+	int i, j;
 
 	//ensure line is not blank or commented out
 	if(tok != NULL && tok[0] != '#' && tok[0] != '\0'){
@@ -243,7 +246,36 @@ void check_line(char *buffer, char **options){
 				else printf("Error: Unknown Compatability Mode Argument \"%s\"\n", strip_quotes(args[1]));
 				break;
 
-			case 8: //setFlags
+			//TODO consider having this call handle_fname instead so that '*' can be used
+			case 8: //hide
+				//args[2] is referring to a group
+				g = get_groups();
+				g_count = get_gcount();
+
+				//look for matching existing group
+				for(i = 0; i < g_count; i++){
+					if(!(strcmp(get_gname(g[i]), args[2]))) break;
+				}
+
+				if(i < g_count){
+					e_count = get_ecount(g[i]);
+					e = get_entries(get_ghead(g[i]), e_count);
+
+					for(j = 0; j < e_count; j++){
+						if(!strcmp(get_ename(e[j]), strip_quotes(args[1]))) break;
+					}
+
+					if(j < e_count){
+						set_hide(e[j], true);
+						set_ecount(g[i], get_ecount(g[i])-1);
+					}
+					else printf("Error: Entry \"%s\" does not exist\n", args[1]);
+				}
+
+				else printf("Error: Group \"%s\" does not exist\n", args[2]);
+				break;
+
+			case 9: //setFlags
 				//args[1] is referring to a group
 				g = get_groups();
 				g_count = get_gcount();
@@ -259,7 +291,7 @@ void check_line(char *buffer, char **options){
 				else printf("Error: Group \"%s\" does not exist\n", args[1]);
 				break;
 
-			case 9: //setLauncher
+			case 10: //setLauncher
 				//args[1] is referring to a group
 				g = get_groups();
 				g_count = get_gcount();
@@ -275,7 +307,7 @@ void check_line(char *buffer, char **options){
 				else printf("Error: Group \"%s\" does not exist\n", args[1]);
 				break;
 
-			case 10: //sort
+			case 11: //sort
 				if(!(strcmp(args[1], "on"))) sort = true;
 				else if(!(strcmp(args[1], "off"))) sort = false;
 				break;
@@ -425,6 +457,7 @@ char *autoAlias(char *path){
 	char *hr_name = malloc(sizeof(char) * BUF_LEN);
 	char *p = hr_name;
 	char *rpath; //necessary so as not to touch the actual path
+	char *last_dot = NULL; //used to trim the file extension (if there is one)
 	bool stop = false; //stop when you don't want to add a series of chars to the output
 
 	//get to the relative path name
@@ -457,6 +490,9 @@ char *autoAlias(char *path){
 				}
 				break;
 
+			case '.':
+				last_dot = p;
+
 			default:
 				if(!stop){
 					*p = *rpath;
@@ -467,7 +503,8 @@ char *autoAlias(char *path){
 	}
 	
 	//close the name
-	if(*path == '"') *(p-1) = '\0'; //close early to avoid including closing quote
+	if(last_dot != NULL) *last_dot = '\0';
+	else if(*path == '"') *(p-1) = '\0'; //close early to avoid including closing quote
 	else *p = '\0';
 
 	return hr_name;

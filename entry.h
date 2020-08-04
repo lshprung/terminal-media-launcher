@@ -19,6 +19,10 @@ char *get_epath(ENTRY *e);
 
 bool get_eforce(ENTRY *e);
 
+void set_hide(ENTRY *e, bool status);
+
+bool get_hide(ENTRY *e);
+
 void entry_debug(ENTRY *trav);
 
 #endif

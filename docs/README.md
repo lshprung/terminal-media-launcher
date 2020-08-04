@@ -1,6 +1,6 @@
 ## Introduction
 
-**Terminal Media Launcher** is a command line utility to help streamline launching applications and other media. The program looks for a config file listing different groups of media and creates an ncurses menu from which to select from.
+**Terminal Media Launcher** is a command line utility to help streamline launching applications and other media. The goal of tml is to provide a fast, minimal, command line frontend with a Unix-like approach to setup and configuration. The program looks for a config file listing different groups of media and creates an ncurses menu from which to select from.
 
 ## Compiling and Running
 

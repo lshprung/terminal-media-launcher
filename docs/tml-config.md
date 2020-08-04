@@ -14,6 +14,7 @@
 	- [addName](#addName)
 	- [addNameF](#addNameF)
 	- [addR](#addR)
+	- [hide](#hide)
 - [Settings](#Settings)
 	- [autoAlias](#autoAlias)
 	- [compMode](#compMode)
@@ -76,6 +77,12 @@ tml will hide empty groups, so you will need to know how to add entries to a gro
 
 `addR` will recursively add entries to a group. `addR` functions like `add`, but will also search sub-directories for matches. 
 
+### hide
+
+- **hide** *entry* *group*
+
+`hide` will remove a specified entry from a specified group. The entry argument should refer to the entry's name, rather than the entry's path. This option may be useful to hide certain files after adding entries with the '\*' operator. *At the moment, hide can only hide a single entry*.
+
 ## Settings
 
 If any of the following settings are specified, they should be at the top of the config file.
@@ -89,6 +96,7 @@ If any of the following settings are specified, they should be at the top of the
 1. Removing any characters inside parenthesis (including parenthesis)
 2. Replacing '-' and '\_' with a space character
 3. Replacing cases of multiple spaces in a row with only one space
+4. Removing file extensions (if the file has an extension) 
 
 `autoAlias` is turned off by default.
 

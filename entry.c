@@ -14,6 +14,7 @@ typedef struct entry{
 	char name[BUF_LEN];
 	char path[BUF_LEN];
 	bool path_force;
+	bool hidden;
 	struct entry *next;
 } ENTRY;
 
@@ -25,6 +26,8 @@ ENTRY **get_entries(ENTRY *head, int count);
 char *get_ename(ENTRY *e);
 char *get_epath(ENTRY *e);
 bool get_eforce(ENTRY *e);
+void set_hide(ENTRY *e, bool status);
+bool get_hide(ENTRY *e);
 void entry_debug(ENTRY *trav);
 
 ENTRY *create_entry(char *new_name, char *new_path, bool force){
@@ -35,6 +38,7 @@ ENTRY *create_entry(char *new_name, char *new_path, bool force){
 	strcpy(new->name, new_name);
 	strcpy(new->path, new_path);
 	new->path_force = force;
+	new->hidden = false;
 	new->next = NULL;
 
 	return new;
@@ -96,10 +100,13 @@ int entry_add(ENTRY *head, ENTRY *tail, ENTRY *add){
 ENTRY **get_entries(ENTRY *head, int count){
 	ENTRY **arr = malloc(sizeof(ENTRY *) * count);
 	ENTRY *trav = head;
-	int i;
+	int i = 0;
 
-	for(i = 0; i < count; i++){
-		arr[i] = trav;
+	while(i < count){
+		if(!trav->hidden){
+			arr[i] = trav;
+			i++;
+		}
 		trav = trav->next;
 	}
 
@@ -118,6 +125,11 @@ char *get_epath(ENTRY *e){
 bool get_eforce(ENTRY *e){
 	assert(e != NULL);
 	return e->path_force;
+}
+
+void set_hide(ENTRY *e, bool status){
+	assert(e != NULL);
+	e->hidden = true;
 }
 
 void entry_debug(ENTRY *trav){
