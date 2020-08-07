@@ -52,7 +52,7 @@ int main(int argc, char **argv){
 	bool tall = true; //is the window a certain height (tbd what the threshold should be TODO)
 	bool wide = true; //is the window a certain width (tbd what the threshold should be TODO)
 	int input;
-	char *full_command; //what will be executed
+	char full_command[BUF_LEN]; //what will be executed
 
 	//if a config path was given as an argument, set it accordingly
 	if(argc > 2 && (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cfg_path"))) cfg_path = argv[2];
@@ -133,7 +133,9 @@ int main(int argc, char **argv){
 #if defined _WIN32 || defined _WIN64
 				win_launch();
 #else
-				full_command = get_launch();
+				//TODO create option to redirect stdout and stderr to avoid writing over the ncurses instance
+				strcpy(full_command, get_launch());
+				strcat(full_command, " > /dev/null 2>&1");
 				system(full_command);
 #endif
 				refresh();
