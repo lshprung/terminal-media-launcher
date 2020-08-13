@@ -24,6 +24,7 @@ char *trim_name(char *name, char *path, int max_len);
 void update_col(int mode, int hl_where); //0 = last, 1 = first; 0 = GROUP, 1 = ENTRY, 2 = INFO
 void switch_col();
 void trav_col(int dir); //0 = down, 1 = up
+int locateChar(char input);
 char *get_launch();
 char *compat_convert(char *path, int mode);
 #if defined _WIN32 || defined _WIN64
@@ -37,7 +38,7 @@ WINDOW *entry_win;
 WINDOW *info_win;
 int g_hover = 0;
 int e_hover = 0;
-int true_hover = 0; //which column are we currently hovering on? (I think)
+int true_hover = 0; //0 = hovering on groups, 1 = hovering on entries
 GROUP **g;
 ENTRY **e;
 int g_count;
@@ -53,6 +54,7 @@ int main(int argc, char **argv){
 	bool wide = true; //is the window a certain width (tbd what the threshold should be TODO)
 	int input;
 	char full_command[BUF_LEN]; //what will be executed
+	int i;
 
 	//if a config path was given as an argument, set it accordingly
 	if(argc > 2 && (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cfg_path"))) cfg_path = argv[2];
@@ -69,6 +71,8 @@ int main(int argc, char **argv){
 	initscr();
 	cbreak();
 	keypad(stdscr, true);
+	noecho();
+	set_escdelay(1); //used to avoid delay after ESC is pressed
 	start_color();
 
 	width = getmaxx(stdscr);
@@ -128,6 +132,17 @@ int main(int argc, char **argv){
 				trav_col(1);
 				break;
 
+			//TODO: consider rethinking jumping to be more optimized
+			case KEY_PPAGE:
+			//case KEY_SUP:
+				while((true_hover ? e_hover : g_hover) > 0) trav_col(1);
+				break;
+
+			case KEY_NPAGE:
+			//case KEY_SDOWN:
+				while((true_hover ? e_hover : g_hover) < (true_hover ? e_count-1 : g_count-1)) trav_col(0);
+				break;
+
 			case 10: //enter key
 
 #if defined _WIN32 || defined _WIN64
@@ -141,10 +156,15 @@ int main(int argc, char **argv){
 				refresh();
 				break;
 
-			case 'q':
+			case 27: //escape key
 				endwin();
 				return 0;
 
+			default: //a search char was entered, locate where to jump to
+				input = locateChar(input) - (true_hover ? e_hover : g_hover);
+				for(i = 0; i < input; i++){
+					trav_col(0);
+				}
 		}
 
 		//move(3, (width/4)+10); //reset cursor location to the search bar after any action
@@ -379,8 +399,31 @@ void trav_col(int dir){
 	return;
 }
 
-//FIXME account for how Windows does things: ""program.exe" [flags] "file""
-	//There is an issue with flags: needs to be able to have quotation marks
+int locateChar(char input){
+	int location = (true_hover ? e_hover : g_hover);
+	int i;
+
+	if(true_hover){ //hovering on entries
+		for(i = location+1; i < e_count; i++){
+			if(input == get_ename(e[i])[0]){
+				location = i;
+				break;
+			}
+		}
+	}
+
+	else{ //hovering on groups
+		for(i = location+1; i < g_count; i++){
+			if(input == get_gname(g[i])[0]){
+				location = i;
+				break;
+			}
+		}
+	}
+
+	return location;
+}
+
 char *get_launch(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
