@@ -23,7 +23,7 @@ void fill_entries();
 char *trim_name(char *name, char *path, int max_len);
 void update_col(int mode, int hl_where); //0 = last, 1 = first; 0 = GROUP, 1 = ENTRY, 2 = INFO
 void switch_col();
-void trav_col(int dir); //0 = down, 1 = up
+void trav_col(int new_i);
 int locateChar(char input);
 char *get_launch();
 char *compat_convert(char *path, int mode);
@@ -125,22 +125,22 @@ int main(int argc, char **argv){
 				break;
 
 			case KEY_DOWN:
-				trav_col(0);
+				trav_col((true_hover ? e_hover : g_hover)+1);
 				break;
 
 			case KEY_UP:
-				trav_col(1);
+				trav_col((true_hover ? e_hover : g_hover)-1);
 				break;
 
 			//TODO: consider rethinking jumping to be more optimized
 			case KEY_PPAGE:
 			//case KEY_SUP:
-				while((true_hover ? e_hover : g_hover) > 0) trav_col(1);
+				trav_col(0);
 				break;
 
 			case KEY_NPAGE:
 			//case KEY_SDOWN:
-				while((true_hover ? e_hover : g_hover) < (true_hover ? e_count-1 : g_count-1)) trav_col(0);
+				trav_col((true_hover ? e_count : g_count)-1);
 				break;
 
 			case 10: //enter key
@@ -161,10 +161,7 @@ int main(int argc, char **argv){
 				return 0;
 
 			default: //a search char was entered, locate where to jump to
-				input = locateChar(input) - (true_hover ? e_hover : g_hover);
-				for(i = 0; i < input; i++){
-					trav_col(0);
-				}
+				trav_col(locateChar(input));
 		}
 
 		//move(3, (width/4)+10); //reset cursor location to the search bar after any action
@@ -354,35 +351,35 @@ void switch_col(){
 	return;
 }
 
-void trav_col(int dir){
+void trav_col(int new_i){
 	int *focus = (true_hover ? &e_hover : &g_hover); //make it easy to know which column we are looking at
-	int *offset = (true_hover ? &e_offset : &g_offset); //this variable is broken
+	int *offset = (true_hover ? &e_offset : &g_offset);
 	int count = (true_hover ? e_count : g_count);
-	int max_hl = height-5+*offset; //for some reason, this works
-	int min_hl = 5+*offset;
-	bool oob_flag = false;
+	int max_hl = height-5; //for some reason, this works
+	int min_hl = 5;
+	int oob_flag = 0; //0 = none, 1 = bottom, 2 = top
 
-	//check if the traversal is valid (i.e. not at top/bottom), exit if not
-	if((dir && !(*focus)) || (!dir && (*focus == count-1))) return;
+	//check if the traversal is valid (i.e. not at top/bottom), alter if not
+	if(new_i < 0) return;
+	if(new_i >= count) new_i = count-1;
 
 	//reset previously highlighted entry and group, change focus
 	mvwchgat(entry_win, 1+e_hover-e_offset, 1, entry_win->_maxx-1, A_NORMAL, 0, NULL);
 	mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_NORMAL, 0, NULL);
-	(dir ? (*focus)-- : (*focus)++);
+	*focus = new_i;
+
 
 	//check offsets relating to new highlight, make sure highlight did not go oob
-	if(*focus+5 > max_hl){
-		*focus--;
+	while(*focus-*offset+5 > max_hl){
 		(*offset)++;
-		oob_flag = true;
+		oob_flag = 1;
 	}
-	else if(*focus+5 < min_hl){
-		*focus++;
+	while(*focus-*offset+5 < min_hl){
 		(*offset)--;
-		oob_flag = true;
+		oob_flag = 2;
 	}
 
-	if(oob_flag) (true_hover ? update_col(1, dir) : update_col(0, dir));
+	if(oob_flag > 0) (true_hover ? update_col(1, oob_flag-1) : update_col(0, oob_flag-1));
 
 	//highlight newly hovered upon entry/group
 	mvwchgat(entry_win, 1+e_hover-e_offset, 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
