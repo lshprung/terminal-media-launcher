@@ -10,13 +10,14 @@
 #include "group.h"
 #define BUF_LEN 1024 //maybe move this line to the header file
 #define MAX_ARGS 5
-#define OPTION_CNT 12
+#define OPTION_CNT 13
 
 //public
 char *find_config();
 void cfg_interp(char *path);
 int get_compmode();
 bool get_sort();
+bool get_case_sensitivity();
 
 //private
 void check_line(char *buffer, char **options);
@@ -35,10 +36,13 @@ int compmode = 0;
 //maybe more later?
 
 //turn on or off sorting (A-Z); On by default
-bool sort = 1;
+bool sort = true;
 
 //set to true to automatically try to create a human readable name for an entry
 bool hr = false;
+
+//turn foldCase (insensitive case searching) on or off; On by default
+bool fold_case = true;
 
 #if defined _WIN32 || defined _WIN64
 //for Windows Compatability, this will be '\\' (otherwise '/')
@@ -93,10 +97,11 @@ void cfg_interp(char *path){
 	options[5] = "addR";
 	options[6] = "autoAlias";
 	options[7] = "compMode";
-	options[8] = "hide";
-	options[9] = "setFlags";
-	options[10] = "setLauncher";
-	options[11] = "sort";
+	options[8] = "foldCase";
+	options[9] = "hide";
+	options[10] = "setFlags";
+	options[11] = "setLauncher";
+	options[12] = "sort";
 
 	//Read each line of "config"
 	while(fgets(buffer, BUF_LEN, fp)){
@@ -131,6 +136,10 @@ int get_compmode(){
 
 bool get_sort(){
 	return sort;
+}
+
+bool get_case_sensitivity(){
+	return fold_case;
 }
 
 //TODO add support for "addR" recursive adding (still needs work...)
@@ -246,8 +255,13 @@ void check_line(char *buffer, char **options){
 				else printf("Error: Unknown Compatability Mode Argument \"%s\"\n", strip_quotes(args[1]));
 				break;
 
+			case 8: //foldCase (case insensitive)
+				if(!(strcmp(args[1], "on"))) fold_case = true;
+				else if(!(strcmp(args[1], "off"))) fold_case = false;
+				break;
+
 			//TODO consider having this call handle_fname instead so that '*' can be used
-			case 8: //hide
+			case 9: //hide
 				//args[2] is referring to a group
 				g = get_groups();
 				g_count = get_gcount();
@@ -275,7 +289,7 @@ void check_line(char *buffer, char **options){
 				else printf("Error: Group \"%s\" does not exist\n", args[2]);
 				break;
 
-			case 9: //setFlags
+			case 10: //setFlags
 				//args[1] is referring to a group
 				g = get_groups();
 				g_count = get_gcount();
@@ -291,7 +305,7 @@ void check_line(char *buffer, char **options){
 				else printf("Error: Group \"%s\" does not exist\n", args[1]);
 				break;
 
-			case 10: //setLauncher
+			case 11: //setLauncher
 				//args[1] is referring to a group
 				g = get_groups();
 				g_count = get_gcount();
@@ -307,7 +321,7 @@ void check_line(char *buffer, char **options){
 				else printf("Error: Group \"%s\" does not exist\n", args[1]);
 				break;
 
-			case 11: //sort
+			case 12: //sort
 				if(!(strcmp(args[1], "on"))) sort = true;
 				else if(!(strcmp(args[1], "off"))) sort = false;
 				break;

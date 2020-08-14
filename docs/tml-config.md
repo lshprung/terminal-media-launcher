@@ -18,6 +18,7 @@
 - [Settings](#Settings)
 	- [autoAlias](#autoAlias)
 	- [compMode](#compMode)
+	- [foldCase](#foldCase)
 	- [sort](#sort)
 - [Example](#Example)
 
@@ -105,6 +106,12 @@ If any of the following settings are specified, they should be at the top of the
 - **compMode WSL**
 
 At the moment, `compMode` can be turned on for using tml in Windows Subsystem for Linux. By default, `compMode` is turned off. *compMode may be removed in the future due to redundancy, as tml works natively in Windows*.
+
+### foldCase
+
+- **foldCase** *on/off*
+
+Entering any non-traversal input in tml can be used to jump to a group or entry. For instance, hitting 'f' on the keyboard will jump the cursor to the next group or entry that starts with an 'f'. *foldCase* determines whether or not this functionality is **case insensitive (on)** or **case sensitive (off)**. *foldCase* is turned on by default.
 
 ### sort
 

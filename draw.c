@@ -398,11 +398,17 @@ void trav_col(int new_i){
 
 int locateChar(char input){
 	int location = (true_hover ? e_hover : g_hover);
+	bool fold_case = get_case_sensitivity();
+	char first_char;
 	int i;
+
+	if(fold_case && input >= 97 && input <= 122) input -= 32;
 
 	if(true_hover){ //hovering on entries
 		for(i = location+1; i < e_count; i++){
-			if(input == get_ename(e[i])[0]){
+			first_char = get_ename(e[i])[0];
+			if(fold_case && first_char >= 97 && first_char <= 122) first_char -= 32;
+			if(input == first_char){
 				location = i;
 				break;
 			}
@@ -411,6 +417,8 @@ int locateChar(char input){
 
 	else{ //hovering on groups
 		for(i = location+1; i < g_count; i++){
+			first_char = get_gname(g[i])[0];
+			if(fold_case && first_char >= 97 && first_char <= 122) first_char -= 32;
 			if(input == get_gname(g[i])[0]){
 				location = i;
 				break;
