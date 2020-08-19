@@ -10,7 +10,7 @@
 #include "group.h"
 #define BUF_LEN 1024 //maybe move this line to the header file
 #define MAX_ARGS 5
-#define OPTION_CNT 13
+#define OPTION_CNT 14
 
 //public
 char *find_config();
@@ -99,9 +99,10 @@ void cfg_interp(char *path){
 	options[7] = "compMode";
 	options[8] = "foldCase";
 	options[9] = "hide";
-	options[10] = "setFlags";
-	options[11] = "setLauncher";
-	options[12] = "sort";
+	options[10] = "hideFile";
+	options[11] = "setFlags";
+	options[12] = "setLauncher";
+	options[13] = "sort";
 
 	//Read each line of "config"
 	while(fgets(buffer, BUF_LEN, fp)){
@@ -262,6 +263,7 @@ void check_line(char *buffer, char **options){
 
 			//TODO consider having this call handle_fname instead so that '*' can be used
 			case 9: //hide
+			case 10: //hideFile
 				//args[2] is referring to a group
 				g = get_groups();
 				g_count = get_gcount();
@@ -276,7 +278,7 @@ void check_line(char *buffer, char **options){
 					e = get_entries(get_ghead(g[i]), e_count);
 
 					for(j = 0; j < e_count; j++){
-						if(!strcmp(get_ename(e[j]), strip_quotes(args[1]))) break;
+						if(!strcmp((search_res == 9 ? get_ename(e[j]) : get_epath(e[j])), strip_quotes(args[1]))) break;
 					}
 
 					if(j < e_count){
@@ -289,7 +291,7 @@ void check_line(char *buffer, char **options){
 				else printf("Error: Group \"%s\" does not exist\n", args[2]);
 				break;
 
-			case 10: //setFlags
+			case 11: //setFlags
 				//args[1] is referring to a group
 				g = get_groups();
 				g_count = get_gcount();
@@ -305,7 +307,7 @@ void check_line(char *buffer, char **options){
 				else printf("Error: Group \"%s\" does not exist\n", args[1]);
 				break;
 
-			case 11: //setLauncher
+			case 12: //setLauncher
 				//args[1] is referring to a group
 				g = get_groups();
 				g_count = get_gcount();
@@ -321,7 +323,7 @@ void check_line(char *buffer, char **options){
 				else printf("Error: Group \"%s\" does not exist\n", args[1]);
 				break;
 
-			case 12: //sort
+			case 13: //sort
 				if(!(strcmp(args[1], "on"))) sort = true;
 				else if(!(strcmp(args[1], "off"))) sort = false;
 				break;
@@ -466,7 +468,6 @@ void addme(char *path, char *group, bool force, char *name){
 }
 
 
-//TODO figure out how to trim the extensions of files off
 char *autoAlias(char *path){
 	char *hr_name = malloc(sizeof(char) * BUF_LEN);
 	char *p = hr_name;

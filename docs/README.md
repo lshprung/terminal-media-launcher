@@ -4,7 +4,7 @@
 
 ## Compiling and Running
 
-tml can be installed on any system with gcc and the ncurses library installed. It has been tested to work on Ubuntu and Windows 10. To compile and run tml:
+tml can be compiled on any system with gcc and the ncurses library installed. It has been tested to work on Ubuntu and Windows 10. To compile and run tml:
 
 1. Clone the repository
 2. Run `make` in the directory the repository was cloned into. This will create a file called `tml`
@@ -20,4 +20,10 @@ By default, tml searches in the following order for a config file:
 2. `$HOME/.tml/config`
 3. `config` (in the current directory)
 
-A different config file location can also be specified with the `-c` flag. For Documentation of the config file, see [tml-config](tml-config.md)
+A different config file location can also be specified with the `-c` flag:
+
+```
+tml -c /path/to/config
+```
+
+For Documentation of the config file, see [tml-config](tml-config.md)

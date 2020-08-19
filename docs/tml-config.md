@@ -15,6 +15,7 @@
 	- [addNameF](#addNameF)
 	- [addR](#addR)
 	- [hide](#hide)
+	- [hideFile](#hideFile)
 - [Settings](#Settings)
 	- [autoAlias](#autoAlias)
 	- [compMode](#compMode)
@@ -83,6 +84,12 @@ tml will hide empty groups, so you will need to know how to add entries to a gro
 - **hide** *entry* *group*
 
 `hide` will remove a specified entry from a specified group. The entry argument should refer to the entry's name, rather than the entry's path. This option may be useful to hide certain files after adding entries with the '\*' operator. *At the moment, hide can only hide a single entry*.
+
+### hideFile
+
+- **hideFile** *path* *group*
+
+`hideFile` has the exact same functionality as `hide`, but takes the absolute path of the entry to hide as the first argument, instead of the name.
 
 ## Settings
 
