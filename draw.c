@@ -18,12 +18,13 @@
 #define WIDTH (getmaxx(stdscr)) //width of the entire term
 #define HEIGHT (getmaxy(stdscr)) //height of the entire term
 
+void update_display(bool resize);
 void draw_title();
 void draw_win(WINDOW *new, char *title);
 void fill_groups();
 void fill_entries();
 char *trim_name(char *name, char *path, int max_len);
-void update_col(int mode, int hl_where); //0 = last, 1 = first; 0 = GROUP, 1 = ENTRY, 2 = INFO
+void update_col(int mode, int hl_where, bool resize); //0 = last, 1 = first; 0 = GROUP, 1 = ENTRY, 2 = INFO
 void switch_col();
 void trav_col(int new_i);
 int locateChar(char input);
@@ -33,9 +34,9 @@ char *compat_convert(char *path, int mode);
 void win_launch();
 #endif
 
-WINDOW *group_win;
-WINDOW *entry_win;
-WINDOW *info_win;
+WINDOW *group_win = NULL;
+WINDOW *entry_win = NULL;
+WINDOW *info_win = NULL;
 int g_hover = 0;
 int e_hover = 0;
 int true_hover = 0; //0 = hovering on groups, 1 = hovering on entries
@@ -83,35 +84,7 @@ int main(int argc, char **argv){
 	prev_width = WIDTH;
 	prev_height = HEIGHT;
 
-	//title at the top (Terminal Media Launcher) (23 chars)
-	draw_title();
-
-	//TODO the search bar is a shelved feature for now, might consider writing it...
-	//Draw Search Bar 2 spaces (3 spaces if window is big enough) under the title
-	/*
-	move(3, WIDTH/4);
-	printw("[ Search: ");
-	move(3, (WIDTH*3)/4);
-	printw("]");
-	move(3, (WIDTH/4)+10);
-	*/
-
-	//Draw Columns 
-	//TODO create conditionals based on size of window)
-	group_win = newwin(HEIGHT-7, WIDTH/2, 4, 0);
-	entry_win = newwin(HEIGHT-7, WIDTH-WIDTH/2, 4, WIDTH/2);
-	info_win = newwin(3, WIDTH, HEIGHT-3, 0);
-	refresh();
-	draw_win(group_win, "GROUP");
-	draw_win(entry_win, "ENTRY");
-	draw_win(info_win, "INFO");
-	update_col(0, 1);
-
-	//start with hover on the first group, draw the entries from the selected group, true_hover is over the groups (rather than the entries)
-	update_col(1, 1);
-	update_col(2, 0);
-	curs_set(0); //hide the cursor
-	//move(3, (WIDTH/4)+10);
+	update_display(false);
 
 	//drawing is done, now run a while loop to receive input
 	while(1){
@@ -133,7 +106,6 @@ int main(int argc, char **argv){
 				trav_col((true_hover ? e_hover : g_hover)-1);
 				break;
 
-			//TODO: consider rethinking jumping to be more optimized
 			case KEY_PPAGE:
 			//case KEY_SUP:
 				trav_col(0);
@@ -164,23 +136,7 @@ int main(int argc, char **argv){
 		}
 
 		//redraw all windows if term is resized
-		if(prev_width != WIDTH || prev_height != HEIGHT){
-			draw_title();
-			delwin(group_win);
-			delwin(entry_win);
-			delwin(info_win);
-			group_win = newwin(HEIGHT-7, WIDTH/2, 4, 0);
-			entry_win = newwin(HEIGHT-7, WIDTH-WIDTH/2, 4, WIDTH/2);
-			info_win = newwin(3, WIDTH, HEIGHT-3, 0);
-			draw_win(group_win, "GROUP");
-			draw_win(entry_win, "ENTRY");
-			draw_win(info_win, "INFO");
-			update_col(0, 1);
-			update_col(1, 1);
-			update_col(2, 0);
-			curs_set(0); //hide the cursor
-			refresh();
-		}
+		if(prev_width != WIDTH || prev_height != HEIGHT) update_display(true);
 
 		//update prevs
 		prev_width = WIDTH;
@@ -189,6 +145,47 @@ int main(int argc, char **argv){
 	
 	endwin();
 	return 0;
+}
+
+void update_display(bool resize){
+	if(WIDTH < 24 || HEIGHT < 10){
+		endwin();
+		printf("Unable to draw: Terminal Window is Too Small\n");
+		exit(0);
+	}
+
+	//title at the top (Terminal Media Launcher) (23 chars)
+	draw_title();
+
+	if(group_win != NULL) delwin(group_win);
+	if(entry_win != NULL) delwin(entry_win);
+	if(info_win != NULL) delwin(info_win);
+
+	//TODO the search bar is a shelved feature for now, might consider writing it...
+	//Draw Search Bar 2 spaces (3 spaces if window is big enough) under the title
+	/*
+	move(3, WIDTH/4);
+	printw("[ Search: ");
+	move(3, (WIDTH*3)/4);
+	printw("]");
+	move(3, (WIDTH/4)+10);
+	*/
+
+	//Draw Columns 
+	group_win = newwin(HEIGHT-7, WIDTH/2, 4, 0);
+	entry_win = newwin(HEIGHT-7, WIDTH-WIDTH/2, 4, WIDTH/2);
+	info_win = newwin(3, WIDTH, HEIGHT-3, 0);
+	draw_win(group_win, "GROUP");
+	draw_win(entry_win, "ENTRY");
+	draw_win(info_win, "INFO");
+	update_col(0, 1, resize);
+
+	//start with hover on the first group, draw the entries from the selected group, true_hover is over the groups (rather than the entries)
+	update_col(1, 1, resize);
+	update_col(2, 0, resize);
+	curs_set(0); //hide the cursor
+	//move(3, (WIDTH/4)+10);
+	refresh();
 }
 
 void draw_title(){
@@ -228,7 +225,6 @@ void fill_groups(){
 
 	for(i = 0+g_offset; i < g_count; i++){
 		if(ycoord >= max_y) break; //already at bottom of terminal window, stop drawing
-		//TODO account for empty groups with a removal function
 		name = get_gname(g[i]);
 
 		//the name is too long, take the group to the trimming function
@@ -280,8 +276,7 @@ char *trim_name(char *name, char *path, int max_len){
 	return name;
 }
 
-//FIXME info printing (mode = 2) is not uniformally in the box
-void update_col(int mode, int hl_where){
+void update_col(int mode, int hl_where, bool resize){
 	//mode 0 = group
 	//mode 1 = entry
 	//mode 2 = info
@@ -325,17 +320,20 @@ void update_col(int mode, int hl_where){
 	wprintw(col, name);
 	wrefresh(col);
 
+	//update certain info in the col only if not a resizing-related call
 	switch(mode){
 		case 0:
 			fill_groups();
-			mvwchgat(group_win, y_hl, 1, group_win->_maxx-1, A_DIM, 2, NULL);
+			if(!resize) mvwchgat(group_win, y_hl, 1, group_win->_maxx-1, A_DIM, 2, NULL);
+			else mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_DIM, (true_hover ? 1 : 2), NULL);
 			break;
 
 		case 1:
 			e_count = get_ecount(g[g_hover]);
 			e = get_entries(get_ghead(g[g_hover]), e_count);
 			fill_entries(e, e_count);
-			mvwchgat(entry_win, y_hl, 1, entry_win->_maxx-1, A_DIM, 1, NULL);
+			if(!resize) mvwchgat(entry_win, y_hl, 1, entry_win->_maxx-1, A_DIM, 1, NULL);
+			else mvwchgat(entry_win, 1+e_hover-e_offset, 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
 			break;
 
 		default:
@@ -399,20 +397,20 @@ void trav_col(int new_i){
 		oob_flag = 2;
 	}
 
-	if(oob_flag > 0) (true_hover ? update_col(1, oob_flag-1) : update_col(0, oob_flag-1));
+	if(oob_flag > 0) (true_hover ? update_col(1, oob_flag-1, false) : update_col(0, oob_flag-1, false));
 
 	//highlight newly hovered upon entry/group
 	mvwchgat(entry_win, 1+e_hover-e_offset, 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
 	mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_DIM, (true_hover ? 1 : 2), NULL);
 	if(!true_hover){ //a little extra work regarding group hover
 		e_offset = 0;
-		update_col(1, 1);
+		update_col(1, 1, false);
 		e_hover = 0;
 	}
 
 	wrefresh(group_win);
 	wrefresh(entry_win);
-	update_col(2, 0);
+	update_col(2, 0, false);
 	return;
 }
 
