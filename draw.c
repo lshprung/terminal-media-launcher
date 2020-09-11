@@ -15,6 +15,8 @@
 #include "read_cfg.h"
 #define MAX_LEN 6
 #define BUF_LEN 1024
+#define WIDTH (getmaxx(stdscr)) //width of the entire term
+#define HEIGHT (getmaxy(stdscr)) //height of the entire term
 
 void draw_title();
 void draw_win(WINDOW *new, char *title);
@@ -31,8 +33,6 @@ char *compat_convert(char *path, int mode);
 void win_launch();
 #endif
 
-static int width;
-static int height;
 WINDOW *group_win;
 WINDOW *entry_win;
 WINDOW *info_win;
@@ -50,10 +50,10 @@ int e_offset = 0;
 
 int main(int argc, char **argv){
 	char *cfg_path;
-	bool tall = true; //is the window a certain height (tbd what the threshold should be TODO)
-	bool wide = true; //is the window a certain width (tbd what the threshold should be TODO)
 	int input;
 	char full_command[BUF_LEN]; //what will be executed
+	int prev_width; //used to check if the window was resized
+	int prev_height; //used to check if the window was resized
 	int i;
 
 	//if a config path was given as an argument, set it accordingly
@@ -75,12 +75,13 @@ int main(int argc, char **argv){
 	set_escdelay(1); //used to avoid delay after ESC is pressed
 	start_color();
 
-	width = getmaxx(stdscr);
-	height = getmaxy(stdscr);
 	init_pair(0, COLOR_WHITE, COLOR_BLACK);
 	init_pair(1, COLOR_BLACK, COLOR_WHITE);
 	init_pair(2, COLOR_BLACK, COLOR_YELLOW);
 	attron(COLOR_PAIR(0));
+
+	prev_width = WIDTH;
+	prev_height = HEIGHT;
 
 	//title at the top (Terminal Media Launcher) (23 chars)
 	draw_title();
@@ -88,18 +89,18 @@ int main(int argc, char **argv){
 	//TODO the search bar is a shelved feature for now, might consider writing it...
 	//Draw Search Bar 2 spaces (3 spaces if window is big enough) under the title
 	/*
-	move(3, width/4);
+	move(3, WIDTH/4);
 	printw("[ Search: ");
-	move(3, (width*3)/4);
+	move(3, (WIDTH*3)/4);
 	printw("]");
-	move(3, (width/4)+10);
+	move(3, (WIDTH/4)+10);
 	*/
 
 	//Draw Columns 
 	//TODO create conditionals based on size of window)
-	group_win = newwin(height-7, width/2, 4, 0);
-	entry_win = newwin(height-7, width/2, 4, width/2);
-	info_win = newwin(3, width, height-3, 0);
+	group_win = newwin(HEIGHT-7, WIDTH/2, 4, 0);
+	entry_win = newwin(HEIGHT-7, WIDTH-WIDTH/2, 4, WIDTH/2);
+	info_win = newwin(3, WIDTH, HEIGHT-3, 0);
 	refresh();
 	draw_win(group_win, "GROUP");
 	draw_win(entry_win, "ENTRY");
@@ -110,7 +111,7 @@ int main(int argc, char **argv){
 	update_col(1, 1);
 	update_col(2, 0);
 	curs_set(0); //hide the cursor
-	//move(3, (width/4)+10);
+	//move(3, (WIDTH/4)+10);
 
 	//drawing is done, now run a while loop to receive input
 	while(1){
@@ -148,12 +149,10 @@ int main(int argc, char **argv){
 #if defined _WIN32 || defined _WIN64
 				win_launch();
 #else
-				//TODO create option to redirect stdout and stderr to avoid writing over the ncurses instance
 				strcpy(full_command, get_launch());
 				strcat(full_command, " > /dev/null 2>&1");
 				system(full_command);
 #endif
-				refresh();
 				break;
 
 			case 27: //escape key
@@ -164,7 +163,28 @@ int main(int argc, char **argv){
 				trav_col(locateChar(input));
 		}
 
-		//move(3, (width/4)+10); //reset cursor location to the search bar after any action
+		//redraw all windows if term is resized
+		if(prev_width != WIDTH || prev_height != HEIGHT){
+			draw_title();
+			delwin(group_win);
+			delwin(entry_win);
+			delwin(info_win);
+			group_win = newwin(HEIGHT-7, WIDTH/2, 4, 0);
+			entry_win = newwin(HEIGHT-7, WIDTH-WIDTH/2, 4, WIDTH/2);
+			info_win = newwin(3, WIDTH, HEIGHT-3, 0);
+			draw_win(group_win, "GROUP");
+			draw_win(entry_win, "ENTRY");
+			draw_win(info_win, "INFO");
+			update_col(0, 1);
+			update_col(1, 1);
+			update_col(2, 0);
+			curs_set(0); //hide the cursor
+			refresh();
+		}
+
+		//update prevs
+		prev_width = WIDTH;
+		prev_height = HEIGHT;
 	}
 	
 	endwin();
@@ -174,10 +194,10 @@ int main(int argc, char **argv){
 void draw_title(){
 	WINDOW *title;
 
-	title = newwin(2, width, 0, 0);
+	title = newwin(2, WIDTH, 0, 0);
 	refresh();
 	attron(A_BOLD | A_UNDERLINE);
-	move(0, (width-23)/2);
+	move(0, (WIDTH-23)/2);
 	printw("Terminal Media Launcher");
 	attroff(A_BOLD | A_UNDERLINE);
 	box(title, 0, 0);
@@ -203,7 +223,7 @@ void fill_groups(){
 	int i;
 	int max_len = group_win->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
-	int max_y = height-8; //last possible slot to draw a group
+	int max_y = HEIGHT-8; //last possible slot to draw a group
 	char *name;
 
 	for(i = 0+g_offset; i < g_count; i++){
@@ -227,7 +247,7 @@ void fill_entries(){
 	int i;
 	int max_len = entry_win->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
-	int max_y = height-8;
+	int max_y = HEIGHT-8;
 	char *name;
 
 	for(i = 0+e_offset; i < e_count; i++){
@@ -344,7 +364,7 @@ void switch_col(){
 		mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx-1, A_DIM, 2, NULL); //adjust group light
 		mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx-1, A_DIM, 1, NULL); //adjust entry light
 	}
-	move(3, (width/4)+10);
+	move(3, (WIDTH/4)+10);
 
 	wrefresh(group_win);
 	wrefresh(entry_win);
@@ -355,7 +375,7 @@ void trav_col(int new_i){
 	int *focus = (true_hover ? &e_hover : &g_hover); //make it easy to know which column we are looking at
 	int *offset = (true_hover ? &e_offset : &g_offset);
 	int count = (true_hover ? e_count : g_count);
-	int max_hl = height-5; //for some reason, this works
+	int max_hl = HEIGHT-5; //for some reason, this works
 	int min_hl = 5;
 	int oob_flag = 0; //0 = none, 1 = bottom, 2 = top
 
