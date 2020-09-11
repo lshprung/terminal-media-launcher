@@ -116,13 +116,17 @@ int main(int argc, char **argv){
 				trav_col((true_hover ? e_count : g_count)-1);
 				break;
 
+			case KEY_F(5):
+				update_display(true);
+				break;
+
 			case 10: //enter key
 
 #if defined _WIN32 || defined _WIN64
 				win_launch();
 #else
 				strcpy(full_command, get_launch());
-				strcat(full_command, " > /dev/null 2>&1");
+				strcat(full_command, " > /dev/null 2>&1 &");
 				system(full_command);
 #endif
 				break;
