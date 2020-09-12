@@ -15,6 +15,7 @@
 #include "read_cfg.h"
 #define MAX_LEN 6
 #define BUF_LEN 1024
+#define GAP_SIZE 1
 #define WIDTH (getmaxx(stdscr)) //width of the entire term
 #define HEIGHT (getmaxy(stdscr)) //height of the entire term
 
@@ -117,6 +118,7 @@ int main(int argc, char **argv){
 				break;
 
 			case KEY_F(5):
+			//manual refresh (for debug purposes)
 				update_display(true);
 				break;
 
@@ -152,7 +154,7 @@ int main(int argc, char **argv){
 }
 
 void update_display(bool resize){
-	if(WIDTH < 24 || HEIGHT < 10){
+	if(WIDTH < 20 || HEIGHT < 6){
 		endwin();
 		printf("Unable to draw: Terminal Window is Too Small\n");
 		exit(0);
@@ -176,8 +178,8 @@ void update_display(bool resize){
 	*/
 
 	//Draw Columns 
-	group_win = newwin(HEIGHT-7, WIDTH/2, 4, 0);
-	entry_win = newwin(HEIGHT-7, WIDTH-WIDTH/2, 4, WIDTH/2);
+	group_win = newwin(HEIGHT-(5+GAP_SIZE), WIDTH/2, 2+GAP_SIZE, 0);
+	entry_win = newwin(HEIGHT-(5+GAP_SIZE), WIDTH-WIDTH/2, 2+GAP_SIZE, WIDTH/2);
 	info_win = newwin(3, WIDTH, HEIGHT-3, 0);
 	draw_win(group_win, "GROUP");
 	draw_win(entry_win, "ENTRY");
@@ -224,7 +226,7 @@ void fill_groups(){
 	int i;
 	int max_len = group_win->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
-	int max_y = HEIGHT-8; //last possible slot to draw a group
+	int max_y = HEIGHT-(6+GAP_SIZE); //last possible slot to draw a group
 	char *name;
 
 	for(i = 0+g_offset; i < g_count; i++){
@@ -247,7 +249,7 @@ void fill_entries(){
 	int i;
 	int max_len = entry_win->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
-	int max_y = HEIGHT-8;
+	int max_y = HEIGHT-(6+GAP_SIZE);
 	char *name;
 
 	for(i = 0+e_offset; i < e_count; i++){
@@ -377,7 +379,7 @@ void trav_col(int new_i){
 	int *focus = (true_hover ? &e_hover : &g_hover); //make it easy to know which column we are looking at
 	int *offset = (true_hover ? &e_offset : &g_offset);
 	int count = (true_hover ? e_count : g_count);
-	int max_hl = HEIGHT-5; //for some reason, this works
+	int max_hl = HEIGHT-(3+GAP_SIZE); //for some reason, this works
 	int min_hl = 5;
 	int oob_flag = 0; //0 = none, 1 = bottom, 2 = top
 
