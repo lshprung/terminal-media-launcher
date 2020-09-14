@@ -57,7 +57,7 @@ tml will hide empty groups, so you will need to know how to add entries to a gro
 
 ### addF
 
-- **addF** *arg* *group*
+- **addF** *new-entry* *group*
 
 `addF` will force an entry to be added to a specified group, regardless as to whether it is a valid file or not. Unlike `add`, `addF`'s argument does not need to be a valid file, but `addF` can only specify a single entry and does not support the '\*' operator. If the arg has a space in it, it must be written in quotes.
 
@@ -69,7 +69,7 @@ tml will hide empty groups, so you will need to know how to add entries to a gro
 
 ### addNameF
 
-- **addNameF** *name* *arg* *group*
+- **addNameF** *name* *new-entry* *group*
 
 `addNameF` can be used in place of `addF` if you want the forced argument to have a different name displayed for the entry than is called in the system call to launch the entry. Otherwise, it is effectively the same as `addF`
 
@@ -83,7 +83,7 @@ tml will hide empty groups, so you will need to know how to add entries to a gro
 
 - **hide** *entry* *group*
 
-`hide` will remove a specified entry from a specified group. The entry argument should refer to the entry's name, rather than the entry's path. This option may be useful to hide certain files after adding entries with the '\*' operator. *At the moment, hide can only hide a single entry*.
+`hide` will remove a specified entry from a specified group. The entry argument should refer to the entry's name, rather than the entry's path. This option may be useful to hide certain entries after adding entries with the '\*' operator. *At the moment, hide can only hide a single entry*.
 
 ### hideFile
 
@@ -99,7 +99,7 @@ If any of the following settings are specified, they should be at the top of the
 
 - **autoAlias** *on/off*
 
-`autoAlias` will attempt to automatically give entries more human-readable names based on their filename by:
+`autoAlias` will attempt to automatically give entries more human-readable names by:
 
 1. Removing any characters inside parenthesis (including parenthesis)
 2. Replacing '-' and '\_' with a space character
