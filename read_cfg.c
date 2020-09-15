@@ -10,7 +10,7 @@
 #include "group.h"
 #define BUF_LEN 1024 //maybe move this line to the header file
 #define MAX_ARGS 5
-#define OPTION_CNT 14
+#define OPTION_CNT 13
 
 //public
 char *find_config();
@@ -20,20 +20,15 @@ bool get_sort();
 bool get_case_sensitivity();
 
 //private
-void check_line(char *buffer, char **options);
+void check_line(char *buffer, char **options, int ln);
 int check_option(char *arg, char **options);
-void handle_fname(char *path, char *group, bool recurs, bool force, char *name);
+void handle_fname(char *path, char *group, bool recurs, bool force, char *name, int ln);
 void addme(char *path, char *group, bool force, char *name);
 char *autoAlias(char *path);
 int search_ch(char *str, char c);
 int wild_cmp(char *wild, char *literal);
 char *strip_quotes(char *str);
-
-//allow for compatability with compatability layers such as WSL
-int compmode = 0;
-//0 -> none
-//1 -> WSL
-//maybe more later?
+void error_mes(int ln, char *message);
 
 //turn on or off sorting (A-Z); On by default
 bool sort = true;
@@ -81,7 +76,7 @@ void cfg_interp(char *path){
 	ENTRY **e;
 	int count;
 	int e_count;
-	int i;
+	int i=0;
 	int j;
 
 	fp = fopen(path, "r");
@@ -96,17 +91,17 @@ void cfg_interp(char *path){
 	options[4] = "addNameF";
 	options[5] = "addR";
 	options[6] = "autoAlias";
-	options[7] = "compMode";
-	options[8] = "foldCase";
-	options[9] = "hide";
-	options[10] = "hideFile";
-	options[11] = "setFlags";
-	options[12] = "setLauncher";
-	options[13] = "sort";
+	options[7] = "foldCase";
+	options[8] = "hide";
+	options[9] = "hideFile";
+	options[10] = "setFlags";
+	options[11] = "setLauncher";
+	options[12] = "sort";
 
 	//Read each line of "config"
 	while(fgets(buffer, BUF_LEN, fp)){
-		check_line(buffer, options);
+		i++;
+		check_line(buffer, options, i);
 	}
 
 	//cleanup
@@ -131,10 +126,6 @@ void cfg_interp(char *path){
 	return;
 }
 
-int get_compmode(){
-	return compmode;
-}
-
 bool get_sort(){
 	return sort;
 }
@@ -146,7 +137,7 @@ bool get_case_sensitivity(){
 //TODO add support for "addR" recursive adding (still needs work...)
 //TODO add support for "alias" option
 //TODO add support for "hide" option
-void check_line(char *buffer, char **options){
+void check_line(char *buffer, char **options, int ln){
 	char *delims = " \t\n";
 	char *tok = strtok(buffer, delims);
 	char args[MAX_ARGS][BUF_LEN];
@@ -158,6 +149,7 @@ void check_line(char *buffer, char **options){
 	int e_count;
 	int search_res;
 	int i, j;
+	char *error_p; //helper for complex error messages
 
 	//ensure line is not blank or commented out
 	if(tok != NULL && tok[0] != '#' && tok[0] != '\0'){
@@ -170,7 +162,7 @@ void check_line(char *buffer, char **options){
 		//record all arguments in the line
 		while(tok != NULL){
 			if(i >= MAX_ARGS){
-				printf("Error: too many arguments\n");
+				error_mes(ln, "Too many arguments");
 				return;
 			}
 			strcpy(args[i], tok);
@@ -217,12 +209,12 @@ void check_line(char *buffer, char **options){
 			case 0: //add
 				//add entry(ies) to a group: first arg is the file(s), second arg is the group to add to
 				//TODO add sorting functionality
-				handle_fname(args[1], args[2], 0, 0, NULL);
+				handle_fname(args[1], args[2], 0, 0, NULL, ln);
 				break;
 				
 			case 1: //addF
 				//force add entry to a group: first arg is the file(s), second arg is the group to add to
-				handle_fname(args[1], args[2], 0, 1, NULL);
+				handle_fname(args[1], args[2], 0, 1, NULL, ln);
 				break;
 
 			case 2: //addGroup
@@ -232,18 +224,18 @@ void check_line(char *buffer, char **options){
 
 			case 3: //addName
 				//add entry to a group: first arg is the name, second arg is the file, and third arg is the group to add to
-				handle_fname(args[2], args[3], 0, 0, args[1]);
+				handle_fname(args[2], args[3], 0, 0, args[1], ln);
 				break;
 
 			case 4: //addNameF
 				//same as addName, but with force on
-				handle_fname(args[2], args[3], 0, 1, args[1]);
+				handle_fname(args[2], args[3], 0, 1, args[1], ln);
 				break;
 
 			case 5: //addR
 				//recursively add: that is, also search directories in the given path
 				//NOTE: experimental
-				handle_fname(args[1], args[2], 1, 0, NULL);
+				handle_fname(args[1], args[2], 1, 0, NULL, ln);
 				break;
 				
 			case 6: //autoAlias
@@ -251,19 +243,14 @@ void check_line(char *buffer, char **options){
 				else if(!(strcmp(args[1], "off"))) hr = false;
 				break;
 
-			case 7: //compMode
-				if(!(strcmp(args[1], "WSL"))) compmode = 1;
-				else printf("Error: Unknown Compatability Mode Argument \"%s\"\n", strip_quotes(args[1]));
-				break;
-
-			case 8: //foldCase (case insensitive)
+			case 7: //foldCase (case insensitive)
 				if(!(strcmp(args[1], "on"))) fold_case = true;
 				else if(!(strcmp(args[1], "off"))) fold_case = false;
 				break;
 
 			//TODO consider having this call handle_fname instead so that '*' can be used
-			case 9: //hide
-			case 10: //hideFile
+			case 8: //hide
+			case 9: //hideFile
 				//args[2] is referring to a group
 				g = get_groups();
 				g_count = get_gcount();
@@ -285,13 +272,23 @@ void check_line(char *buffer, char **options){
 						set_hide(e[j], true);
 						set_ecount(g[i], get_ecount(g[i])-1);
 					}
-					else printf("Error: Entry \"%s\" does not exist\n", args[1]);
+					else{
+						error_p = malloc(sizeof(char) * 1024);
+						sprintf(error_p, "Entry \"%s\" does not exist", args[1]);
+						error_mes(ln, error_p);
+						free(error_p);
+					}
 				}
 
-				else printf("Error: Group \"%s\" does not exist\n", args[2]);
+				else{
+					error_p = malloc(sizeof(char) * 1024);
+					sprintf(error_p, "Group \"%s\" does not exist", args[2]);
+					error_mes(ln, error_p);
+					free(error_p);
+				}
 				break;
 
-			case 11: //setFlags
+			case 10: //setFlags
 				//args[1] is referring to a group
 				g = get_groups();
 				g_count = get_gcount();
@@ -304,10 +301,15 @@ void check_line(char *buffer, char **options){
 				//set a group's launcher flags (like ./program -f file for fullscreen)
 				//assert that a matching group was found
 				if(i < g_count) set_gflags(g[i], strip_quotes(args[2]));
-				else printf("Error: Group \"%s\" does not exist\n", args[1]);
+				else{
+					error_p = malloc(sizeof(char) * 1024);
+					sprintf(error_p, "Group \"%s\" does not exist", args[1]);
+					error_mes(ln, error_p);
+					free(error_p);
+				}
 				break;
 
-			case 12: //setLauncher
+			case 11: //setLauncher
 				//args[1] is referring to a group
 				g = get_groups();
 				g_count = get_gcount();
@@ -320,16 +322,24 @@ void check_line(char *buffer, char **options){
 				//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
 				//assert that a matching group was found
 				if(i < g_count) set_gprog(g[i], strip_quotes(args[2]));
-				else printf("Error: Group \"%s\" does not exist\n", args[1]);
+				else{
+					error_p = malloc(sizeof(char) * 1024);
+					sprintf(error_p, "Group \"%s\" does not exist", args[1]);
+					error_mes(ln, error_p);
+					free(error_p);
+				}
 				break;
 
-			case 13: //sort
+			case 12: //sort
 				if(!(strcmp(args[1], "on"))) sort = true;
 				else if(!(strcmp(args[1], "off"))) sort = false;
 				break;
 
 			default:
-				printf("Error: Unknown config option \"%s\"\n", args[0]);
+				error_p = malloc(sizeof(char) * 1024);
+				sprintf(error_p, "Unknown config option \"%s\"", args[0]);
+				error_mes(ln, error_p);
+				free(error_p);
 
 		}
 
@@ -361,7 +371,7 @@ int check_option(char *arg, char **options){
 
 //TODO augment to involve recurs
 //TODO could use some cleanup...
-void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
+void handle_fname(char *path, char *group, bool recurs, bool force, char *name, int ln){
 	ENTRY *new;
 	char *search; //pointer for traversing path
 	char full_path_cpy[BUF_LEN];
@@ -373,11 +383,12 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 	DIR *dp;
 	struct dirent *fname;
 	int i;
+	char *error_p; //helper for complex error messages
 
 	assert(path != NULL && group != NULL);
 
 	if(path[0] == '\0' || group[0] == '\0'){
-		printf("Error: too few arguments for \"add\"\n");
+		error_mes(ln, "Too few arguments for \"add\"");
 		return;
 	}
 
@@ -420,7 +431,7 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 					//FIXME this may still need some work...
 					else if(recurs && fname->d_type == DT_DIR && fname->d_name[0] != '.'){
 						strcat(relative_path_cpy, "/*");
-						handle_fname(relative_path_cpy, group, 1, 0, NULL);
+						handle_fname(relative_path_cpy, group, 1, 0, NULL, ln);
 					}
 #endif
 
@@ -430,11 +441,22 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name){
 			}
 
 			//directory is not real, report error to the user
-			else printf("Error: \"%s\" bad path\n", dirname);
+			else{
+				error_p = malloc(sizeof(char) * 1024);
+				sprintf(error_p, "\"%s\" bad path", dirname);
+				error_mes(ln, error_p);
+				free(error_p);
+				//printf("Error: \"%s\" bad path\n", dirname);
+			}
 		}
 
 		//path is not real, report error to the user
-		else printf("Error: \"%s\" bad path\n", dirname);
+		else{
+			error_p = malloc(sizeof(char) * 1024);
+			sprintf(error_p, "\"%s\" bad path", full_path_cpy);
+			error_mes(ln, error_p);
+			free(error_p);
+		}
 	}
 
 	//file name is okay
@@ -585,4 +607,13 @@ char *strip_quotes(char *str){
 	}
 
 	return str;
+}
+
+void error_mes(int ln, char *message){
+
+	assert(message != NULL);
+
+	printf("Configuration File Error:\nOn line %d: %s\n\n", ln, message);
+
+	return;
 }

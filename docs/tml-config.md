@@ -18,7 +18,6 @@
 	- [hideFile](#hideFile)
 - [Settings](#Settings)
 	- [autoAlias](#autoAlias)
-	- [compMode](#compMode)
 	- [foldCase](#foldCase)
 	- [sort](#sort)
 - [Example](#Example)
@@ -107,12 +106,6 @@ If any of the following settings are specified, they should be at the top of the
 4. Removing file extensions (if the file has an extension) 
 
 `autoAlias` is turned off by default.
-
-### compMode
-
-- **compMode WSL**
-
-At the moment, `compMode` can be turned on for using tml in Windows Subsystem for Linux. By default, `compMode` is turned off. *compMode may be removed in the future due to redundancy, as tml works natively in Windows*.
 
 ### foldCase
 

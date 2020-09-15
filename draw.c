@@ -458,7 +458,6 @@ char *get_launch(){
 	char *flags = get_gflags(g[g_hover]);
 	char *path = get_epath(e[e_hover]);
 	bool force = get_eforce(e[e_hover]);
-	int mode = get_compmode();
 	char *full_command = malloc(sizeof(char) * BUF_LEN);
 
 	full_command[0] = '\0';
@@ -471,8 +470,6 @@ char *get_launch(){
 	}
 
 	else{
-		//if the entry is not forced and compatability mode is on, run it through the converter function
-		if(mode != 0 && !force) path = compat_convert(path, mode);
 		strcat(full_command, "\"");
 		strcat(full_command, program);
 		strcat(full_command, "\"");
@@ -488,34 +485,6 @@ char *get_launch(){
 
 	return full_command;
 
-}
-
-char *compat_convert(char *path, int mode){
-	char *new = malloc(sizeof(char) * BUF_LEN);
-	char *trav = new;
-
-	//1 -> WSL: letter is in /mnt/, convert slashes to backslashes
-	if(mode == 1){
-		path = path+5;
-		*trav = *path - 32; //point at letter, make it uppercase
-		trav++;
-		*trav = ':';
-		path++;
-		trav++;
-
-		//convert each character
-		while(*path != '\0'){
-			if(*path == '/') *trav = '\\';
-			else *trav = *path;
-			path++;
-			trav++;
-		}
-		*trav = '\0';
-	}
-
-	else printf("Error: mode should not be %d\n", mode);
-
-	return new;
 }
 
 #if defined _WIN32 || defined _WIN64
