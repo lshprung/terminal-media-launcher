@@ -41,5 +41,5 @@ A different configuration file location can also be specified with the `-c` flag
 tml -c /path/to/config
 ```
 
-For Documentation of the configuration file, see [tml-config](tml-config.md)
+For Documentation of the configuration file, see [tml-config](tml-config.md).
 If you installed tml, you can also consult **tml**(1) and **tml-config**(5).
