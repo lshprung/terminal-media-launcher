@@ -22,8 +22,7 @@
 void update_display(bool resize);
 void draw_title();
 void draw_win(WINDOW *new, char *title);
-void fill_groups();
-void fill_entries();
+void fill_col(int mode); //0 = GROUP, 1 = ENTRY
 char *trim_name(char *name, char *path, int max_len);
 void update_col(int mode, int hl_where, bool resize); //0 = last, 1 = first; 0 = GROUP, 1 = ENTRY, 2 = INFO
 void switch_col();
@@ -47,8 +46,6 @@ int g_count;
 int e_count;
 int g_offset = 0;
 int e_offset = 0;
-
-//TODO consider figuring out where some refreshes are unecessary
 
 int main(int argc, char **argv){
 	char *cfg_path;
@@ -95,7 +92,7 @@ int main(int argc, char **argv){
 			case 9: //tab key
 			case KEY_LEFT:
 			case KEY_RIGHT:
-				//switch true_hover to look at the other column (TODO this code could use some polish)
+				//switch true_hover to look at the other column
 				switch_col();
 				break;
 
@@ -167,16 +164,6 @@ void update_display(bool resize){
 	if(entry_win != NULL) delwin(entry_win);
 	if(info_win != NULL) delwin(info_win);
 
-	//TODO the search bar is a shelved feature for now, might consider writing it...
-	//Draw Search Bar 2 spaces (3 spaces if window is big enough) under the title
-	/*
-	move(3, WIDTH/4);
-	printw("[ Search: ");
-	move(3, (WIDTH*3)/4);
-	printw("]");
-	move(3, (WIDTH/4)+10);
-	*/
-
 	//Draw Columns 
 	group_win = newwin(HEIGHT-(5+GAP_SIZE), WIDTH/2, 2+GAP_SIZE, 0);
 	entry_win = newwin(HEIGHT-(5+GAP_SIZE), WIDTH-WIDTH/2, 2+GAP_SIZE, WIDTH/2);
@@ -222,50 +209,34 @@ void draw_win(WINDOW *new, char *title){
 	return;
 }
 
-void fill_groups(){
+void fill_col(int mode){
+	//mode 0 = group
+	//mode 1 = entry
+
 	int i;
-	int max_len = group_win->_maxx-1; //longest possible string length that can be displayed in the window
-	int ycoord = 1;
-	int max_y = HEIGHT-(6+GAP_SIZE); //last possible slot to draw a group
-	char *name;
-
-	for(i = 0+g_offset; i < g_count; i++){
-		if(ycoord >= max_y) break; //already at bottom of terminal window, stop drawing
-		name = get_gname(g[i]);
-
-		//the name is too long, take the group to the trimming function
-		if(strlen(name) > max_len) name = trim_name(name, get_gname(g[i]), max_len);
-		wmove(group_win, ycoord, 1);
-		wprintw(group_win, "%s", name);
-		ycoord++;
-	}
-
-	wrefresh(group_win);
-	return;
-}
-
-//very similar to the previous function, perhaps they can be combined... (TODO)
-void fill_entries(){
-	int i;
-	int max_len = entry_win->_maxx-1; //longest possible string length that can be displayed in the window
+	WINDOW *col = (mode ? entry_win : group_win);
+	int count = (mode ? e_count : g_count);
+	int offset = (mode ? e_offset : g_offset);
+	int max_len = col->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
 	int max_y = HEIGHT-(6+GAP_SIZE);
 	char *name;
 
-	for(i = 0+e_offset; i < e_count; i++){
+	for(i = 0+offset; i < count; i++){
 		if(ycoord >= max_y) break; //reached the bottom of the terminal window, stop drawing
-		name = get_ename(e[i]);
+		name = (mode ? get_ename(e[i]) : get_gname(g[i]));
 
 		//the name is too long, take the group to the trimming function
-		if(strlen(name) > max_len) name = trim_name(name, get_epath(e[i]), max_len);
-		wmove(entry_win, ycoord, 1);
-		wprintw(entry_win, "%s", name);
+		if(strlen(name) > max_len) name = trim_name(name, (mode ? get_epath(e[i]) : get_gname(g[i])), max_len);
+		wmove(col, ycoord, 1);
+		wprintw(col, "%s", name);
 		ycoord++;
 	}
 
-	wrefresh(entry_win);
+	wrefresh(col);
 	return;
 }
+
 
 char *trim_name(char *name, char *path, int max_len){
 	char *relative;
@@ -329,7 +300,7 @@ void update_col(int mode, int hl_where, bool resize){
 	//update certain info in the col only if not a resizing-related call
 	switch(mode){
 		case 0:
-			fill_groups();
+			fill_col(0);
 			if(!resize) mvwchgat(group_win, y_hl, 1, group_win->_maxx-1, A_DIM, 2, NULL);
 			else mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_DIM, (true_hover ? 1 : 2), NULL);
 			break;
@@ -337,7 +308,7 @@ void update_col(int mode, int hl_where, bool resize){
 		case 1:
 			e_count = get_ecount(g[g_hover]);
 			e = get_entries(get_ghead(g[g_hover]), e_count);
-			fill_entries(e, e_count);
+			fill_col(1);
 			if(!resize) mvwchgat(entry_win, y_hl, 1, entry_win->_maxx-1, A_DIM, 1, NULL);
 			else mvwchgat(entry_win, 1+e_hover-e_offset, 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
 			break;
