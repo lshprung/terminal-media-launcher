@@ -265,7 +265,7 @@ void check_line(char *buffer, char **options, int ln){
 					e = get_entries(get_ghead(g[i]), e_count);
 
 					for(j = 0; j < e_count; j++){
-						if(!strcmp((search_res == 9 ? get_ename(e[j]) : get_epath(e[j])), strip_quotes(args[1]))) break;
+						if(!strcmp((search_res == 8 ? get_ename(e[j]) : get_epath(e[j])), strip_quotes(args[1]))) break;
 					}
 
 					if(j < e_count){
