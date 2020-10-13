@@ -67,6 +67,12 @@ int main(int argc, char **argv){
 	g = get_groups(); //retrieve results of cfg_interp
 	g_count = get_gcount(g); //retrieve number of groups in g (only do this after removing empty groups)
 
+	//check that there are is at least one valid group
+	if(g_count == 0){
+		printf("Error: No Entries!\n");
+		exit(0);
+	}
+
 	initscr();
 	cbreak();
 	keypad(stdscr, true);

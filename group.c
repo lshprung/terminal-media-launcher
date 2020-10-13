@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include "entry.h"
 #include "group.h"
+#include "read_cfg.h"
 #define BUF_LEN 1024
 
 typedef struct group{
@@ -143,7 +144,8 @@ void clean_groups(){
 	GROUP *hold;
 
 	if(group_count == 0){
-		printf("Error: no groups!\n");
+		printf("Error: no groups! ");
+		refer_to_doc();
 		exit(0);
 	}
 

@@ -18,6 +18,7 @@ void cfg_interp(char *path);
 int get_compmode();
 bool get_sort();
 bool get_case_sensitivity();
+void refer_to_doc();
 
 //private
 void check_line(char *buffer, char **options, int ln);
@@ -60,10 +61,12 @@ char *find_config(){
 
 	for(i = 0; i < check_count; i++){
 		path = choices[i];
+		printf("Checking for config at %s: ", choices[i]);
 		if(access(path, R_OK) == 0){
-			printf("Using config \"%s\"\n", path);
+			printf("Using config \"%s\"\n\n", path);
 			return path;
 		}
+		else printf("File does not exist\n");
 	}
 
 	return "config";
@@ -80,7 +83,13 @@ void cfg_interp(char *path){
 	int j;
 
 	fp = fopen(path, "r");
-	assert(fp != NULL);
+	//assert(fp != NULL);
+	if(fp == NULL){
+		printf("config does not exist in current directory. ");
+		refer_to_doc();
+		exit(0);
+	}
+	else if(!strcmp(path, "config")) printf("Using config in current directory\n");
 
 	//build the options array
 	char **options = malloc(sizeof(char *) * OPTION_CNT);
@@ -132,6 +141,11 @@ bool get_sort(){
 
 bool get_case_sensitivity(){
 	return fold_case;
+}
+
+void refer_to_doc(){
+	printf("Refer to documentation on how to create tml config file\n");
+	return;
 }
 
 //TODO add support for "addR" recursive adding (still needs work...)

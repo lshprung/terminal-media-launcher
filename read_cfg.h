@@ -9,4 +9,6 @@ bool get_sort();
 
 bool get_case_sensitivity();
 
+void refer_to_doc();
+
 #endif

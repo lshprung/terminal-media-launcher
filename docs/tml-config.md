@@ -126,7 +126,7 @@ autoAlias on
 
 # Adding a Group of Various Applications
 
-addGroup Applcations
+addGroup Applications
 addName GIMP /usr/bin/gimp Applications
 addName Chromium /usr/bin/chromium-browser Applications
 addName Thunderbird /usr/bin/thunderbird Applications
@@ -141,7 +141,7 @@ add /home/john/Videos/*mp4 Videos
 
 addGroup Pictures
 setLauncher Pictures /usr/bin/sxiv
-setFlags "-s f"
+setFlags Pictures "-s f"
 add /home/john/Pictures/*jpg Pictures
 add /home/john/Pictures/*png Pictures
 addR "/mnt/External_Drive/Johns Photos/*" Pictures
