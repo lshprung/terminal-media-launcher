@@ -48,7 +48,7 @@ int g_offset = 0;
 int e_offset = 0;
 
 int main(int argc, char **argv){
-	char *cfg_path;
+	char cfg_path[BUF_LEN];
 	int input;
 	char full_command[BUF_LEN]; //what will be executed
 	int prev_width; //used to check if the window was resized
@@ -56,8 +56,8 @@ int main(int argc, char **argv){
 	int i;
 
 	//if a config path was given as an argument, set it accordingly
-	if(argc > 2 && (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cfg_path"))) cfg_path = argv[2];
-	else cfg_path = find_config();
+	if(argc > 2 && (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cfg_path"))) strcpy(cfg_path, argv[2]);
+	else strcpy(cfg_path, find_config());
 
 	//Fill Groups
 	cfg_interp(cfg_path); //read the contents of the cfg file
