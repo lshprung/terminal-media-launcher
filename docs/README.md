@@ -4,7 +4,7 @@
 
 ## Compiling and Running
 
-tml can be compiled on any system with make, gcc, and the ncurses library (libncurses-dev) installed. It has been tested to work on Ubuntu, and can also be compiled and run on Windows 10, but is designed with Linux in mind. To compile and run tml:
+tml can be compiled on any system with make, gcc, and the ncurses library (libncurses-dev) installed. It can be compiled and installed on any Linux distribution, and can also be compiled and run on Windows 10. To compile and run tml:
 
 1. Clone the repository
 2. Run `make` in the directory the repository was cloned into. This will create a file called `tml`
@@ -14,7 +14,7 @@ Note that tml will not run until you have created a configuration file.
 
 ### Installation
 
-tml can be installed by running:
+tml can be installed on Linux by running:
 
 ```
 sudo make install
@@ -36,9 +36,14 @@ sudo make uninstall
 
 By default, tml searches in the following order for a configuration file:
 
+### Linux
+
 1. `$HOME/.config/tml/config`
 2. `$HOME/.tml/config`
-3. `config` (in the current directory)
+
+### Windows
+
+1. `%APPDATA%\tml\config`
 
 A different configuration file location can also be specified with the `-c` flag:
 

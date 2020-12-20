@@ -1,6 +1,6 @@
 ## Introduction
 
-**config** specifies settings for Terminal Media Launcher, including preferences, groups, entries, and file locations. Each line of `config` is read by tml unless the line is empty or the line begins with a '#'. tml will not run if no config file exists, so you will need to know how to write one
+**config** specifies settings for Terminal Media Launcher, including preferences, groups, entries, and file locations. Each line of `config` is read by tml unless the line is empty or the line begins with a '#'. tml can automatically generate a configuration file if no such file is found. An automatically  generated  configuration file will create groups for Music, Pictures, and Videos, and add entries to each group from the respective directory in the user's home directory. It is highly recommended that the user edit the configuration file manually.
 
 ## Table of Contents
 
@@ -30,13 +30,13 @@ tml will not work without any groups, so you will need to know how to create a g
 
 - **addGroup** *name*
 
-`addGroup` will create a new group with a specified name. By default this group is empty, with zero entries, no launching application specified, and no flags specified. If their is a space in the name, it must be written in quotes (ex. "TV Shows")
+`addGroup` will create a new group with a specified name. By default this group is empty, with zero entries, no launching application specified, and no flags specified. If there is a space in the name, it must be written in quotes (ex. "TV Shows")
 
 ### setLauncher
 
 - **setLauncher** *group* */path/to/launcher*
 
-`setLauncher` will set a group's launching application. If no launching application is specified for a group, tml will treat each entry in that group as an executable file. If their is a space in the path to the launching application, it must be written in quotes (ex. "/usr/bin/my launcher"). *Keep in mind that the path to the launching application should be absolute*.
+`setLauncher` will set a group's launching application. If no launching application is specified for a group, tml will treat each entry in that group as an executable file. If there is a space in the path to the launching application, it must be written in quotes (ex. "/usr/bin/my launcher"). *Keep in mind that the path to the launching application should be absolute*.
 
 ### setFlags
 
