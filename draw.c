@@ -29,7 +29,6 @@ void switch_col();
 void trav_col(int new_i);
 int locateChar(char input);
 char *get_launch();
-char *compat_convert(char *path, int mode);
 #if defined _WIN32 || defined _WIN64
 void win_launch();
 #endif
@@ -57,7 +56,11 @@ int main(int argc, char **argv){
 
 	//if a config path was given as an argument, set it accordingly
 	if(argc > 2 && (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cfg_path"))) strcpy(cfg_path, argv[2]);
+#if defined _WIN32 || defined _WIN64
+	else strcpy(cfg_path, find_config_win());
+#else
 	else strcpy(cfg_path, find_config());
+#endif
 
 	//Fill Groups
 	cfg_interp(cfg_path); //read the contents of the cfg file
