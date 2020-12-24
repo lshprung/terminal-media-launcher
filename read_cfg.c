@@ -192,7 +192,7 @@ void mkconfig_wizard(char *path){
 
 	printf("\nNo configuration file found. Auto-generate one now at \"%s\"? [Y/n] ", path);
 	fflush(stdout);
-	scanf("%c", &input);
+	scanf(" %c", &input);
 
 	if(input == 'n'){
 		printf("Configuration will not be auto-generated\n");
@@ -275,7 +275,7 @@ void mkconfig_wizard(char *path){
 	fclose(fp);
 	printf("done\nIt is highly recommended to further tweak the configuration file! [press any key to continue]");
 	fflush(stdout);
-	fflush(stdin);
+	getchar();
 	getchar();
 
 	return;
