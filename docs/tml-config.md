@@ -5,22 +5,23 @@
 ## Table of Contents
 
 - [Creating a Group](#CreatingAGroup)
-	- [addGroup](#addGroup)
-	- [setLauncher](#setLauncher)
-	- [setFlags](#setFlags)
+	- [addGroup](#addgroup)
+	- [setLauncher](#setlauncher)
+	- [setLauncherRaw](#setlauncherraw)
+	- [setFlags](#setflags)
 - [Adding Entries](#AddingEntries)
 	- [add](#add)
-	- [addF](#addF)
-	- [addName](#addName)
-	- [addNameF](#addNameF)
-	- [addR](#addR)
+	- [addF](#addf)
+	- [addName](#addname)
+	- [addNameF](#addnamef)
+	- [addR](#addr)
 	- [hide](#hide)
-	- [hideFile](#hideFile)
-- [Settings](#Settings)
-	- [autoAlias](#autoAlias)
-	- [foldCase](#foldCase)
+	- [hideFile](#hidefile)
+- [Settings](#settings)
+	- [autoAlias](#autoalias)
+	- [foldCase](#foldcase)
 	- [sort](#sort)
-- [Example](#Example)
+- [Example](#example)
 
 ## Creating a Group <a name="CreatingAGroup"></a>
 
@@ -37,6 +38,12 @@ tml will not work without any groups, so you will need to know how to create a g
 - **setLauncher** *group* */path/to/launcher*
 
 `setLauncher` will set a group's launching application. If no launching application is specified for a group, tml will treat each entry in that group as an executable file. If there is a space in the path to the launching application, it must be written in quotes (ex. "/usr/bin/my launcher"). *Keep in mind that the path to the launching application should be absolute*.
+
+### setLauncherRaw
+
+- **setLauncherRaw** *group* */path/to/launcher*
+
+`setLauncherRaw` is identical to `setLauncher` with the exception that the launcher application specified will not be wrapped in quotes for the system call when a member of the group is launched. This can be used to specify more complex launching instructions.
 
 ### setFlags
 
