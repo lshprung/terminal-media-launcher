@@ -437,7 +437,7 @@ char *get_launch(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
 	char *path = get_epath(e[e_hover]);
-	bool force = get_eforce(e[e_hover]);
+	bool quotes = get_gquotes(g[g_hover]);
 	char *full_command = malloc(sizeof(char) * BUF_LEN);
 
 	full_command[0] = '\0';
@@ -450,9 +450,9 @@ char *get_launch(){
 	}
 
 	else{
-		strcat(full_command, "\"");
+		if(quotes) strcat(full_command, "\"");
 		strcat(full_command, program);
-		strcat(full_command, "\"");
+		if(quotes) strcat(full_command, "\"");
 		if(flags[0] !='\0'){
 			strcat(full_command, " ");
 			strcat(full_command, flags);
@@ -472,6 +472,7 @@ void win_launch(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
 	char *path = get_epath(e[e_hover]);
+	bool quotes = get_gquotes(g[g_hover]);
 	char file[BUF_LEN];
 	char params[BUF_LEN];
 
@@ -485,9 +486,9 @@ void win_launch(){
 	}
 
 	else{
-		strcat(file, "\"");
+		if(quotes) strcat(file, "\"");
 		strcat(file, program);
-		strcat(file, "\"");
+		if(quotes) strcat(file, "\"");
 
 		params[0] = '\0';
 		if(flags[0] != '\0'){

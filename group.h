@@ -29,6 +29,10 @@ int get_ecount(GROUP *g);
 
 void set_ecount(GROUP *g, int new_count);
 
+void set_gquotes(GROUP *g, bool b);
+
+bool get_gquotes(GROUP *g);
+
 int get_gcount();
 
 void group_debug();

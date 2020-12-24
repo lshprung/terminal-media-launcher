@@ -17,6 +17,7 @@ typedef struct group{
 	struct entry *tail;
 	struct group *next;
 	int entry_count;
+	bool launcher_quotes; //set by a group option whether or not the launcher should be wrapped by quotes
 } GROUP;
 
 GROUP *create_group(char *new_name);
@@ -32,6 +33,8 @@ void set_gflags(GROUP *g, char *p);
 ENTRY *get_ghead(GROUP *g);
 int get_ecount(GROUP *g);
 void set_ecount(GROUP *g, int new_count); //for use in hiding entries
+void set_gquotes(GROUP *g, bool b);
+bool get_gquotes(GROUP *g);
 int get_gcount();
 void group_debug(); //debug function to output all groups
 
@@ -50,6 +53,7 @@ GROUP *create_group(char *new_name){
 	new->tail = NULL;
 	new->next = NULL;
 	new->entry_count = 0;
+	new->launcher_quotes = true;
 
 	group_count++;
 	return new;
@@ -226,6 +230,15 @@ int get_ecount(GROUP *g){
 void set_ecount(GROUP *g, int new_count){
 	assert(g != NULL);
 	g->entry_count = new_count;
+}
+
+void set_gquotes(GROUP *g, bool b){
+	assert(g != NULL);
+	g->launcher_quotes = b;
+}
+
+bool get_gquotes(GROUP *g){
+	return g->launcher_quotes;
 }
 
 int get_gcount(){
