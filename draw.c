@@ -1,9 +1,12 @@
 //Windows Compatability
 #if defined _WIN32 || defined _WIN64
 #include <ncurses/ncurses.h>
-#include <windows.h>
+#include "windows/draw.h"
+#include "windows/read_cfg.h"
 #else
 #include <ncurses.h>
+#include "unix/draw.h"
+#include "unix/read_cfg.h"
 #endif
 
 #include <stdbool.h>
@@ -13,8 +16,8 @@
 #include "entry.h"
 #include "group.h"
 #include "read_cfg.h"
-#define MAX_LEN 6
 #define BUF_LEN 1024
+#define MAX_LEN 6
 #define GAP_SIZE 1
 #define WIDTH (getmaxx(stdscr)) //width of the entire term
 #define HEIGHT (getmaxy(stdscr)) //height of the entire term
@@ -29,9 +32,6 @@ void switch_col();
 void trav_col(int new_i);
 int locateChar(char input);
 char *get_launch();
-#if defined _WIN32 || defined _WIN64
-void win_launch();
-#endif
 
 WINDOW *group_win = NULL;
 WINDOW *entry_win = NULL;
@@ -56,11 +56,7 @@ int main(int argc, char **argv){
 
 	//if a config path was given as an argument, set it accordingly
 	if(argc > 2 && (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cfg_path"))) strcpy(cfg_path, argv[2]);
-#if defined _WIN32 || defined _WIN64
-	else strcpy(cfg_path, find_config_win());
-#else
 	else strcpy(cfg_path, find_config());
-#endif
 
 	//Fill Groups
 	cfg_interp(cfg_path); //read the contents of the cfg file
@@ -129,14 +125,7 @@ int main(int argc, char **argv){
 				break;
 
 			case 10: //enter key
-
-#if defined _WIN32 || defined _WIN64
-				win_launch();
-#else
-				strcpy(full_command, get_launch());
-				strcat(full_command, " > /dev/null 2>&1 &");
-				system(full_command);
-#endif
+				launch();
 				break;
 
 			case 27: //escape key
@@ -466,42 +455,3 @@ char *get_launch(){
 	return full_command;
 
 }
-
-#if defined _WIN32 || defined _WIN64
-void win_launch(){
-	char *program = get_gprog(g[g_hover]);
-	char *flags = get_gflags(g[g_hover]);
-	char *path = get_epath(e[e_hover]);
-	bool quotes = get_gquotes(g[g_hover]);
-	char file[BUF_LEN];
-	char params[BUF_LEN];
-
-	file[0] = '\0';
-
-	if(!(strcmp(program, "./"))){
-		strcat(file, "\"");
-		strcat(file, path);
-		strcat(file, "\"");
-		ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOW);
-	}
-
-	else{
-		if(quotes) strcat(file, "\"");
-		strcat(file, program);
-		if(quotes) strcat(file, "\"");
-
-		params[0] = '\0';
-		if(flags[0] != '\0'){
-			strcat(params, flags);
-			strcat(params, " ");
-		}
-		strcat(params, "\"");
-		strcat(params, path);
-		strcat(params, "\"");
-		
-		ShellExecute(NULL, NULL, file, params, NULL, SW_SHOW);
-	}
-
-	return;
-}
-#endif

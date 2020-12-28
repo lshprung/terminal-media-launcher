@@ -1,11 +1,7 @@
 #ifndef READ_CFG_H
 #define READ_CFG_H
 
-#if defined _WIN32 || defined _WIN64
-char *find_config_win();
-#else
-char *find_config();
-#endif
+#define BUF_LEN 1024
 
 void cfg_interp();
 
@@ -14,5 +10,17 @@ bool get_sort();
 bool get_case_sensitivity();
 
 void refer_to_doc();
+
+void addme();
+
+int search_ch();
+
+int search_last_ch();
+
+int wild_cmp();
+
+char *strip_quotes();
+
+void error_mes();
 
 #endif

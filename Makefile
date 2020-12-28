@@ -3,13 +3,32 @@ NAME = tml
 LIBS = -lncurses
 PREFIX = /usr/local
 
-$(NAME): draw.o read_cfg.o group.o entry.o
-	$(CC) -o $(NAME) draw.o read_cfg.o group.o entry.o $(LIBS)
 
-draw.o: draw.c read_cfg.h group.h entry.h
-read_cfg.o: read_cfg.c group.o entry.o
+ifeq ($(OS),Windows_NT)
+
+$(NAME): draw.o read_cfg.o group.o entry.o windows/draw.o windows/read_cfg.o
+	$(CC) -o $(NAME) draw.o read_cfg.o group.o entry.o windows/draw.o windows/read_cfg.o $(LIBS)
+
+draw.o: draw.c read_cfg.h group.h entry.h windows/draw.h windows/read_cfg.h
+windows/draw.o: windows/draw.c windows/draw.h draw.h
+read_cfg.o: read_cfg.c group.o entry.o windows/read_cfg.h
+windows/read_cfg.o: windows/read_cfg.c windows/read_cfg.h read_cfg.h
+
+else 
+
+$(NAME): draw.o read_cfg.o group.o entry.o unix/draw.o unix/read_cfg.o
+	$(CC) -o $(NAME) draw.o read_cfg.o group.o entry.o unix/draw.o unix/read_cfg.o $(LIBS)
+
+draw.o: draw.c read_cfg.h group.h entry.h unix/draw.h unix/read_cfg.h
+unix/draw.o: unix/draw.c unix/draw.h draw.h
+read_cfg.o: read_cfg.c group.o entry.o unix/read_cfg.h
+windows/read_cfg.o: unix/read_cfg.c unix/read_cfg.h read_cfg.h
+
+endif
+
 group.o: group.c group.h entry.h
 entry.o: entry.c entry.h read_cfg.h group.h
+
 
 .PHONY: clean
 clean:
