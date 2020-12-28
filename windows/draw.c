@@ -1,10 +1,11 @@
+#include <ncurses/ncurses.h>
 #include <stdbool.h>
 #include <windows.h>
 
-#include "../draw.h"
-#include "../entry.h"
-#include "../group.h"
-#include "draw.h"
+#include "../include/draw.h"
+#include "../include/draw_extend.h"
+#include "../include/entry.h"
+#include "../include/group.h"
 
 void launch(){
 	char *program = get_gprog(g[g_hover]);

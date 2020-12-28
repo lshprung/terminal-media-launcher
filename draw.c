@@ -6,18 +6,17 @@
 //Windows/Unix Compatability
 #if defined _WIN32 || defined _WIN64
 #include <ncurses/ncurses.h>
-#include "windows/draw.h"
-#include "windows/read_cfg.h"
 #else
 #include <ncurses.h>
-#include "unix/draw.h"
-#include "unix/read_cfg.h"
 #endif
 
-#include "entry.h"
-#include "group.h"
-#include "read_cfg.h"
-#include "draw.h"
+//*_extend.h headers handle differences in os (i.e. windows vs unix)
+#include "include/draw.h"
+#include "include/draw_extend.h"
+#include "include/entry.h"
+#include "include/group.h"
+#include "include/read_cfg.h"
+#include "include/read_cfg_extend.h"
 #define MAX_LEN 6
 #define GAP_SIZE 1
 #define WIDTH (getmaxx(stdscr)) //width of the entire term

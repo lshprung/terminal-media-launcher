@@ -1,5 +1,5 @@
-#ifndef UNIX_READ_CFG_H
-#define UNIX_READ_CFG_H
+#ifndef READ_CFG_EXTEND_H
+#define READ_CFG_EXTEND_H
 
 extern char sep;
 

@@ -1,8 +1,9 @@
+#include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "../draw.h"
-#include "draw.h"
+#include "../include/draw.h"
+#include "../include/draw_extend.h"
 
 void launch(){
 	char full_command[BUF_LEN];

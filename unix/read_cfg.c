@@ -8,9 +8,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "../read_cfg.h"
-#include "../entry.h"
-#include "read_cfg.h"
+#include "../include/read_cfg.h"
+#include "../include/entry.h"
+#include "../include/read_cfg_extend.h"
 
 char sep = '/';
 

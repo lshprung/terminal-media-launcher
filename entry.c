@@ -5,10 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "entry.h"
-#include "group.h"
-#include "read_cfg.h"
-#define BUF_LEN 1024
+
+#include "include/entry.h"
+#include "include/group.h"
+#include "include/read_cfg.h"
 
 typedef struct entry{
 	char name[BUF_LEN];

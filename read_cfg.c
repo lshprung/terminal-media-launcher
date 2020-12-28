@@ -4,15 +4,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
 #if defined _WIN32 || defined _WIN64
 #include "windows/read_cfg.h"
 #else
 #include "unix/read_cfg.h"
 #endif
+*/
 
-#include "entry.h"
-#include "group.h"
-#include "read_cfg.h"
+#include "include/entry.h"
+#include "include/group.h"
+#include "include/read_cfg.h"
+#include "include/read_cfg_extend.h"
 #define MAX_ARGS 5
 #define OPTION_CNT 14
 
