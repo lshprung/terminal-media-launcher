@@ -10,10 +10,7 @@
 
 #include "../read_cfg.h"
 #include "../entry.h"
-
-char *find_config();
-void mkconfig_wizard();
-void handle_fname(char *path, char *group, bool recurs, bool force, char *name, int ln);
+#include "read_cfg.h"
 
 char sep = '\\';
 

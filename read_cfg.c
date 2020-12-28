@@ -1,31 +1,20 @@
+#include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #if defined _WIN32 || defined _WIN64
 #include "windows/read_cfg.h"
 #else
 #include "unix/read_cfg.h"
 #endif
 
-#include <assert.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "entry.h"
 #include "group.h"
-#define BUF_LEN 1024
+#include "read_cfg.h"
 #define MAX_ARGS 5
 #define OPTION_CNT 14
-
-//public
-void cfg_interp(char *path);
-bool get_sort();
-bool get_case_sensitivity();
-void refer_to_doc();
-void addme(char *path, char *group, bool force, char *name);
-int search_ch(char *str, char c);
-int search_last_ch(char *str, char c);
-int wild_cmp(char *wild, char *literal);
-char *strip_quotes(char *str);
-void error_mes(int ln, char *message);
 
 //private
 void check_line(char *buffer, char **options, int ln);

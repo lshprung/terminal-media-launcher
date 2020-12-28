@@ -1,4 +1,9 @@
-//Windows Compatability
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+//Windows/Unix Compatability
 #if defined _WIN32 || defined _WIN64
 #include <ncurses/ncurses.h>
 #include "windows/draw.h"
@@ -9,14 +14,10 @@
 #include "unix/read_cfg.h"
 #endif
 
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include "entry.h"
 #include "group.h"
 #include "read_cfg.h"
-#define BUF_LEN 1024
+#include "draw.h"
 #define MAX_LEN 6
 #define GAP_SIZE 1
 #define WIDTH (getmaxx(stdscr)) //width of the entire term
@@ -31,7 +32,6 @@ void update_col(int mode, int hl_where, bool resize); //0 = last, 1 = first; 0 =
 void switch_col();
 void trav_col(int new_i);
 int locateChar(char input);
-char *get_launch();
 
 WINDOW *group_win = NULL;
 WINDOW *entry_win = NULL;

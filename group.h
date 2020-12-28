@@ -9,7 +9,7 @@ void group_add(char *gname, ENTRY *addme);
 
 void group_rm(GROUP *g);
 
-void clean_groups();
+void clean_groups(); //remove empty groups from linked list
 
 GROUP **get_groups();
 
@@ -27,7 +27,7 @@ ENTRY *get_ghead(GROUP *g);
 
 int get_ecount(GROUP *g);
 
-void set_ecount(GROUP *g, int new_count);
+void set_ecount(GROUP *g, int new_count); //for use in hiding entries
 
 void set_gquotes(GROUP *g, bool b);
 
@@ -35,6 +35,6 @@ bool get_gquotes(GROUP *g);
 
 int get_gcount();
 
-void group_debug();
+void group_debug(); //debug function to output all groups
 
 #endif 

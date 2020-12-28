@@ -7,6 +7,6 @@ char *find_config();
 
 void mkconfig_wizard();
 
-void handle_fname();
+void handle_fname(char *path, char *group, bool recurs, bool force, char *name, int ln);
 
 #endif

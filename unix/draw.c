@@ -2,8 +2,7 @@
 #include <string.h>
 
 #include "../draw.h"
-
-void launch();
+#include "draw.h"
 
 void launch(){
 	char full_command[BUF_LEN];

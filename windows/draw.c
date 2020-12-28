@@ -4,6 +4,7 @@
 #include "../draw.h"
 #include "../entry.h"
 #include "../group.h"
+#include "draw.h"
 
 void launch(){
 	char *program = get_gprog(g[g_hover]);
