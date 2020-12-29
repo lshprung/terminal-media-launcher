@@ -10,7 +10,6 @@
 
 #include "../include/read_cfg.h"
 #include "../include/entry.h"
-#include "../include/read_cfg_extend.h"
 
 char sep = '/';
 

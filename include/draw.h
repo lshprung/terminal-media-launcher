@@ -12,4 +12,7 @@ extern struct entry **e;
 
 char *get_launch();
 
+//functions that differ between os
+void launch();
+
 #endif

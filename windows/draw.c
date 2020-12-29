@@ -1,9 +1,7 @@
-#include <ncurses/ncurses.h>
 #include <stdbool.h>
 #include <windows.h>
 
 #include "../include/draw.h"
-#include "../include/draw_extend.h"
 #include "../include/entry.h"
 #include "../include/group.h"
 

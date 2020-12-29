@@ -15,7 +15,6 @@
 #include "include/entry.h"
 #include "include/group.h"
 #include "include/read_cfg.h"
-#include "include/read_cfg_extend.h"
 #define MAX_ARGS 5
 #define OPTION_CNT 14
 

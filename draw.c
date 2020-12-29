@@ -10,13 +10,10 @@
 #include <ncurses.h>
 #endif
 
-//*_extend.h headers handle differences in os (i.e. windows vs unix)
 #include "include/draw.h"
-#include "include/draw_extend.h"
 #include "include/entry.h"
 #include "include/group.h"
 #include "include/read_cfg.h"
-#include "include/read_cfg_extend.h"
 #define MAX_LEN 6
 #define GAP_SIZE 1
 #define WIDTH (getmaxx(stdscr)) //width of the entire term

@@ -9,21 +9,21 @@ ifeq ($(OS),Windows_NT)
 $(NAME): draw.o read_cfg.o group.o entry.o windows/draw.o windows/read_cfg.o
 	$(CC) -o $(NAME) draw.o read_cfg.o group.o entry.o windows/draw.o windows/read_cfg.o $(LIBS)
 
-windows/draw.o: windows/draw.c include/draw.h include/draw_extend.h
-windows/read_cfg.o: windows/read_cfg.c include/read_cfg.h include/read_cfg_extend.h 
+windows/draw.o: windows/draw.c include/draw.h 
+windows/read_cfg.o: windows/read_cfg.c include/read_cfg.h 
 
 else 
 
 $(NAME): draw.o read_cfg.o group.o entry.o unix/draw.o unix/read_cfg.o
 	$(CC) -o $(NAME) draw.o read_cfg.o group.o entry.o unix/draw.o unix/read_cfg.o $(LIBS)
 
-unix/draw.o: unix/draw.c include/draw.h include/draw_extend.h
-unix/read_cfg.o: unix/read_cfg.c include/read_cfg.h include/read_cfg_extend.h 
+unix/draw.o: unix/draw.c include/draw.h
+unix/read_cfg.o: unix/read_cfg.c include/read_cfg.h
 
 endif
 
-draw.o: draw.c include/draw.h include/draw_extend.h include/entry.h include/group.h include/read_cfg.h include/read_cfg_extend.h
-read_cfg.o: read_cfg.c include/entry.h include/group.h include/read_cfg_extend.h
+draw.o: draw.c include/draw.h include/entry.h include/group.h include/read_cfg.h 
+read_cfg.o: read_cfg.c include/entry.h include/group.h 
 group.o: group.c include/entry.h include/group.h include/read_cfg.h
 entry.o: entry.c include/entry.h include/group.h include/read_cfg.h 
 
