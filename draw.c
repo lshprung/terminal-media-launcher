@@ -10,6 +10,7 @@
 #include <ncurses.h>
 #endif
 
+#include "include/cache.h"
 #include "include/draw.h"
 #include "include/entry.h"
 #include "include/group.h"
@@ -32,9 +33,9 @@ int locateChar(char input);
 WINDOW *group_win = NULL;
 WINDOW *entry_win = NULL;
 WINDOW *info_win = NULL;
-int g_hover = 0;
-int e_hover = 0;
-int true_hover = 0; //0 = hovering on groups, 1 = hovering on entries
+int g_hover;
+int e_hover;
+int true_hover; //0 = hovering on groups, 1 = hovering on entries
 GROUP **g;
 ENTRY **e;
 int g_count;
@@ -68,6 +69,9 @@ int main(int argc, char **argv){
 		exit(0);
 	}
 
+	//load cached data
+	load_cache(&g_hover, &e_hover, &true_hover, cfg_path);
+
 	initscr();
 	cbreak();
 	keypad(stdscr, true);
@@ -85,8 +89,11 @@ int main(int argc, char **argv){
 
 	update_display(false);
 
-	//drawing is done, now run a while loop to receive input
-	while(1){
+	//update highlighting for loaded location
+	update_display(true);
+
+	//drawing is done, now run a while loop to receive input (ESC ends this loop)
+	while(input != 27){
 		input = getch();
 
 		switch(input){
@@ -124,10 +131,6 @@ int main(int argc, char **argv){
 				launch();
 				break;
 
-			case 27: //escape key
-				endwin();
-				return 0;
-
 			default: //a search char was entered, locate where to jump to
 				trav_col(locateChar(input));
 		}
@@ -141,6 +144,10 @@ int main(int argc, char **argv){
 	}
 	
 	endwin();
+
+	//save position data to cache
+	save_to_cache(g_hover, e_hover, true_hover, cfg_path);
+
 	return 0;
 }
 
