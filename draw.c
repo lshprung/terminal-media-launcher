@@ -90,6 +90,14 @@ int main(int argc, char **argv){
 	update_display(false);
 
 	//update highlighting for loaded location
+	if(true_hover){
+		i = e_hover;
+		true_hover = 0;
+		trav_col(g_hover);
+		switch_col();
+		trav_col(i);
+	}
+	else trav_col(g_hover);
 	update_display(true);
 
 	//drawing is done, now run a while loop to receive input (ESC ends this loop)
