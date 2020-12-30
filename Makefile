@@ -6,8 +6,8 @@ PREFIX = /usr/local
 
 ifeq ($(OS),Windows_NT)
 
-$(NAME): draw.o read_cfg.o group.o entry.o windows/cache.o windows/draw.o windows/read_cfg.o
-	$(CC) -o $(NAME) draw.o read_cfg.o group.o entry.o windows/cache.o windows/draw.o windows/read_cfg.o $(LIBS)
+$(NAME): cache.o draw.o read_cfg.o group.o entry.o windows/cache.o windows/draw.o windows/read_cfg.o
+	$(CC) -o $(NAME) cache.o draw.o read_cfg.o group.o entry.o windows/cache.o windows/draw.o windows/read_cfg.o $(LIBS)
 
 windows/draw.o: windows/draw.c include/draw.h 
 windows/read_cfg.o: windows/read_cfg.c include/read_cfg.h 
@@ -15,8 +15,8 @@ windows/cache.o: windows/cache.c include/cache.h include/read_cfg.h
 
 else 
 
-$(NAME): draw.o read_cfg.o group.o entry.o unix/cache.o unix/draw.o unix/read_cfg.o
-	$(CC) -o $(NAME) draw.o read_cfg.o group.o entry.o unix/cache.o unix/draw.o unix/read_cfg.o $(LIBS)
+$(NAME): cache.o draw.o read_cfg.o group.o entry.o unix/cache.o unix/draw.o unix/read_cfg.o
+	$(CC) -o $(NAME) cache.o draw.o read_cfg.o group.o entry.o unix/cache.o unix/draw.o unix/read_cfg.o $(LIBS)
 
 unix/draw.o: unix/draw.c include/draw.h
 unix/read_cfg.o: unix/read_cfg.c include/read_cfg.h
@@ -24,6 +24,7 @@ unix/cache.o: unix/cache.c include/cache.h include/read_cfg.h
 
 endif
 
+cache.o: cache.c include/cache.h include/read_cfg.h
 draw.o: draw.c include/cache.h include/draw.h include/entry.h include/group.h include/read_cfg.h 
 read_cfg.o: read_cfg.c include/entry.h include/group.h include/read_cfg.h
 group.o: group.c include/entry.h include/group.h include/read_cfg.h
