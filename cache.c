@@ -2,12 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "include/cache.h"
 #include "include/read_cfg.h"
 
 void save_to_cache(int g_hover, int e_hover, int true_hover, char *cfg_name){
 	FILE *fp;
+	struct stat cfg_stat; //for determining last modification time of file
 	char *path = get_cache_path(true);
 
 	//ensure get_cache_path() did not return NULL
@@ -20,8 +24,12 @@ void save_to_cache(int g_hover, int e_hover, int true_hover, char *cfg_name){
 		return;
 	}
 
+	//determine last modification time for cfg file
+	stat(cfg_name, &cfg_stat);
+
 	//write to file
 	fwrite(cfg_name, sizeof(char), BUF_LEN, fp);
+	fwrite(&cfg_stat.st_mtime, sizeof(long int), 1, fp);
 	fwrite(&g_hover, sizeof(int), 1, fp);
 	fwrite(&e_hover, sizeof(int), 1, fp);
 	fwrite(&true_hover, sizeof(int), 1, fp);
@@ -34,6 +42,8 @@ void load_cache(int *g_hover, int *e_hover, int *true_hover, char *new_cfg_name)
 	FILE *fp;
 	char *path = get_cache_path(false);
 	char saved_cfg_name[BUF_LEN];
+	long int saved_cfg_mtime;
+	struct stat new_cfg_stat;
 
 	//ensure get_cache_path() did not return NULL
 	if(path == NULL) return;
@@ -45,10 +55,12 @@ void load_cache(int *g_hover, int *e_hover, int *true_hover, char *new_cfg_name)
 		return;
 	}
 
-	//check if cfg_name matches; if not, do not load from cache
+	//check that cfg_name matches and is not newer than the cached cfg; if not, do not load from cache
 	fread(saved_cfg_name, sizeof(char), BUF_LEN, fp);
+	fread(&saved_cfg_mtime, sizeof(long int), 1, fp);
+	stat(new_cfg_name, &new_cfg_stat);
 
-	if(!(strcmp(saved_cfg_name, new_cfg_name))){
+	if(!(strcmp(saved_cfg_name, new_cfg_name)) && saved_cfg_mtime >= new_cfg_stat.st_mtime){
 		fread(g_hover, sizeof(int), 1, fp);
 		fread(e_hover, sizeof(int), 1, fp);
 		fread(true_hover, sizeof(int), 1, fp);
