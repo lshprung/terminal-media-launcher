@@ -32,9 +32,11 @@ entry.o: entry.c include/entry.h include/group.h include/read_cfg.h
 
 .PHONY: clean
 clean:
-	rm *.o $(NAME)
+	rm -f *.o
 	rm -f unix/*.o
 	rm -f windows/*.o
+	rm -f $(NAME)
+	rm -f $(NAME).exe
 
 ifneq ($(OS),Windows_NT) 
 

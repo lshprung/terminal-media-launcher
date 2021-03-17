@@ -1,0 +1,11 @@
+*
+!.gitignore
+!*.c
+!docs
+!docs/*
+!include
+!include/*.h
+!unix
+!unix/*
+!windows
+!windows/*

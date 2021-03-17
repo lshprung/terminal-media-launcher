@@ -4,6 +4,8 @@
 
 ## Compiling and Running
 
+For Windows instructions, see [here](windows_compile_instructions.md)
+
 tml can be compiled on any system with make, gcc, and the ncurses library (libncurses-dev) installed. It can be compiled and installed on any Linux distribution, and can also be compiled and run on Windows 10. To compile and run tml:
 
 1. Clone the repository
