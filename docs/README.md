@@ -54,4 +54,5 @@ tml -c /path/to/config
 ```
 
 For Documentation of the configuration file, see [tml-config](tml-config.md).
+For a help message and list of flags, `tml --help`.
 If you installed tml, you can also consult **tml**(1) and **tml-config**(5).

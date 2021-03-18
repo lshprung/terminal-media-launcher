@@ -20,6 +20,7 @@
 #define WIDTH (getmaxx(stdscr)) //width of the entire term
 #define HEIGHT (getmaxy(stdscr)) //height of the entire term
 
+void print_help(char *exec_name);
 void update_display(bool resize);
 void draw_title();
 void draw_win(WINDOW *new, char *title);
@@ -51,6 +52,14 @@ int main(int argc, char **argv){
 	int prev_height; //used to check if the window was resized
 	int i;
 
+	//If passed the quiet flag, disable output
+	if(argc > 1 && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))){
+		print_help(argv[0]);
+		return 0;
+	}
+
+	if(argc > 1 && (!strcmp(argv[1], "-q") || !strcmp(argv[1], "--quiet"))) freopen("/dev/null", "w", stdout);
+
 	//if a config path was given as an argument, set it accordingly
 	if(argc > 2 && (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cfg_path"))) strcpy(cfg_path, argv[2]);
 	else strcpy(cfg_path, find_config());
@@ -71,6 +80,9 @@ int main(int argc, char **argv){
 
 	//load cached data
 	load_cache(&g_hover, &e_hover, &true_hover, cfg_path);
+
+	//reopen stdout for drawing menu
+	freopen("/dev/tty", "w", stdout);
 
 	initscr();
 	cbreak();
@@ -157,6 +169,15 @@ int main(int argc, char **argv){
 	save_to_cache(g_hover, e_hover, true_hover, cfg_path);
 
 	return 0;
+}
+
+void print_help(char *exec_name){
+	printf("Usage: %s [OPTION] [FILE]\n", exec_name);
+	printf("Draw an Ncurses Menu to Launch Media from\n\n");
+
+	printf(" -c, --config	Specify a configuration file path\n");
+	printf(" -h, --help 	Print this help message\n");
+	printf(" -q, --quiet	Suppress stdout messages\n");
 }
 
 void update_display(bool resize){
