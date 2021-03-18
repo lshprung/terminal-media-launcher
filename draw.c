@@ -48,16 +48,17 @@ int main(int argc, char **argv){
 	char cfg_path[BUF_LEN];
 	int input;
 	char full_command[BUF_LEN]; //what will be executed
-	int prev_width; //used to check if the window was resized
-	int prev_height; //used to check if the window was resized
+	int prev_width;             //used to check if the window was resized
+	int prev_height;            //used to check if the window was resized
 	int i;
 
-	//If passed the quiet flag, disable output
+	//if passed the help flag, print help message and exit
 	if(argc > 1 && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))){
 		print_help(argv[0]);
 		return 0;
 	}
 
+	//if passed the quiet flag, disable output
 	if(argc > 1 && (!strcmp(argv[1], "-q") || !strcmp(argv[1], "--quiet"))) freopen("/dev/null", "w", stdout);
 
 	//if a config path was given as an argument, set it accordingly
@@ -94,6 +95,7 @@ int main(int argc, char **argv){
 	init_pair(0, COLOR_WHITE, COLOR_BLACK);
 	init_pair(1, COLOR_BLACK, COLOR_WHITE);
 	init_pair(2, COLOR_BLACK, COLOR_YELLOW);
+	init_pair(3, COLOR_BLACK, COLOR_GREEN);
 	attron(COLOR_PAIR(0));
 
 	prev_width = WIDTH;
@@ -148,6 +150,10 @@ int main(int argc, char **argv){
 				break;
 
 			case 10: //enter key
+				//create a green highlight over the launched entry
+				mvwchgat(entry_win, 1+e_hover-e_offset, 1, entry_win->_maxx-1, A_DIM, 3, NULL);
+				wrefresh(entry_win);
+
 				launch();
 				break;
 
