@@ -101,6 +101,7 @@ int main(int argc, char **argv){
 	prev_width = WIDTH;
 	prev_height = HEIGHT;
 
+	//update to show menu
 	update_display(false);
 
 	//update highlighting for loaded location
@@ -209,9 +210,11 @@ void update_display(bool resize){
 	draw_win(info_win, "INFO");
 	update_col(0, 1, resize);
 
-	//start with hover on the first group, draw the entries from the selected group, true_hover is over the groups (rather than the entries)
-	update_col(1, 1, resize);
-	update_col(2, 0, resize);
+	//start with hover on the first group, draw the entries from the selected group, true_hover is over the groups (rather than the entries) (do update after first draw, only after subsequent (resize) updates)
+	if(resize){
+		update_col(1, 1, resize);
+		update_col(2, 0, resize);
+	}
 	curs_set(0); //hide the cursor
 	//move(3, (WIDTH/4)+10);
 	refresh();
