@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=tml
+Comment=Terminal Media Launcher
+Path=/usr/local/bin
+Exec=tml
+Icon=tml
+Terminal=true
+Categories=Utility
