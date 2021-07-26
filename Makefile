@@ -72,7 +72,6 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/share/man/man1/$(NAME).1.gz
 	rm -f $(DESTDIR)$(PREFIX)/share/man/man5/$(NAME)-config.5.gz
 	rm -f $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
-	rm -f $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
 	rm -f $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/$(NAME).svg
 	update-desktop-database $(DESTDIR)$(PREFIX)/share/applications
 

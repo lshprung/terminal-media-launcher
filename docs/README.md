@@ -29,6 +29,16 @@ To uninstall these files:
 sudo make uninstall
 ```
 
+### Create Desktop Entry
+
+If tml is installed (see above), a Desktop Entry can be created on Linux by running:
+
+```
+sudo make desktop-entry
+```
+
+This will create a desktop entry at `/usr/local/share/applications/tml.desktop`.
+
 ## Screenshots
 
 ![screenshot 1](screenshot1.png)
