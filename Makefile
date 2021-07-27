@@ -42,19 +42,19 @@ ifneq ($(OS),Windows_NT)
 
 .PHONY: desktop-entry
 desktop-entry:
+	echo "[Desktop Entry]" > icon/$(NAME).desktop
+	echo "Type=Application" >> icon/$(NAME).desktop
+	echo "Name=$(NAME)" >> icon/$(NAME).desktop
+	echo "Comment=Terminal Media Launcher" >> icon/$(NAME).desktop
+	echo "Path=$(DESTDIR)$(PREFIX)/bin" >> icon/$(NAME).desktop
+	echo "Exec=$(NAME)" >> icon/$(NAME).desktop
+	echo "Icon=$(NAME)" >> icon/$(NAME).desktop
+	echo "Terminal=true" >> icon/$(NAME).desktop
+	echo "Categories=Utility" >> icon/$(NAME).desktop
 	mkdir -p $(DESTDIR)$(PREFIX)/share/applications
-	echo "[Desktop Entry]" > $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
-	echo "Type=Application" >> $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
-	echo "Name=$(NAME)" >> $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
-	echo "Comment=Terminal Media Launcher" >> $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
-	echo "Path=$(DESTDIR)$(PREFIX)/bin" >> $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
-	echo "Exec=$(NAME)" >> $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
-	echo "Icon=$(NAME)" >> $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
-	echo "Terminal=true" >> $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
-	echo "Categories=Utility" >> $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
 	mkdir -p $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps
 	cp -i icon/icon.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/tml.svg
-	desktop-file-install --dir=$(DESTDIR)$(PREFIX)/share/applications $(DESTDIR)$(PREFIX)/share/applications/$(NAME).desktop
+	desktop-file-install --dir=$(DESTDIR)$(PREFIX)/share/applications icon/$(NAME).desktop
 	update-desktop-database $(DESTDIR)$(PREFIX)/share/applications
 
 .PHONY: install
