@@ -16,10 +16,11 @@ void launch(){
 	file[0] = '\0';
 
 	if(!(strcmp(program, "./"))){
+		strcat(file, "/C ");
 		strcat(file, "\"");
 		strcat(file, path);
 		strcat(file, "\"");
-		ShellExecute(NULL, NULL, file, NULL, NULL, SW_SHOW);
+		ShellExecute(NULL, NULL, "cmd.exe", file, NULL, SW_HIDE);
 	}
 
 	else{
