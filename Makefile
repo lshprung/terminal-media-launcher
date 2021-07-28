@@ -6,8 +6,11 @@ PREFIX = /usr/local
 
 ifeq ($(OS),Windows_NT)
 
-$(NAME): cache.o draw.o read_cfg.o group.o entry.o windows/cache.o windows/draw.o windows/read_cfg.o
-	$(CC) -o $(NAME) cache.o draw.o read_cfg.o group.o entry.o windows/cache.o windows/draw.o windows/read_cfg.o $(LIBS)
+$(NAME): cache.o draw.o read_cfg.o group.o entry.o windows/cache.o windows/draw.o windows/read_cfg.o windows/make_icon.res
+	$(CC) -o $(NAME) cache.o draw.o read_cfg.o group.o entry.o windows/cache.o windows/draw.o windows/read_cfg.o windows/make_icon.res $(LIBS)
+
+windows/make_icon.res: windows/make_icon.rc
+	windres windows/make_icon.rc -O coff -o windows/make_icon.res
 
 windows/draw.o: windows/draw.c include/draw.h 
 windows/read_cfg.o: windows/read_cfg.c include/read_cfg.h 
@@ -35,6 +38,7 @@ clean:
 	rm -f *.o
 	rm -f unix/*.o
 	rm -f windows/*.o
+	rm -f windows/*.res
 	rm -f $(NAME)
 	rm -f $(NAME).exe
 

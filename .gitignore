@@ -11,3 +11,4 @@
 !unix/*.c
 !windows
 !windows/*.c
+!windows/make_icon.rc
