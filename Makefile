@@ -9,7 +9,7 @@ ifeq ($(OS),Windows_NT)
 $(NAME): cache.o draw.o read_cfg.o group.o entry.o windows/cache.o windows/draw.o windows/read_cfg.o windows/make_icon.res
 	$(CC) -o $(NAME) cache.o draw.o read_cfg.o group.o entry.o windows/cache.o windows/draw.o windows/read_cfg.o windows/make_icon.res $(LIBS)
 
-windows/make_icon.res: windows/make_icon.rc
+windows/make_icon.res: icon/icon.ico windows/make_icon.rc
 	windres windows/make_icon.rc -O coff -o windows/make_icon.res
 
 windows/draw.o: windows/draw.c include/draw.h 
