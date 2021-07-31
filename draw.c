@@ -15,11 +15,13 @@
 #include "include/entry.h"
 #include "include/group.h"
 #include "include/read_cfg.h"
-#define MAX_LEN 6
+#define FLAG_COUNT 3
 #define GAP_SIZE 1
+#define MAX_LEN 6
 #define WIDTH (getmaxx(stdscr)) //width of the entire term
 #define HEIGHT (getmaxy(stdscr)) //height of the entire term
 
+bool *handle_args(int argc, char **argv, char **cfg_path);
 void print_help(char *exec_name);
 void update_display(bool resize);
 void draw_title();
@@ -45,25 +47,18 @@ int g_offset = 0;
 int e_offset = 0;
 
 int main(int argc, char **argv){
-	char cfg_path[BUF_LEN];
+	bool *flags_set = NULL;
+	char *cfg_path = malloc(sizeof(char) * BUF_LEN);
 	int input;
 	char full_command[BUF_LEN]; //what will be executed
 	int prev_width;             //used to check if the window was resized
 	int prev_height;            //used to check if the window was resized
 	int i;
 
-	//if passed the help flag, print help message and exit
-	if(argc > 1 && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))){
-		print_help(argv[0]);
-		return 0;
-	}
-
-	//if passed the quiet flag, disable output
-	if(argc > 1 && (!strcmp(argv[1], "-q") || !strcmp(argv[1], "--quiet"))) freopen("/dev/null", "w", stdout);
-
-	//if a config path was given as an argument, set it accordingly
-	if(argc > 2 && (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cfg_path"))) strcpy(cfg_path, argv[2]);
-	else strcpy(cfg_path, find_config());
+	flags_set = handle_args(argc, argv, &cfg_path);
+	if(flags_set[1]) return(0);                         //exit if help flag was passed
+	if(flags_set[2]) freopen("/dev/null", "w", stdout); //turn off output if quiet flag was passed
+	if(!flags_set[0]) strcpy(cfg_path, find_config());  //find_config if not config flag was passed
 
 	//Fill Groups
 	cfg_interp(cfg_path); //read the contents of the cfg file
@@ -176,6 +171,43 @@ int main(int argc, char **argv){
 	save_to_cache(g_hover, e_hover, true_hover, cfg_path);
 
 	return 0;
+}
+
+bool *handle_args(int argc, char **argv, char **cfg_path){
+	//create bool array with set flags
+	// 0 -> -c|--cfg_path
+	// 1 -> -h|--help
+	// 2 -> -q|--quiet
+
+	bool *flags_set = calloc(FLAG_COUNT, sizeof(bool));
+	int i;
+
+	for(i = 1; i < argc; ++i){
+		//-c
+		if(!strcmp(argv[i], "-c") || !strcmp(argv[i], "--cfg_path")){
+			++i;
+			if(i < argc){
+				strcpy(*cfg_path, argv[i]);
+				flags_set[0] = true;
+			}
+			continue;
+		}
+		
+		//-h
+		if(!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")){
+			print_help(argv[0]);
+			flags_set[1] = true;
+			break; //break rather than continue; program will quit if a help message is requested
+		}
+
+		//-q
+		if(!strcmp(argv[i], "-q") || !strcmp(argv[i], "--quiet")){
+			flags_set[2] = true;
+			continue;
+		}
+	}
+
+	return flags_set;
 }
 
 void print_help(char *exec_name){
