@@ -1,5 +1,6 @@
 *
 !.gitignore
+!tasklist.md
 !*.c
 !docs
 !docs/*
