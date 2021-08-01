@@ -6,7 +6,7 @@
 
 ### Completed
 
-- If giving invalid config path for -c|--cfg\_path flag, program crashes
+- If giving invalid config path for -c|--cfg\_path flag, program crashes - Fixed in commit `77798c73c5ce16ef355436816514d703dfc84464`
 
 ---
 
