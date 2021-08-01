@@ -175,7 +175,7 @@ int main(int argc, char **argv){
 
 bool *handle_args(int argc, char **argv, char **cfg_path){
 	//create bool array with set flags
-	// 0 -> -c|--cfg_path
+	// 0 -> -c|--config
 	// 1 -> -h|--help
 	// 2 -> -q|--quiet
 
@@ -184,7 +184,7 @@ bool *handle_args(int argc, char **argv, char **cfg_path){
 
 	for(i = 1; i < argc; ++i){
 		//-c
-		if(!strcmp(argv[i], "-c") || !strcmp(argv[i], "--cfg_path")){
+		if(!strcmp(argv[i], "-c") || !strcmp(argv[i], "--config")){
 			++i;
 			if(i < argc){
 				strcpy(*cfg_path, argv[i]);
