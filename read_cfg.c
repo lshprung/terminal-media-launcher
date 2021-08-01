@@ -32,7 +32,8 @@ bool hr = false;
 //turn foldCase (insensitive case searching) on or off; On by default
 bool fold_case = true;
 
-void cfg_interp(char *path){
+//return false if invalid path
+bool cfg_interp(char *path){
 	FILE *fp;
 	char buffer[BUF_LEN];
 	GROUP **g;
@@ -43,7 +44,10 @@ void cfg_interp(char *path){
 	int j;
 
 	fp = fopen(path, "r");
-	assert(fp != NULL);
+	if(fp == NULL){
+		printf("Error: Invalid Configuration Path \"%s\"\n", path);
+		return false;
+	}
 
 	//build the options array
 	char **options = malloc(sizeof(char *) * OPTION_CNT);
@@ -87,7 +91,7 @@ void cfg_interp(char *path){
 	*/
 
 	fclose(fp);
-	return;
+	return true;
 }
 
 bool get_sort(){

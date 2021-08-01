@@ -3,7 +3,7 @@
 
 #define BUF_LEN 1024
 
-void cfg_interp(char *path);
+bool cfg_interp(char *path);
 bool get_sort();
 bool get_case_sensitivity();
 void refer_to_doc();

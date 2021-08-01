@@ -61,7 +61,11 @@ int main(int argc, char **argv){
 	if(!flags_set[0]) strcpy(cfg_path, find_config());  //find_config if not config flag was passed
 
 	//Fill Groups
-	cfg_interp(cfg_path); //read the contents of the cfg file
+	//read the contents of the cfg file; print help message if invalid
+	if(!cfg_interp(cfg_path)){
+		print_help(argv[0]);
+		return 0;
+	}
 
 	//Remove Empty Groups from the Array
 	clean_groups();

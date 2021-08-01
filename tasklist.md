@@ -2,11 +2,11 @@
 
 ## FIXME
 
-- **If giving invalid config path for -c|--cfg\_path flag, program crashes**
-	- Should give a formal error message
 - **On Windows, running without alias option turned on in cfg causes instability**
 
 ### Completed
+
+- If giving invalid config path for -c|--cfg\_path flag, program crashes
 
 ---
 
