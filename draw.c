@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 //Windows/Unix Compatability
@@ -54,6 +55,8 @@ int main(int argc, char **argv){
 	int prev_width;             //used to check if the window was resized
 	int prev_height;            //used to check if the window was resized
 	int i;
+
+	srand(time(NULL));
 
 	flags_set = handle_args(argc, argv, &cfg_path);
 	if(flags_set[1]) return(0);                         //exit if help flag was passed
@@ -142,6 +145,11 @@ int main(int argc, char **argv){
 			case KEY_NPAGE:
 			//case KEY_SDOWN:
 				trav_col((true_hover ? e_count : g_count)-1);
+				break;
+
+			case KEY_F(3):
+			//jump to random group/entry
+				trav_col(rand() % (true_hover ? e_count : g_count));
 				break;
 
 			case KEY_F(5):

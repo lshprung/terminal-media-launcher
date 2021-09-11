@@ -20,3 +20,5 @@
 ### Completed
 
 - Create a task list to keep track of ideas and bugs - Added in commit `c21fbd4582ef016c4b195bfa7db8727914befb15`
+- Add "random" key to jump to a random group/entry
+	- Added as F3
