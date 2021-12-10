@@ -20,11 +20,11 @@ char *get_cache_path(bool create){
 
 	//if create is asserted, build the path to the file
 	if(create){
-		sprintf(path, "%s%ctml%c", appdata, sep, sep);
+		sprintf(path, "%s%cterminal-media-launcher%c", appdata, sep, sep);
 		mkdir(path);
 	}
 
-	sprintf(path, "%s%ctml%ccache.bin", appdata, sep, sep);
+	sprintf(path, "%s%cterminal-media-launcher%ccache.bin", appdata, sep, sep);
 
 	return path;
 }

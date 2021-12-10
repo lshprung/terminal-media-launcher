@@ -10,13 +10,13 @@ Compiling on Windows requires access to the MinGW toolchain. The easiest way to 
 
 4. `pacman -S git mingw-w64-x86_64-gcc mingw-w64-x86_64-ncurses make` to install necessary packages
 
-5. `git clone https://github.com/lshprung/tml` to clone the repository
+5. `git clone https://github.com/lshprung/terminal-media-launcher` to clone the repository
 
-6. `cd tml` to enter the repository
+6. `cd terminal-media-launcher` to enter the repository
 
 7. `make` to compile
 
-If you did everything correctly, compilation should succeed. Open File Explorer in the current directory (can be done by running `explorer .` in MSYS2 terminal) and double click the generated executable (should be called tml.exe)
+If you did everything correctly, compilation should succeed. Open File Explorer in the current directory (can be done by running `explorer .` in MSYS2 terminal) and double click the generated executable (should be called terminal-media-launcher.exe)
 
 ## Resolving Missing .dll Files
 

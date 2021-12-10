@@ -103,7 +103,7 @@ bool get_case_sensitivity(){
 }
 
 void refer_to_doc(){
-	printf("Refer to documentation on how to create tml config file\n");
+	printf("Refer to documentation on how to create terminal-media-launcher config file\n");
 	return;
 }
 

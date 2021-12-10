@@ -1,5 +1,5 @@
 CC = gcc
-NAME = tml
+NAME = terminal-media-launcher
 LIBS = -lncurses
 PREFIX = /usr/local
 
@@ -57,18 +57,18 @@ desktop-entry:
 	echo "Categories=Utility" >> icon/$(NAME).desktop
 	mkdir -p $(DESTDIR)$(PREFIX)/share/applications
 	mkdir -p $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps
-	cp -i icon/icon.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/tml.svg
+	cp icon/icon.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/$(NAME).svg
 	desktop-file-install --dir=$(DESTDIR)$(PREFIX)/share/applications icon/$(NAME).desktop
 	update-desktop-database $(DESTDIR)$(PREFIX)/share/applications
 
 .PHONY: install
 install:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	cp -i $(NAME) $(DESTDIR)$(PREFIX)/bin/$(NAME)
+	cp $(NAME) $(DESTDIR)$(PREFIX)/bin/$(NAME)
 	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
-	cp -i docs/$(NAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(NAME).1.gz
+	cp docs/$(NAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(NAME).1.gz
 	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man5
-	cp -i docs/$(NAME)-config.5.gz $(DESTDIR)$(PREFIX)/share/man/man5/$(NAME)-config.5.gz
+	cp docs/$(NAME)-config.5.gz $(DESTDIR)$(PREFIX)/share/man/man5/$(NAME)-config.5.gz
 
 .PHONY: uninstall
 uninstall:
