@@ -55,20 +55,20 @@ desktop-entry:
 	echo "Icon=$(NAME)" >> icon/$(NAME).desktop
 	echo "Terminal=true" >> icon/$(NAME).desktop
 	echo "Categories=Utility" >> icon/$(NAME).desktop
-	mkdir -p $(DESTDIR)$(PREFIX)/share/applications
-	mkdir -p $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps
-	cp icon/icon.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/$(NAME).svg
+	install -d $(DESTDIR)$(PREFIX)/share/applications
+	install -d $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps
+	install icon/icon.svg $(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/$(NAME).svg
 	desktop-file-install --dir=$(DESTDIR)$(PREFIX)/share/applications icon/$(NAME).desktop
 	update-desktop-database $(DESTDIR)$(PREFIX)/share/applications
 
 .PHONY: install
 install:
-	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	cp $(NAME) $(DESTDIR)$(PREFIX)/bin/$(NAME)
-	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
-	cp docs/$(NAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(NAME).1.gz
-	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man5
-	cp docs/$(NAME)-config.5.gz $(DESTDIR)$(PREFIX)/share/man/man5/$(NAME)-config.5.gz
+	install -d $(DESTDIR)$(PREFIX)/bin
+	install $(NAME) $(DESTDIR)$(PREFIX)/bin/$(NAME)
+	install -d $(DESTDIR)$(PREFIX)/share/man/man1
+	install docs/$(NAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(NAME).1.gz
+	install -d $(DESTDIR)$(PREFIX)/share/man/man5
+	install docs/$(NAME)-config.5.gz $(DESTDIR)$(PREFIX)/share/man/man5/$(NAME)-config.5.gz
 
 .PHONY: uninstall
 uninstall:
