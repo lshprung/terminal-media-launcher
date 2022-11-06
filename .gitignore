@@ -1,15 +1,8 @@
 *
 !.gitignore
-!tasklist.md
-!*.c
 !docs
 !docs/*
 !icon
 !icon/icon*
-!include
-!include/*.h
-!unix
-!unix/*.c
-!windows
-!windows/*.c
-!windows/make_icon.rc
+!src
+!src/*
