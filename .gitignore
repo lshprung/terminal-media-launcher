@@ -1,13 +1,7 @@
 *
 !.gitignore
 
-!AUTHORS
-!ChangeLog
-!COPYING
-!INSTALL
 !Makefile.am
-!NEWS
-!README
 
 !configure.ac
 !docs
@@ -15,8 +9,8 @@
 !icon
 !icon/icon*
 !src
-!src/Makefile.am
 !src/*.c
+!src/Makefile.am
 !src/include
 !src/include/*.h
 !src/unix/

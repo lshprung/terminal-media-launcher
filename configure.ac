@@ -1,6 +1,6 @@
 AC_INIT([terminal-media-launcher], [0.1], [lshprung@example.com])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 
 AC_PROG_CC
 
