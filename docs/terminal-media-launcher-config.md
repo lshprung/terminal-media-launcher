@@ -1,6 +1,6 @@
 ## Introduction
 
-**config** specifies settings for Terminal Media Launcher, including preferences, groups, entries, and file locations. Each line of `config` is read by tml unless the line is empty or the line begins with a '#'. tml can automatically generate a configuration file if no such file is found. An automatically  generated  configuration file will create groups for Music, Pictures, and Videos, and add entries to each group from the respective directory in the user's home directory. It is highly recommended that the user edit the configuration file manually.
+**config** specifies settings for Terminal Media Launcher, including preferences, groups, entries, and file locations. Each line of `config` is read by terminal-media-launcher unless the line is empty or the line begins with a '#'. terminal-media-launcher can automatically generate a configuration file if no such file is found. An automatically  generated  configuration file will create groups for Music, Pictures, and Videos, and add entries to each group from the respective directory in the user's home directory. It is highly recommended that the user edit the configuration file manually.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@
 
 ## Creating a Group <a name="CreatingAGroup"></a>
 
-tml will not work without any groups, so you will need to know how to create a group.
+terminal-media-launcher will not work without any groups, so you will need to know how to create a group.
 
 ### addGroup
 
@@ -37,7 +37,7 @@ tml will not work without any groups, so you will need to know how to create a g
 
 - **setLauncher** *group* */path/to/launcher*
 
-`setLauncher` will set a group's launching application. If no launching application is specified for a group, tml will treat each entry in that group as an executable file. If there is a space in the path to the launching application, it must be written in quotes (ex. "/usr/bin/my launcher"). *Keep in mind that the path to the launching application should be absolute*.
+`setLauncher` will set a group's launching application. If no launching application is specified for a group, terminal-media-launcher will treat each entry in that group as an executable file. If there is a space in the path to the launching application, it must be written in quotes (ex. "/usr/bin/my launcher"). *Keep in mind that the path to the launching application should be absolute*.
 
 ### setLauncherRaw
 
@@ -53,7 +53,7 @@ tml will not work without any groups, so you will need to know how to create a g
 
 ## Adding Entries <a name=AddingEntries></a>
 
-tml will hide empty groups, so you will need to know how to add entries to a group.
+terminal-media-launcher will hide empty groups, so you will need to know how to add entries to a group.
 
 ### add
 
@@ -118,7 +118,7 @@ If any of the following settings are specified, they should be at the top of the
 
 - **foldCase** *on/off*
 
-Entering any non-traversal input in tml can be used to jump to a group or entry. For instance, hitting 'f' on the keyboard will jump the cursor to the next group or entry that starts with an 'f'. *foldCase* determines whether or not this functionality is **case insensitive (on)** or **case sensitive (off)**. *foldCase* is turned on by default.
+Entering any non-traversal input in terminal-media-launcher can be used to jump to a group or entry. For instance, hitting 'f' on the keyboard will jump the cursor to the next group or entry that starts with an 'f'. *foldCase* determines whether or not this functionality is **case insensitive (on)** or **case sensitive (off)**. *foldCase* is turned on by default.
 
 ### sort
 
