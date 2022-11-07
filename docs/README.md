@@ -9,8 +9,20 @@ For Windows instructions, see [here](windows_compile_instructions.md)
 terminal-media-launcher can be compiled on any system with make, gcc, and the ncurses library (libncurses-dev) installed. It can be compiled and installed on any Linux distribution, and can also be compiled and run on Windows 10. To compile and run terminal-media-launcher:
 
 1. Clone the repository
-2. Run `make` in the directory the repository was cloned into. This will create a file called `terminal-media-launcher`
-3. `./terminal-media-launcher` to run the program
+2. Run the commands below in the directory the repository was cloned into. This will build the binary `src/terminal-media-launcher`
+
+```
+$ autoreconf
+$ automake --add-missing
+$ ./configure
+$ make
+```
+
+3. To run the program:
+
+```
+$ src/terminal-media-launcher
+```
 
 Note that terminal-media-launcher will not run until you have created a configuration file.
 
