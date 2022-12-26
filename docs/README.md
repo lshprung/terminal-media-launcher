@@ -12,8 +12,6 @@ terminal-media-launcher can be compiled on any system with make, gcc, and the nc
 2. Run the commands below in the directory the repository was cloned into. This will build the binary `src/terminal-media-launcher`
 
 ```
-$ autoreconf
-$ automake --add-missing
 $ ./configure
 $ make
 ```
