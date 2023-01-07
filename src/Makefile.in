@@ -99,14 +99,18 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_terminal_media_launcher_OBJECTS = cache.$(OBJEXT) draw.$(OBJEXT) \
-	read_cfg.$(OBJEXT) group.$(OBJEXT) entry.$(OBJEXT) \
-	unix/cache.$(OBJEXT) unix/draw.$(OBJEXT) \
-	unix/read_cfg.$(OBJEXT)
+am_terminal_media_launcher_OBJECTS =  \
+	terminal_media_launcher-cache.$(OBJEXT) \
+	terminal_media_launcher-draw.$(OBJEXT) \
+	terminal_media_launcher-read_cfg.$(OBJEXT) \
+	terminal_media_launcher-group.$(OBJEXT) \
+	terminal_media_launcher-entry.$(OBJEXT) \
+	unix/terminal_media_launcher-cache.$(OBJEXT) \
+	unix/terminal_media_launcher-draw.$(OBJEXT) \
+	unix/terminal_media_launcher-read_cfg.$(OBJEXT)
 terminal_media_launcher_OBJECTS =  \
 	$(am_terminal_media_launcher_OBJECTS)
-am__DEPENDENCIES_1 =
-terminal_media_launcher_DEPENDENCIES = $(am__DEPENDENCIES_1)
+terminal_media_launcher_DEPENDENCIES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -122,11 +126,19 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/cache.Po ./$(DEPDIR)/draw.Po \
-	./$(DEPDIR)/entry.Po ./$(DEPDIR)/group.Po \
-	./$(DEPDIR)/read_cfg.Po unix/$(DEPDIR)/cache.Po \
-	unix/$(DEPDIR)/draw.Po unix/$(DEPDIR)/read_cfg.Po
+am__depfiles_remade = ./$(DEPDIR)/terminal_media_launcher-cache.Po \
+	./$(DEPDIR)/terminal_media_launcher-draw.Po \
+	./$(DEPDIR)/terminal_media_launcher-entry.Po \
+	./$(DEPDIR)/terminal_media_launcher-group.Po \
+	./$(DEPDIR)/terminal_media_launcher-read_cfg.Po \
+	unix/$(DEPDIR)/terminal_media_launcher-cache.Po \
+	unix/$(DEPDIR)/terminal_media_launcher-draw.Po \
+	unix/$(DEPDIR)/terminal_media_launcher-read_cfg.Po
 am__mv = mv -f
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_@AM_V@)
@@ -179,6 +191,8 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CURSES_CFLAGS = @CURSES_CFLAGS@
+CURSES_LIBS = @CURSES_LIBS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -195,7 +209,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
-LIBS = -lncurses
+LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
@@ -208,6 +222,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -257,7 +274,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = subdir-objects
 terminal_media_launcher_SOURCES = cache.c draw.c read_cfg.c group.c entry.c unix/cache.c unix/draw.c unix/read_cfg.c
-terminal_media_launcher_LDADD = $(LIBS)
+terminal_media_launcher_LDADD = @CURSES_LIBS@
+terminal_media_launcher_CPPFLAGS = @CURSES_CFLAGS@
 all: all-am
 
 .SUFFIXES:
@@ -339,11 +357,11 @@ unix/$(am__dirstamp):
 unix/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) unix/$(DEPDIR)
 	@: > unix/$(DEPDIR)/$(am__dirstamp)
-unix/cache.$(OBJEXT): unix/$(am__dirstamp) \
+unix/terminal_media_launcher-cache.$(OBJEXT): unix/$(am__dirstamp) \
 	unix/$(DEPDIR)/$(am__dirstamp)
-unix/draw.$(OBJEXT): unix/$(am__dirstamp) \
+unix/terminal_media_launcher-draw.$(OBJEXT): unix/$(am__dirstamp) \
 	unix/$(DEPDIR)/$(am__dirstamp)
-unix/read_cfg.$(OBJEXT): unix/$(am__dirstamp) \
+unix/terminal_media_launcher-read_cfg.$(OBJEXT): unix/$(am__dirstamp) \
 	unix/$(DEPDIR)/$(am__dirstamp)
 
 terminal_media_launcher$(EXEEXT): $(terminal_media_launcher_OBJECTS) $(terminal_media_launcher_DEPENDENCIES) $(EXTRA_terminal_media_launcher_DEPENDENCIES) 
@@ -357,14 +375,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/draw.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/entry.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/read_cfg.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@unix/$(DEPDIR)/cache.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@unix/$(DEPDIR)/draw.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@unix/$(DEPDIR)/read_cfg.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/terminal_media_launcher-cache.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/terminal_media_launcher-draw.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/terminal_media_launcher-entry.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/terminal_media_launcher-group.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/terminal_media_launcher-read_cfg.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@unix/$(DEPDIR)/terminal_media_launcher-cache.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@unix/$(DEPDIR)/terminal_media_launcher-draw.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@unix/$(DEPDIR)/terminal_media_launcher-read_cfg.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -387,6 +405,118 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+terminal_media_launcher-cache.o: cache.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal_media_launcher-cache.o -MD -MP -MF $(DEPDIR)/terminal_media_launcher-cache.Tpo -c -o terminal_media_launcher-cache.o `test -f 'cache.c' || echo '$(srcdir)/'`cache.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/terminal_media_launcher-cache.Tpo $(DEPDIR)/terminal_media_launcher-cache.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='cache.c' object='terminal_media_launcher-cache.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal_media_launcher-cache.o `test -f 'cache.c' || echo '$(srcdir)/'`cache.c
+
+terminal_media_launcher-cache.obj: cache.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal_media_launcher-cache.obj -MD -MP -MF $(DEPDIR)/terminal_media_launcher-cache.Tpo -c -o terminal_media_launcher-cache.obj `if test -f 'cache.c'; then $(CYGPATH_W) 'cache.c'; else $(CYGPATH_W) '$(srcdir)/cache.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/terminal_media_launcher-cache.Tpo $(DEPDIR)/terminal_media_launcher-cache.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='cache.c' object='terminal_media_launcher-cache.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal_media_launcher-cache.obj `if test -f 'cache.c'; then $(CYGPATH_W) 'cache.c'; else $(CYGPATH_W) '$(srcdir)/cache.c'; fi`
+
+terminal_media_launcher-draw.o: draw.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal_media_launcher-draw.o -MD -MP -MF $(DEPDIR)/terminal_media_launcher-draw.Tpo -c -o terminal_media_launcher-draw.o `test -f 'draw.c' || echo '$(srcdir)/'`draw.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/terminal_media_launcher-draw.Tpo $(DEPDIR)/terminal_media_launcher-draw.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='draw.c' object='terminal_media_launcher-draw.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal_media_launcher-draw.o `test -f 'draw.c' || echo '$(srcdir)/'`draw.c
+
+terminal_media_launcher-draw.obj: draw.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal_media_launcher-draw.obj -MD -MP -MF $(DEPDIR)/terminal_media_launcher-draw.Tpo -c -o terminal_media_launcher-draw.obj `if test -f 'draw.c'; then $(CYGPATH_W) 'draw.c'; else $(CYGPATH_W) '$(srcdir)/draw.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/terminal_media_launcher-draw.Tpo $(DEPDIR)/terminal_media_launcher-draw.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='draw.c' object='terminal_media_launcher-draw.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal_media_launcher-draw.obj `if test -f 'draw.c'; then $(CYGPATH_W) 'draw.c'; else $(CYGPATH_W) '$(srcdir)/draw.c'; fi`
+
+terminal_media_launcher-read_cfg.o: read_cfg.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal_media_launcher-read_cfg.o -MD -MP -MF $(DEPDIR)/terminal_media_launcher-read_cfg.Tpo -c -o terminal_media_launcher-read_cfg.o `test -f 'read_cfg.c' || echo '$(srcdir)/'`read_cfg.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/terminal_media_launcher-read_cfg.Tpo $(DEPDIR)/terminal_media_launcher-read_cfg.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='read_cfg.c' object='terminal_media_launcher-read_cfg.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal_media_launcher-read_cfg.o `test -f 'read_cfg.c' || echo '$(srcdir)/'`read_cfg.c
+
+terminal_media_launcher-read_cfg.obj: read_cfg.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal_media_launcher-read_cfg.obj -MD -MP -MF $(DEPDIR)/terminal_media_launcher-read_cfg.Tpo -c -o terminal_media_launcher-read_cfg.obj `if test -f 'read_cfg.c'; then $(CYGPATH_W) 'read_cfg.c'; else $(CYGPATH_W) '$(srcdir)/read_cfg.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/terminal_media_launcher-read_cfg.Tpo $(DEPDIR)/terminal_media_launcher-read_cfg.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='read_cfg.c' object='terminal_media_launcher-read_cfg.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal_media_launcher-read_cfg.obj `if test -f 'read_cfg.c'; then $(CYGPATH_W) 'read_cfg.c'; else $(CYGPATH_W) '$(srcdir)/read_cfg.c'; fi`
+
+terminal_media_launcher-group.o: group.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal_media_launcher-group.o -MD -MP -MF $(DEPDIR)/terminal_media_launcher-group.Tpo -c -o terminal_media_launcher-group.o `test -f 'group.c' || echo '$(srcdir)/'`group.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/terminal_media_launcher-group.Tpo $(DEPDIR)/terminal_media_launcher-group.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='group.c' object='terminal_media_launcher-group.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal_media_launcher-group.o `test -f 'group.c' || echo '$(srcdir)/'`group.c
+
+terminal_media_launcher-group.obj: group.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal_media_launcher-group.obj -MD -MP -MF $(DEPDIR)/terminal_media_launcher-group.Tpo -c -o terminal_media_launcher-group.obj `if test -f 'group.c'; then $(CYGPATH_W) 'group.c'; else $(CYGPATH_W) '$(srcdir)/group.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/terminal_media_launcher-group.Tpo $(DEPDIR)/terminal_media_launcher-group.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='group.c' object='terminal_media_launcher-group.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal_media_launcher-group.obj `if test -f 'group.c'; then $(CYGPATH_W) 'group.c'; else $(CYGPATH_W) '$(srcdir)/group.c'; fi`
+
+terminal_media_launcher-entry.o: entry.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal_media_launcher-entry.o -MD -MP -MF $(DEPDIR)/terminal_media_launcher-entry.Tpo -c -o terminal_media_launcher-entry.o `test -f 'entry.c' || echo '$(srcdir)/'`entry.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/terminal_media_launcher-entry.Tpo $(DEPDIR)/terminal_media_launcher-entry.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='entry.c' object='terminal_media_launcher-entry.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal_media_launcher-entry.o `test -f 'entry.c' || echo '$(srcdir)/'`entry.c
+
+terminal_media_launcher-entry.obj: entry.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT terminal_media_launcher-entry.obj -MD -MP -MF $(DEPDIR)/terminal_media_launcher-entry.Tpo -c -o terminal_media_launcher-entry.obj `if test -f 'entry.c'; then $(CYGPATH_W) 'entry.c'; else $(CYGPATH_W) '$(srcdir)/entry.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/terminal_media_launcher-entry.Tpo $(DEPDIR)/terminal_media_launcher-entry.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='entry.c' object='terminal_media_launcher-entry.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o terminal_media_launcher-entry.obj `if test -f 'entry.c'; then $(CYGPATH_W) 'entry.c'; else $(CYGPATH_W) '$(srcdir)/entry.c'; fi`
+
+unix/terminal_media_launcher-cache.o: unix/cache.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT unix/terminal_media_launcher-cache.o -MD -MP -MF unix/$(DEPDIR)/terminal_media_launcher-cache.Tpo -c -o unix/terminal_media_launcher-cache.o `test -f 'unix/cache.c' || echo '$(srcdir)/'`unix/cache.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) unix/$(DEPDIR)/terminal_media_launcher-cache.Tpo unix/$(DEPDIR)/terminal_media_launcher-cache.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='unix/cache.c' object='unix/terminal_media_launcher-cache.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o unix/terminal_media_launcher-cache.o `test -f 'unix/cache.c' || echo '$(srcdir)/'`unix/cache.c
+
+unix/terminal_media_launcher-cache.obj: unix/cache.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT unix/terminal_media_launcher-cache.obj -MD -MP -MF unix/$(DEPDIR)/terminal_media_launcher-cache.Tpo -c -o unix/terminal_media_launcher-cache.obj `if test -f 'unix/cache.c'; then $(CYGPATH_W) 'unix/cache.c'; else $(CYGPATH_W) '$(srcdir)/unix/cache.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) unix/$(DEPDIR)/terminal_media_launcher-cache.Tpo unix/$(DEPDIR)/terminal_media_launcher-cache.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='unix/cache.c' object='unix/terminal_media_launcher-cache.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o unix/terminal_media_launcher-cache.obj `if test -f 'unix/cache.c'; then $(CYGPATH_W) 'unix/cache.c'; else $(CYGPATH_W) '$(srcdir)/unix/cache.c'; fi`
+
+unix/terminal_media_launcher-draw.o: unix/draw.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT unix/terminal_media_launcher-draw.o -MD -MP -MF unix/$(DEPDIR)/terminal_media_launcher-draw.Tpo -c -o unix/terminal_media_launcher-draw.o `test -f 'unix/draw.c' || echo '$(srcdir)/'`unix/draw.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) unix/$(DEPDIR)/terminal_media_launcher-draw.Tpo unix/$(DEPDIR)/terminal_media_launcher-draw.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='unix/draw.c' object='unix/terminal_media_launcher-draw.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o unix/terminal_media_launcher-draw.o `test -f 'unix/draw.c' || echo '$(srcdir)/'`unix/draw.c
+
+unix/terminal_media_launcher-draw.obj: unix/draw.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT unix/terminal_media_launcher-draw.obj -MD -MP -MF unix/$(DEPDIR)/terminal_media_launcher-draw.Tpo -c -o unix/terminal_media_launcher-draw.obj `if test -f 'unix/draw.c'; then $(CYGPATH_W) 'unix/draw.c'; else $(CYGPATH_W) '$(srcdir)/unix/draw.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) unix/$(DEPDIR)/terminal_media_launcher-draw.Tpo unix/$(DEPDIR)/terminal_media_launcher-draw.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='unix/draw.c' object='unix/terminal_media_launcher-draw.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o unix/terminal_media_launcher-draw.obj `if test -f 'unix/draw.c'; then $(CYGPATH_W) 'unix/draw.c'; else $(CYGPATH_W) '$(srcdir)/unix/draw.c'; fi`
+
+unix/terminal_media_launcher-read_cfg.o: unix/read_cfg.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT unix/terminal_media_launcher-read_cfg.o -MD -MP -MF unix/$(DEPDIR)/terminal_media_launcher-read_cfg.Tpo -c -o unix/terminal_media_launcher-read_cfg.o `test -f 'unix/read_cfg.c' || echo '$(srcdir)/'`unix/read_cfg.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) unix/$(DEPDIR)/terminal_media_launcher-read_cfg.Tpo unix/$(DEPDIR)/terminal_media_launcher-read_cfg.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='unix/read_cfg.c' object='unix/terminal_media_launcher-read_cfg.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o unix/terminal_media_launcher-read_cfg.o `test -f 'unix/read_cfg.c' || echo '$(srcdir)/'`unix/read_cfg.c
+
+unix/terminal_media_launcher-read_cfg.obj: unix/read_cfg.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT unix/terminal_media_launcher-read_cfg.obj -MD -MP -MF unix/$(DEPDIR)/terminal_media_launcher-read_cfg.Tpo -c -o unix/terminal_media_launcher-read_cfg.obj `if test -f 'unix/read_cfg.c'; then $(CYGPATH_W) 'unix/read_cfg.c'; else $(CYGPATH_W) '$(srcdir)/unix/read_cfg.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) unix/$(DEPDIR)/terminal_media_launcher-read_cfg.Tpo unix/$(DEPDIR)/terminal_media_launcher-read_cfg.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='unix/read_cfg.c' object='unix/terminal_media_launcher-read_cfg.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(terminal_media_launcher_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o unix/terminal_media_launcher-read_cfg.obj `if test -f 'unix/read_cfg.c'; then $(CYGPATH_W) 'unix/read_cfg.c'; else $(CYGPATH_W) '$(srcdir)/unix/read_cfg.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -517,14 +647,14 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/cache.Po
-	-rm -f ./$(DEPDIR)/draw.Po
-	-rm -f ./$(DEPDIR)/entry.Po
-	-rm -f ./$(DEPDIR)/group.Po
-	-rm -f ./$(DEPDIR)/read_cfg.Po
-	-rm -f unix/$(DEPDIR)/cache.Po
-	-rm -f unix/$(DEPDIR)/draw.Po
-	-rm -f unix/$(DEPDIR)/read_cfg.Po
+		-rm -f ./$(DEPDIR)/terminal_media_launcher-cache.Po
+	-rm -f ./$(DEPDIR)/terminal_media_launcher-draw.Po
+	-rm -f ./$(DEPDIR)/terminal_media_launcher-entry.Po
+	-rm -f ./$(DEPDIR)/terminal_media_launcher-group.Po
+	-rm -f ./$(DEPDIR)/terminal_media_launcher-read_cfg.Po
+	-rm -f unix/$(DEPDIR)/terminal_media_launcher-cache.Po
+	-rm -f unix/$(DEPDIR)/terminal_media_launcher-draw.Po
+	-rm -f unix/$(DEPDIR)/terminal_media_launcher-read_cfg.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -570,14 +700,14 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/cache.Po
-	-rm -f ./$(DEPDIR)/draw.Po
-	-rm -f ./$(DEPDIR)/entry.Po
-	-rm -f ./$(DEPDIR)/group.Po
-	-rm -f ./$(DEPDIR)/read_cfg.Po
-	-rm -f unix/$(DEPDIR)/cache.Po
-	-rm -f unix/$(DEPDIR)/draw.Po
-	-rm -f unix/$(DEPDIR)/read_cfg.Po
+		-rm -f ./$(DEPDIR)/terminal_media_launcher-cache.Po
+	-rm -f ./$(DEPDIR)/terminal_media_launcher-draw.Po
+	-rm -f ./$(DEPDIR)/terminal_media_launcher-entry.Po
+	-rm -f ./$(DEPDIR)/terminal_media_launcher-group.Po
+	-rm -f ./$(DEPDIR)/terminal_media_launcher-read_cfg.Po
+	-rm -f unix/$(DEPDIR)/terminal_media_launcher-cache.Po
+	-rm -f unix/$(DEPDIR)/terminal_media_launcher-draw.Po
+	-rm -f unix/$(DEPDIR)/terminal_media_launcher-read_cfg.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

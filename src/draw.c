@@ -4,12 +4,7 @@
 #include <time.h>
 #include <unistd.h>
 
-//Windows/Unix Compatability
-#if defined _WIN32 || defined _WIN64
-#include <ncurses/ncurses.h>
-#else
 #include <ncurses.h>
-#endif
 
 #include "include/cache.h"
 #include "include/draw.h"
