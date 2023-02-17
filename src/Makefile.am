@@ -1,4 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
+EXTRA_DIST = include unix windows
 
 if WINDOWS
 PLATFORM=windows

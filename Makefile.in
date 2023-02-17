@@ -13,7 +13,6 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
-
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -94,7 +93,7 @@ am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
-	$(am__configure_deps) $(dist_doc_DATA) $(am__DIST_COMMON)
+	$(am__configure_deps) $(am__DIST_COMMON)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
@@ -155,12 +154,10 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 man1dir = $(mandir)/man1
-am__installdirs = "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(man5dir)" \
-	"$(DESTDIR)$(docdir)"
+am__installdirs = "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(man5dir)"
 man5dir = $(mandir)/man5
 NROFF = nroff
 MANS = $(dist_man_MANS) $(man1_MANS) $(man5_MANS)
-DATA = $(dist_doc_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -337,9 +334,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = src
-dist_doc_DATA = docs/*
-#dist_man_MANS = man/terminal-media-launcher.1 man/terminal-media-launcher-config.5
+SUBDIRS = src docs
 dist_man_MANS = man
 man1_MANS = man/terminal-media-launcher.1
 man5_MANS = man/terminal-media-launcher-config.5
@@ -465,27 +460,6 @@ uninstall-man5:
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^5][0-9a-z]*$$,5,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
 	dir='$(DESTDIR)$(man5dir)'; $(am__uninstall_files_from_dir)
-install-dist_docDATA: $(dist_doc_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(docdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(docdir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docdir)" || exit $$?; \
-	done
-
-uninstall-dist_docDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(docdir)'; $(am__uninstall_files_from_dir)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.
@@ -792,10 +766,10 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(MANS) $(DATA)
+all-am: Makefile $(MANS)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(man5dir)" "$(DESTDIR)$(docdir)"; do \
+	for dir in "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(man5dir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -849,7 +823,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-dist_docDATA install-man
+install-data-am: install-man
 
 install-dvi: install-dvi-recursive
 
@@ -895,7 +869,7 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-dist_docDATA uninstall-man
+uninstall-am: uninstall-man
 
 uninstall-man: uninstall-man1 uninstall-man5
 
@@ -908,15 +882,14 @@ uninstall-man: uninstall-man1 uninstall-man5
 	dist-zstd distcheck distclean distclean-generic distclean-tags \
 	distcleancheck distdir distuninstallcheck dvi dvi-am html \
 	html-am info info-am install install-am install-data \
-	install-data-am install-dist_docDATA install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-man1 install-man5 install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-dist_docDATA uninstall-man uninstall-man1 \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-man1 install-man5 \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags \
+	tags-am uninstall uninstall-am uninstall-man uninstall-man1 \
 	uninstall-man5
 
 .PRECIOUS: Makefile

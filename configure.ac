@@ -47,5 +47,6 @@ AM_CONDITIONAL([UNIX], [test "$build_unix" = "yes"])
 AM_CONDITIONAL([WINDOWS], [test "$build_windows" = "yes"])
 
 AC_CONFIG_FILES([Makefile
-                 src/Makefile])
+                 src/Makefile
+			     docs/Makefile])
 AC_OUTPUT

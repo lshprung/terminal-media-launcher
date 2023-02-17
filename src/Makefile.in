@@ -284,6 +284,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = subdir-objects
+EXTRA_DIST = include unix windows
 @WINDOWS_FALSE@PLATFORM = unix
 @WINDOWS_TRUE@PLATFORM = windows
 terminal_media_launcher_SOURCES = cache.c draw.c read_cfg.c group.c entry.c $(PLATFORM)/cache.c $(PLATFORM)/draw.c $(PLATFORM)/read_cfg.c
