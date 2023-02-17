@@ -1,0 +1,81 @@
+.TH TERMINAL-MEDIA-LAUNCHER 1
+
+.SH NAME
+terminal-media-launcher \- terminal media launcher
+
+.SH SYNOPSIS
+terminal-media-launcher [-c|--config PATH]
+
+.SH DESCRIPTION
+\fBterminal-media-launcher\fR is a TUI application designed to help streamline launching applications and other media. It aims to be a fast and minimal command line frontend with a Unix-like approach to setup and configuration. The program looks for a configuration file listing different groups of media and creates an ncurses menu from which the user can launch their media files.
+
+Upon execution, the program will look for a configuration file. If a configuration file is found, the program will draw two columns: one for groups, and one for entries. At the bottom of the window, a preview of the command execution is displayed. If a configuration file is not found, the user will be prompted whether or not they would like to have a configuration file automatically generated.
+
+.SH OPTIONS
+\fB-c\fR, \fB--config\fR \fIpath\fR
+.RS
+Specify a configuration file path.
+.RE
+
+\fB-h\fR, \fB--help\fR
+.RS
+Print a help message
+.RE
+
+\fB-q\fR, \fB--quiet\fR
+.RS
+Suppress stdout messages
+.RE
+
+.SH KEY BINDINGS
+.B Up, Down
+.RS
+Move selection up and down on the focused column
+.RE
+
+.B Tab, Left, Right
+.RS
+Toggle focus between group and entry columns
+.RE
+
+.B PgUp
+.RS
+Jump to the top of the focused column
+.RE
+
+.B PgDn
+.RS
+Jump to the bottom of the focused column
+.RE
+
+.B F3
+.RS
+Jump to a random row of the focused column
+.RE
+
+.B Enter
+.RS
+Execute the selected entry
+.RE
+
+.B Escape
+.RS
+Exit the program
+.RE
+
+Any other input will jump to the next matching group/entry that begins with the input character, if one exists (ex. hitting 'f' while focused on the entries column will jump to the next entry that starts with an 'f' unless there is no entry that starts with an 'f').
+
+.SH FILES
+\fB~/.config/terminal-media-launcher/config (or ~/.terminal-media-launcher/config)\fR
+.RS
+When starting, terminal-media-launcher looks for a configuration file in the following order:
+
+ 1. ~/.config/terminal-media-launcher/config
+ 
+ 2. ~/.terminal-media-launcher/config
+
+You can specify a custom path using the -c option. For documentation of the config file, see \fBterminal-media-launcher-config\fR(5).
+.RE
+
+.SH SEE ALSO
+terminal-media-launcher-config(5)
