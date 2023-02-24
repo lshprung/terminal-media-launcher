@@ -23,7 +23,7 @@ char *find_config(){
 	sprintf(choices[0], "%s%cterminal-media-launcher%cconfig", appdata, sep, sep);
 
 	for(i = 0; i < check_count; i++){
-		path = choices[i];
+		strcpy(path, choices[i]);
 		printf("Checking for config at %s: ", choices[i]);
 		if(access(path, R_OK) == 0){
 			printf("Using config \"%s\"\n\n", path);
@@ -34,7 +34,7 @@ char *find_config(){
 
 	//TODO no config exists, ask user if they want to autogenerate one
 	mkconfig_wizard(choices[0]);
-	path = choices[0];
+	strcpy(path, choices[0]);
 	return path;
 }
 
