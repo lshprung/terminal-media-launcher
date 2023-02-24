@@ -24,7 +24,7 @@ char *find_config(){
 	sprintf(choices[1], "%s%c.terminal-media-launcher%cconfig", home, sep, sep);
 
 	for(i = 0; i < check_count; i++){
-		path = choices[i];
+		strcpy(path, choices[i]);
 		printf("Checking for config at %s: ", choices[i]);
 		if(access(path, R_OK) == 0){
 			printf("Using config \"%s\"\n\n", path);
@@ -33,9 +33,8 @@ char *find_config(){
 		else printf("File does not exist\n");
 	}
 
-	//TODO no config exists, ask user if they want to autogenerate one
 	mkconfig_wizard(choices[0]);
-	path = choices[0];
+	strcpy(path, choices[0]);
 	return path;
 }
 
@@ -185,7 +184,7 @@ void handle_fname(char *path, char *group, bool recurs, bool force, char *name, 
 
 			//the directory is real
 			if(dp != NULL){ 
-				while(fname = readdir(dp)){
+				while((fname = readdir(dp))){
 					relative_path_cpy[0] = '\0';
 					strcat(relative_path_cpy, dirname);
 					strcat(relative_path_cpy, fname->d_name);

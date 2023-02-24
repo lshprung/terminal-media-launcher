@@ -17,7 +17,7 @@ void error_mes(int ln, char *message);
 //functions that differ by os
 extern char sep;
 char *find_config();
-void mkconfig_wizard();
+void mkconfig_wizard(char *path);
 void handle_fname(char *path, char *group, bool recurs, bool force, char *name, int ln);
 
 #endif
