@@ -6,17 +6,24 @@
 
 For Windows instructions, see [here](windows_compile_instructions.md)
 
-terminal-media-launcher can be compiled on any system with make, gcc, and the ncurses library (libncurses-dev) installed. It can be compiled and installed on any Linux distribution, and can also be compiled and run on Windows 10. To compile and run terminal-media-launcher:
+terminal-media-launcher can be compiled on any system with make, gcc, and the ncurses development library installed. It can be compiled and installed on any Linux distribution, and can also be compiled and run on Microsoft Windows. To compile and run terminal-media-launcher:
 
-1. Clone the repository
-2. Run the commands below in the directory the repository was cloned into. This will build the binary `src/terminal-media-launcher`
+1. Install dependencies. On Debian and Debian-based systems:
+
+```
+# apt install gcc libncurses-dev make
+```
+
+2. Download the latest `.tar.gz` release
+	- The source acquired from the source repository can also be compiled, but requires additional dependencies to build (`autoconf`, `automake`, `autoconf-archive`)
+3. Run the commands below in the directory the repository was cloned into. This will build the binary `src/terminal-media-launcher`
 
 ```
 $ ./configure
 $ make
 ```
 
-3. To run the program:
+4. To run the program:
 
 ```
 $ src/terminal-media-launcher
@@ -26,19 +33,21 @@ Note that terminal-media-launcher will not run until you have created a configur
 
 ### Installation
 
-terminal-media-launcher can be installed on Linux by running:
+terminal-media-launcher can be installed by running:
 
 ```
-sudo make install
+make install
 ```
 
-This will install `terminal-media-launcher` to `/usr/local/bin/terminal-media-launcher` as well as man pages `terminal-media-launcher` and `terminal-media-launcher-config`.
 To uninstall these files:
 
 ```
-sudo make uninstall
+make uninstall
 ```
 
+By default, the program and related files are installed with prefix `/usr/local`, but this prefix can be changed with `./configure --prefix=PREFIX` flag (i.e., `./configure --prefix=$HOME/.local`
+
+<!--
 ### Create Desktop Entry
 
 If terminal-media-launcher is installed (see above), a Desktop Entry can be created on Linux by running:
@@ -48,6 +57,7 @@ sudo make desktop-entry
 ```
 
 This will create a desktop entry at `/usr/local/share/applications/terminal-media-launcher.desktop`.
+-->
 
 ## Screenshots
 
@@ -75,4 +85,4 @@ terminal-media-launcher -c /path/to/config
 
 For Documentation of the configuration file, see [terminal-media-launcher-config](terminal-media-launcher-config.md).
 For a help message and list of flags, `terminal-media-launcher --help`.
-If you installed terminal-media-launcher, you can also consult **terminal-media-launcher**(1) and **terminal-media-launcher-config**(5).
+You can also consult the man pages **terminal-media-launcher**(1) and **terminal-media-launcher-config**(5)

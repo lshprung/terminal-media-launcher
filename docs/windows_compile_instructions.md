@@ -8,15 +8,13 @@ Compiling on Windows requires access to the MinGW toolchain. The easiest way to 
 
 3. Run `pacman -Syu` until all packages are up to date
 
-4. `pacman -S git mingw-w64-x86_64-gcc mingw-w64-x86_64-ncurses make` to install necessary packages
+4. From here, follow the Unix instructions. The command to install dependencies in MSYS2 is
 
-5. `git clone https://github.com/lshprung/terminal-media-launcher` to clone the repository
+```
+$ pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-ncurses make
+```
 
-6. `cd terminal-media-launcher` to enter the repository
-
-7. `make` to compile
-
-If you did everything correctly, compilation should succeed. Open File Explorer in the current directory (can be done by running `explorer .` in MSYS2 terminal) and double click the generated executable (should be called terminal-media-launcher.exe)
+Open File Explorer in the current directory (can be done by running `explorer .` in MSYS2 terminal) and double click the generated executable in `src/`
 
 ## Resolving Missing .dll Files
 
@@ -32,7 +30,7 @@ This is usually the result of the MSYS2 MinGW libraries not being in your PATH. 
 
 ### 1. Edit PATH (Recommended)
 
-Add the following entry to your PATH environment variable: `C:\msys64\mingw64\bin` (replace `C:\msys64` with the location that MSYS2 was installed to). This will help Windows to find the library it thinks it is missing and the program should now lauch without an error
+Add the following entry to your PATH environment variable: `C:\msys64\mingw64\bin` (replace `C:\msys64` with the location that MSYS2 was installed to). This will help Windows to find the library it thinks it is missing and the program should now lauch without an error.
 
 ### 2. Compile with -static flag
 
