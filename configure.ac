@@ -51,3 +51,13 @@ AC_CONFIG_FILES([Makefile
 			     docs/Makefile
 				 data/Makefile])
 AC_OUTPUT
+
+# Print helpful message
+cat << EOF
+
+** Configuration summary for ${PACKAGE_NAME} ${PACKAGE_VERSION}
+
+      Prefix: ${prefix}
+    Compiler: ${CC} ${CFLAGS} ${CPPFLAGS}
+   Libraries: ${LIBS}
+EOF

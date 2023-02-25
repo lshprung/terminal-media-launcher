@@ -7108,3 +7108,13 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
+
+# Print helpful message
+cat << EOF
+
+** Configuration summary for ${PACKAGE_NAME} ${PACKAGE_VERSION}
+
+      Prefix: ${prefix}
+    Compiler: ${CC} ${CFLAGS} ${CPPFLAGS}
+   Libraries: ${LIBS}
+EOF
