@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=terminal-media-launcher
-Comment=Terminal Media Launcher
-Path=/usr/local/bin
-Exec=terminal-media-launcher
-Icon=terminal-media-launcher
-Terminal=true
-Categories=Utility

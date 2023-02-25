@@ -14,7 +14,13 @@ Compiling on Windows requires access to the MinGW toolchain. The easiest way to 
 $ pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-ncurses make
 ```
 
-Open File Explorer in the current directory (can be done by running `explorer .` in MSYS2 terminal) and double click the generated executable in `src/`
+5. (optional) An icon can be embedded into the executable built at `src/terminal-media-launcher.exe` using the [rcedit](https://github.com/electron/rcedit) tool:
+
+```
+$ rcedit.exe "src/terminal-media-launcher.exe" --set-icon "icon/icon.ico"
+```
+
+Open File Explorer in the current directory (can be done by running `explorer .` in MSYS2 terminal) and double click the generated executable in `src/` to run the program. If your MSYS2 `/bin` is set in your system PATH (see below), then you can also follow the Unix installation instructions to install `terminal-media-launcher` on your Windows system.
 
 ## Resolving Missing .dll Files
 
