@@ -8,8 +8,9 @@ For Windows instructions, see [here](windows_compile_instructions.md)
 
 terminal-media-launcher can be compiled on any system with make, gcc, and the ncurses development library installed. It can be compiled and installed on any Linux distribution, and can also be compiled and run on Microsoft Windows. To compile and run terminal-media-launcher:
 
-1. Install dependencies. On Debian and Debian-based systems:
+1. Install dependencies. 
 
+On Debian and Debian-based systems:
 ```
 # apt install gcc libncurses-dev make
 ```

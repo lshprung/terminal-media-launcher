@@ -17,8 +17,7 @@ AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
 AC_CHECK_HEADER_STDBOOL
 
 # Checks for library functions.
-AC_FUNC_MALLOC
-AC_CHECK_FUNCS([mkdir strrchr])
+AC_CHECK_FUNCS([malloc mkdir strrchr])
 
 # Check for curses with color support
 AX_WITH_CURSES
