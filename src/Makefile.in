@@ -88,7 +88,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = terminal_media_launcher$(EXEEXT)
+bin_PROGRAMS = terminal-media-launcher$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -381,8 +381,8 @@ $(PLATFORM)/terminal_media_launcher-read_cfg.$(OBJEXT):  \
 	$(PLATFORM)/$(am__dirstamp) \
 	$(PLATFORM)/$(DEPDIR)/$(am__dirstamp)
 
-terminal_media_launcher$(EXEEXT): $(terminal_media_launcher_OBJECTS) $(terminal_media_launcher_DEPENDENCIES) $(EXTRA_terminal_media_launcher_DEPENDENCIES) 
-	@rm -f terminal_media_launcher$(EXEEXT)
+terminal-media-launcher$(EXEEXT): $(terminal_media_launcher_OBJECTS) $(terminal_media_launcher_DEPENDENCIES) $(EXTRA_terminal_media_launcher_DEPENDENCIES) 
+	@rm -f terminal-media-launcher$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(terminal_media_launcher_OBJECTS) $(terminal_media_launcher_LDADD) $(LIBS)
 
 mostlyclean-compile:
