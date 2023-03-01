@@ -22,6 +22,6 @@ For a help message and list of flags
 
     terminal-media-launcher --help
 
- You can also consult the man pages **terminal-media-launcher**(1) and **terminal-media-launcher-config**(5)
+ You can also consult the man pages terminal-media-launcher(1) and terminal-media-launcher-config(5)
 
  -- louie <louie@example.com>  Mon, 27 Feb 2023 13:34:32 -0800

@@ -11,5 +11,5 @@ Architecture: amd64
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: Lightweight Terminal Media Launcher written in C
- Terminal Media Launcher is a command line utility to help streamline 
+ Terminal Media Launcher is a command line utility to help streamline
  launching applications and other media

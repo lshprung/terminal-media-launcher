@@ -1,4 +1,4 @@
-![logo](../data/icon.svg)
+![logo](../data/terminal-media-launcher.svg)
 
 ## Introduction
 

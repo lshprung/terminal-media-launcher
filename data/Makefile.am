@@ -1,4 +1,4 @@
-EXTRA_DIST = icon.ico icon.svg
+EXTRA_DIST = terminal-media-launcher.ico terminal-media-launcher.svg
 
 # Build a .desktop entry
 BUILT_SOURCES = $(PACKAGE_NAME).desktop
