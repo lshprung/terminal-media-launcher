@@ -1,3 +1,5 @@
+![logo](../data/icon.svg)
+
 ## Introduction
 
 **Terminal Media Launcher** is a command line utility to help streamline launching applications and other media. The goal of this program is to provide a fast, minimal, command line frontend with a Unix-like approach to setup and configuration. The program looks for a configuration file listing different groups of media and creates an ncurses menu from which to select from. If a configuration file is found, the program will draw two columns: one for groups, and one for entries. At the bottom of the window, a preview of the command execution is displayed.
