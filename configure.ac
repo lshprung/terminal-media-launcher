@@ -1,4 +1,4 @@
-AC_INIT([terminal-media-launcher], [0.1])
+AC_INIT([terminal-media-launcher],[0.1])
 AC_CONFIG_SRCDIR([src/draw.c])
 #AC_CONFIG_HEADERS([config.h])
 
