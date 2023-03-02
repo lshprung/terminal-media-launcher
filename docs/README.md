@@ -17,6 +17,11 @@ On Debian and Debian-based systems:
 # apt install gcc libncurses-dev make
 ```
 
+On RHEL and RHEL-based systems:
+```
+# dnf install gcc ncurses-devel
+```
+
 2. Download the latest `.tar.gz` release
 	- The source acquired from the source repository can also be compiled, but requires additional dependencies to build (`autoconf`, `automake`, `autoconf-archive`)
 3. Run the commands below in the directory the repository was cloned into. This will build the binary `src/terminal-media-launcher`

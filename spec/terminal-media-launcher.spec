@@ -1,0 +1,46 @@
+Name:           terminal-media-launcher
+Version:        0.1
+Release:        1%{?dist}
+Summary:        Lightweight Terminal Media Launcher written in C
+
+License:        GPLv3+
+URL:            https://github.com/lshprung/terminal-media-launcher
+Source0:        %{name}-%{version}.tar.gz
+
+Requires:       glibc >= 2.7, ncurses >= 6
+
+%description
+Terminal Media Launcher is a command line utility to help streamline
+launching applications and other media
+
+%prep
+%autosetup
+
+
+%build
+%configure
+%make_build
+
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%make_install
+
+
+%files
+%license
+%doc
+%{_bindir}/terminal-media-launcher
+%{_docdir}/terminal-media-launcher/README.md
+%{_docdir}/terminal-media-launcher/screenshot1.png
+%{_docdir}/terminal-media-launcher/screenshot2.png
+%{_docdir}/terminal-media-launcher/terminal-media-launcher-config.md
+%{_docdir}/terminal-media-launcher/windows_compile_instructions.md
+%{_mandir}/man1/terminal-media-launcher.1.gz
+%{_mandir}/man5/terminal-media-launcher-config.5.gz
+
+
+
+%changelog
+* Thu Mar 02 2023 louie
+- First version being packaged
