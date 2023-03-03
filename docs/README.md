@@ -55,17 +55,15 @@ make uninstall
 
 By default, the program and related files are installed with prefix `/usr/local`, but this prefix can be changed with `./configure --prefix=PREFIX` flag (i.e., `./configure --prefix=$HOME/.local`
 
-<!--
 ### Create Desktop Entry
 
-If terminal-media-launcher is installed (see above), a Desktop Entry can be created on Linux by running:
+Installation of a desktop entry can be enabled by passing a flag to the configure script:
 
 ```
-sudo make desktop-entry
+./configure --enable-desktop-entry
 ```
 
-This will create a desktop entry at `/usr/local/share/applications/terminal-media-launcher.desktop`.
--->
+Setting this flag will install a desktop entry alongside the program when following the installation instructions above
 
 ## Screenshots
 

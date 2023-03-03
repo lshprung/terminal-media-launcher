@@ -45,6 +45,15 @@ esac
 AM_CONDITIONAL([UNIX], [test "$build_unix" = "yes"])
 AM_CONDITIONAL([WINDOWS], [test "$build_windows" = "yes"])
 
+# enable/disable options
+AC_ARG_ENABLE([desktop-entry],
+			[AS_HELP_STRING([--enable-desktop-entry],
+							[install a desktop entry (default is no)])],
+			[desktop_entry=$enableval],
+			[desktop_entry=no])
+
+AM_CONDITIONAL([DESKTOP_ENTRY], [test "$desktop_entry" = "yes"])
+
 AC_CONFIG_FILES([Makefile
                  src/Makefile
 			     docs/Makefile
@@ -56,7 +65,8 @@ cat << EOF
 
 ** Configuration summary for ${PACKAGE_NAME} ${PACKAGE_VERSION}
 
-      Prefix: ${prefix}
-    Compiler: ${CC} ${CFLAGS} ${CPPFLAGS}
-   Libraries: ${LIBS}
+          Prefix: ${prefix}
+        Compiler: ${CC} ${CFLAGS} ${CPPFLAGS}
+       Libraries: ${LIBS}
+   Desktop Entry: ${desktop_entry}
 EOF
