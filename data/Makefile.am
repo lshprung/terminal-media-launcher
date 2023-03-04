@@ -3,18 +3,23 @@ EXTRA_DIST = terminal-media-launcher.ico terminal-media-launcher.svg
 # Build a .desktop entry
 if DESKTOP_ENTRY
 
-BUILT_SOURCES = $(PACKAGE_NAME).desktop
 CLEANFILES = $(PACKAGE_NAME).desktop
+
+edit = sed \
+	   -e 's|@PACKAGE_NAME[@]|$(PACKAGE_NAME)|g' \
+	   -e 's|@bindir[@]|$(bindir)|g' \
+	   -e 's|@EXEEXT[@]|$(EXEEXT)|g'
+
 $(PACKAGE_NAME).desktop: Makefile
-	echo "[Desktop Entry]" > $@
-	echo "Type=Application" >> $@
-	echo "Name=$(PACKAGE_NAME)" >> $@
-	echo "Comment=Terminal Media Launcher" >> $@
-	echo "Path=$(bindir)/$(PACKAGE_NAME)$(EXEEXT)" >> $@
-	echo "Exec=$(PACKAGE_NAME)$(EXEEXT)" >> $@
-	echo "Icon=$(PACKAGE_NAME)" >> $@
-	echo "Terminal=true" >> $@
-	echo "Categories=Utility" >> $@
+	rm -f $@ $@.tmp
+	srcdir=''; \
+		   test -f ./$@.in || srcdir=$(srcdir)/; \
+		   $(edit) $${srcdir}$@.in >$@.tmp
+	chmod +x $@.tmp
+	chmod a-w $@.tmp
+	mv $@.tmp $@
+
+$(PACKAGE_NAME).desktop: $(srcdir)/$(PACKAGE_NAME).desktop.in
 
 desktopdir = $(datadir)/applications
 icondir    = $(datadir)/pixmaps

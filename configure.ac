@@ -57,7 +57,8 @@ AM_CONDITIONAL([DESKTOP_ENTRY], [test "$desktop_entry" = "yes"])
 AC_CONFIG_FILES([Makefile
                  src/Makefile
 			     docs/Makefile
-				 data/Makefile])
+				 data/Makefile
+				 spec/terminal-media-launcher.spec])
 AC_OUTPUT
 
 # Print helpful message

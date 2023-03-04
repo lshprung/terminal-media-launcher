@@ -252,14 +252,17 @@ top_srcdir = @top_srcdir@
 EXTRA_DIST = terminal-media-launcher.ico terminal-media-launcher.svg
 
 # Build a .desktop entry
-@DESKTOP_ENTRY_TRUE@BUILT_SOURCES = $(PACKAGE_NAME).desktop
 @DESKTOP_ENTRY_TRUE@CLEANFILES = $(PACKAGE_NAME).desktop
+@DESKTOP_ENTRY_TRUE@edit = sed \
+@DESKTOP_ENTRY_TRUE@	   -e 's|@PACKAGE_NAME[@]|$(PACKAGE_NAME)|g' \
+@DESKTOP_ENTRY_TRUE@	   -e 's|@bindir[@]|$(bindir)|g' \
+@DESKTOP_ENTRY_TRUE@	   -e 's|@EXEEXT[@]|$(EXEEXT)|g'
+
 @DESKTOP_ENTRY_TRUE@desktopdir = $(datadir)/applications
 @DESKTOP_ENTRY_TRUE@icondir = $(datadir)/pixmaps
 @DESKTOP_ENTRY_TRUE@desktop_DATA = $(PACKAGE_NAME).desktop
 @DESKTOP_ENTRY_TRUE@icon_DATA = $(PACKAGE_NAME).svg
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+all: all-am
 
 .SUFFIXES:
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
@@ -374,17 +377,14 @@ distdir-am: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
+check: check-am
 all-am: Makefile $(DATA)
 installdirs:
 	for dir in "$(DESTDIR)$(desktopdir)" "$(DESTDIR)$(icondir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
-install-exec: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-exec-am
+install: install-am
+install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
 
@@ -414,7 +414,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-generic mostlyclean-am
@@ -481,7 +480,7 @@ ps-am:
 
 uninstall-am: uninstall-desktopDATA uninstall-iconDATA
 
-.MAKE: all check install install-am install-exec install-strip
+.MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic cscopelist-am \
 	ctags-am distclean distclean-generic distdir dvi dvi-am html \
@@ -497,16 +496,17 @@ uninstall-am: uninstall-desktopDATA uninstall-iconDATA
 
 .PRECIOUS: Makefile
 
+
 @DESKTOP_ENTRY_TRUE@$(PACKAGE_NAME).desktop: Makefile
-@DESKTOP_ENTRY_TRUE@	echo "[Desktop Entry]" > $@
-@DESKTOP_ENTRY_TRUE@	echo "Type=Application" >> $@
-@DESKTOP_ENTRY_TRUE@	echo "Name=$(PACKAGE_NAME)" >> $@
-@DESKTOP_ENTRY_TRUE@	echo "Comment=Terminal Media Launcher" >> $@
-@DESKTOP_ENTRY_TRUE@	echo "Path=$(bindir)/$(PACKAGE_NAME)$(EXEEXT)" >> $@
-@DESKTOP_ENTRY_TRUE@	echo "Exec=$(PACKAGE_NAME)$(EXEEXT)" >> $@
-@DESKTOP_ENTRY_TRUE@	echo "Icon=$(PACKAGE_NAME)" >> $@
-@DESKTOP_ENTRY_TRUE@	echo "Terminal=true" >> $@
-@DESKTOP_ENTRY_TRUE@	echo "Categories=Utility" >> $@
+@DESKTOP_ENTRY_TRUE@	rm -f $@ $@.tmp
+@DESKTOP_ENTRY_TRUE@	srcdir=''; \
+@DESKTOP_ENTRY_TRUE@		   test -f ./$@.in || srcdir=$(srcdir)/; \
+@DESKTOP_ENTRY_TRUE@		   $(edit) $${srcdir}$@.in >$@.tmp
+@DESKTOP_ENTRY_TRUE@	chmod +x $@.tmp
+@DESKTOP_ENTRY_TRUE@	chmod a-w $@.tmp
+@DESKTOP_ENTRY_TRUE@	mv $@.tmp $@
+
+@DESKTOP_ENTRY_TRUE@$(PACKAGE_NAME).desktop: $(srcdir)/$(PACKAGE_NAME).desktop.in
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

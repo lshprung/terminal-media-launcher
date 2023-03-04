@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=@PACKAGE_NAME@
+Comment=Terminal Media Launcher
+Path=@bindir@/@PACKAGE_NAME@@EXEEXT@
+Exec=@PACKAGE_NAME@@EXEEXT@
+Icon=@PACKAGE_NAME@
+Terminal=true
+Categories=Utility
