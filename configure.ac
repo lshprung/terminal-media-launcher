@@ -58,6 +58,12 @@ AC_ARG_ENABLE([embed_icon],
 			  [AS_HELP_STRING([--disable-embed-icon],
 							  [embed icon in windows executable (default is yes)])],
 							  [embed_icon=no])
+if test "x$embed_icon" = "xyes"; then
+	AC_CHECK_TOOL([WINDRES], [windres])
+	AS_VAR_IF([WINDRES], [],
+			  [AC_MSG_WARN([Cannot embed icon])
+			  embed_icon=no])
+fi
 AM_CONDITIONAL([EMBED_ICON], [test "$embed_icon" = "yes"])
 
 AC_CONFIG_FILES([Makefile

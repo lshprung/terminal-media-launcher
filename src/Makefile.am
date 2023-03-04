@@ -18,7 +18,7 @@ BUILT_SOURCES = icon/$(PACKAGE_NAME).res
 CLEANFILES = icon/$(PACKAGE_NAME).res
 
 icon/$(PACKAGE_NAME).res: icon/$(PACKAGE_NAME).ico icon/$(PACKAGE_NAME).rc
-	windres icon/$(PACKAGE_NAME).rc -O coff -o $@
+	$(WINDRES) icon/$(PACKAGE_NAME).rc -O coff -o $@
 
 endif
 else
