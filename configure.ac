@@ -64,6 +64,7 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
 			     docs/Makefile
 				 data/Makefile
+				 spec/Makefile
 				 spec/terminal-media-launcher.spec])
 AC_OUTPUT
 

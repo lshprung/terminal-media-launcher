@@ -97,7 +97,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
-CONFIG_CLEAN_FILES = spec/terminal-media-launcher.spec
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -187,8 +187,7 @@ ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
 DIST_SUBDIRS = $(SUBDIRS)
-am__DIST_COMMON = $(dist_man_MANS) $(srcdir)/Makefile.in \
-	$(top_srcdir)/spec/terminal-media-launcher.spec.in COPYING \
+am__DIST_COMMON = $(dist_man_MANS) $(srcdir)/Makefile.in COPYING \
 	compile config.guess config.sub depcomp install-sh missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
@@ -335,11 +334,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = src docs data
+SUBDIRS = src docs data spec
 dist_man_MANS = man
 man1_MANS = man/$(PACKAGE_NAME).1
 man5_MANS = man/$(PACKAGE_NAME)-config.5
-EXTRA_DIST = debian spec
+EXTRA_DIST = debian
 all: all-recursive
 
 .SUFFIXES:
@@ -376,8 +375,6 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
-spec/terminal-media-launcher.spec: $(top_builddir)/config.status $(top_srcdir)/spec/terminal-media-launcher.spec.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 install-man1: $(dist_man_MANS) $(man1_MANS)
 	@$(NORMAL_INSTALL)
 	@list1='$(man1_MANS)'; \
