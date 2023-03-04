@@ -18,7 +18,7 @@ launching applications and other media
 
 
 %build
-%configure
+%configure --enable-desktop-entry
 %make_build
 
 
@@ -38,6 +38,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_docdir}/terminal-media-launcher/windows_compile_instructions.md
 %{_mandir}/man1/terminal-media-launcher.1.gz
 %{_mandir}/man5/terminal-media-launcher-config.5.gz
+%{_mandir}/man5/terminal-media-launcher-config.5.gz
+%{_datadir}/applications/terminal-media-launcher.desktop
+%{_datadir}/pixmaps/terminal-media-launcher.svg
 
 
 
