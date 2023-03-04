@@ -47,12 +47,18 @@ AM_CONDITIONAL([WINDOWS], [test "$build_windows" = "yes"])
 
 # enable/disable options
 AC_ARG_ENABLE([desktop-entry],
-			[AS_HELP_STRING([--enable-desktop-entry],
-							[install a desktop entry (default is no)])],
-			[desktop_entry=$enableval],
-			[desktop_entry=no])
-
+			  [AS_HELP_STRING([--enable-desktop-entry],
+							  [install a desktop entry (default is no)])],
+							  [desktop_entry=$enableval],
+							  [desktop_entry=no])
 AM_CONDITIONAL([DESKTOP_ENTRY], [test "$desktop_entry" = "yes"])
+
+embed_icon=yes
+AC_ARG_ENABLE([embed_icon],
+			  [AS_HELP_STRING([--disable-embed-icon],
+							  [embed icon in windows executable (default is yes)])],
+							  [embed_icon=no])
+AM_CONDITIONAL([EMBED_ICON], [test "$embed_icon" = "yes"])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
@@ -70,4 +76,5 @@ cat << EOF
         Compiler: ${CC} ${CFLAGS} ${CPPFLAGS}
        Libraries: ${LIBS}
    Desktop Entry: ${desktop_entry}
+      Embed Icon: ${embed_icon}
 EOF

@@ -249,7 +249,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = terminal-media-launcher.ico terminal-media-launcher.svg
+EXTRA_DIST = $(PACKAGE_NAME).svg 
 
 # Build a .desktop entry
 @DESKTOP_ENTRY_TRUE@CLEANFILES = $(PACKAGE_NAME).desktop

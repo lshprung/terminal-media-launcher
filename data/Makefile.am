@@ -1,4 +1,4 @@
-EXTRA_DIST = terminal-media-launcher.ico terminal-media-launcher.svg
+EXTRA_DIST = $(PACKAGE_NAME).svg 
 
 # Build a .desktop entry
 if DESKTOP_ENTRY
@@ -27,3 +27,4 @@ desktop_DATA = $(PACKAGE_NAME).desktop
 icon_DATA = $(PACKAGE_NAME).svg
 
 endif
+

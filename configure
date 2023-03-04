@@ -623,6 +623,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+EMBED_ICON_FALSE
+EMBED_ICON_TRUE
 DESKTOP_ENTRY_FALSE
 DESKTOP_ENTRY_TRUE
 WINDOWS_FALSE
@@ -736,6 +738,7 @@ enable_dependency_tracking
 with_ncurses
 with_ncursesw
 enable_desktop_entry
+enable_embed_icon
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1388,6 +1391,7 @@ Optional Features:
   --disable-dependency-tracking
                           speeds up one-time build
   --enable-desktop-entry  install a desktop entry (default is no)
+  --disable-embed-icon    embed icon in windows executable (default is yes)
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -5734,13 +5738,27 @@ else
   desktop_entry=no
 fi
 
-
  if test "$desktop_entry" = "yes"; then
   DESKTOP_ENTRY_TRUE=
   DESKTOP_ENTRY_FALSE='#'
 else
   DESKTOP_ENTRY_TRUE='#'
   DESKTOP_ENTRY_FALSE=
+fi
+
+
+embed_icon=yes
+# Check whether --enable-embed_icon was given.
+if test "${enable_embed_icon+set}" = set; then :
+  enableval=$enable_embed_icon; embed_icon=no
+fi
+
+ if test "$embed_icon" = "yes"; then
+  EMBED_ICON_TRUE=
+  EMBED_ICON_FALSE='#'
+else
+  EMBED_ICON_TRUE='#'
+  EMBED_ICON_FALSE=
 fi
 
 
@@ -5925,6 +5943,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DESKTOP_ENTRY_TRUE}" && test -z "${DESKTOP_ENTRY_FALSE}"; then
   as_fn_error $? "conditional \"DESKTOP_ENTRY\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${EMBED_ICON_TRUE}" && test -z "${EMBED_ICON_FALSE}"; then
+  as_fn_error $? "conditional \"EMBED_ICON\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -7078,4 +7100,5 @@ cat << EOF
         Compiler: ${CC} ${CFLAGS} ${CPPFLAGS}
        Libraries: ${LIBS}
    Desktop Entry: ${desktop_entry}
+      Embed Icon: ${embed_icon}
 EOF

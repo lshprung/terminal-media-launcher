@@ -89,6 +89,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = terminal-media-launcher$(EXEEXT)
+
+# Embed icon
+@EMBED_ICON_TRUE@@WINDOWS_TRUE@am__append_1 = icon/$(PACKAGE_NAME).rc icon/$(PACKAGE_NAME).ico
+@EMBED_ICON_TRUE@@WINDOWS_TRUE@am__append_2 = icon/$(PACKAGE_NAME).res
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -100,7 +104,12 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
+am__terminal_media_launcher_SOURCES_DIST = cache.c draw.c read_cfg.c \
+	group.c entry.c $(PLATFORM)/cache.c $(PLATFORM)/draw.c \
+	$(PLATFORM)/read_cfg.c icon/$(PACKAGE_NAME).rc \
+	icon/$(PACKAGE_NAME).ico
 am__dirstamp = $(am__leading_dot)dirstamp
+am__objects_1 =
 am_terminal_media_launcher_OBJECTS =  \
 	terminal_media_launcher-cache.$(OBJEXT) \
 	terminal_media_launcher-draw.$(OBJEXT) \
@@ -109,10 +118,11 @@ am_terminal_media_launcher_OBJECTS =  \
 	terminal_media_launcher-entry.$(OBJEXT) \
 	$(PLATFORM)/terminal_media_launcher-cache.$(OBJEXT) \
 	$(PLATFORM)/terminal_media_launcher-draw.$(OBJEXT) \
-	$(PLATFORM)/terminal_media_launcher-read_cfg.$(OBJEXT)
+	$(PLATFORM)/terminal_media_launcher-read_cfg.$(OBJEXT) \
+	$(am__objects_1)
 terminal_media_launcher_OBJECTS =  \
 	$(am_terminal_media_launcher_OBJECTS)
-terminal_media_launcher_DEPENDENCIES =
+terminal_media_launcher_DEPENDENCIES = $(am__append_2)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -155,7 +165,7 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(terminal_media_launcher_SOURCES)
-DIST_SOURCES = $(terminal_media_launcher_SOURCES)
+DIST_SOURCES = $(am__terminal_media_launcher_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -284,13 +294,18 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = subdir-objects
-EXTRA_DIST = include unix windows
+EXTRA_DIST = include unix windows 
+terminal_media_launcher_SOURCES = cache.c draw.c read_cfg.c group.c \
+	entry.c $(PLATFORM)/cache.c $(PLATFORM)/draw.c \
+	$(PLATFORM)/read_cfg.c $(am__append_1)
+terminal_media_launcher_LDADD = @CURSES_LIBS@ $(am__append_2)
+terminal_media_launcher_CPPFLAGS = @CURSES_CFLAGS@
 @WINDOWS_FALSE@PLATFORM = unix
 @WINDOWS_TRUE@PLATFORM = windows
-terminal_media_launcher_SOURCES = cache.c draw.c read_cfg.c group.c entry.c $(PLATFORM)/cache.c $(PLATFORM)/draw.c $(PLATFORM)/read_cfg.c
-terminal_media_launcher_LDADD = @CURSES_LIBS@
-terminal_media_launcher_CPPFLAGS = @CURSES_CFLAGS@
-all: all-am
+@EMBED_ICON_TRUE@@WINDOWS_TRUE@BUILT_SOURCES = icon/$(PACKAGE_NAME).res
+@EMBED_ICON_TRUE@@WINDOWS_TRUE@CLEANFILES = icon/$(PACKAGE_NAME).res
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .o .obj
@@ -621,14 +636,17 @@ distdir-am: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS)
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
-install-exec: install-exec-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
+install-exec: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
 
@@ -649,6 +667,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -659,6 +678,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
@@ -742,7 +762,7 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS
 
-.MAKE: install-am install-strip
+.MAKE: all check install install-am install-exec install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
 	clean-binPROGRAMS clean-generic cscopelist-am ctags ctags-am \
@@ -760,6 +780,9 @@ uninstall-am: uninstall-binPROGRAMS
 
 .PRECIOUS: Makefile
 
+
+@EMBED_ICON_TRUE@@WINDOWS_TRUE@icon/$(PACKAGE_NAME).res: icon/$(PACKAGE_NAME).ico icon/$(PACKAGE_NAME).rc
+@EMBED_ICON_TRUE@@WINDOWS_TRUE@	windres icon/$(PACKAGE_NAME).rc -O coff -o $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
