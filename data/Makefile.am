@@ -1,4 +1,4 @@
-EXTRA_DIST = $(PACKAGE_NAME).svg 
+EXTRA_DIST = $(PACKAGE_NAME).svg $(PACKAGE_NAME).desktop.in
 
 # Build a .desktop entry
 if DESKTOP_ENTRY
