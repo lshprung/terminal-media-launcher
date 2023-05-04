@@ -1,3 +1,4 @@
+#include <getopt.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,6 +55,11 @@ int main(int argc, char **argv){
 	srand(time(NULL));
 
 	flags_set = handle_args(argc, argv, &cfg_path);
+	//exit if args could not be interpreted (i.e., --config with no argument)
+	if(flags_set == NULL) {                            
+		print_help(argv[0]);
+		return 1;                     
+	}
 	if(flags_set[1]) return(0);                         //exit if help flag was passed
 	if(flags_set[2]) freopen("/dev/null", "w", stdout); //turn off output if quiet flag was passed
 	if(!flags_set[0]) strcpy(cfg_path, find_config());  //find_config if not config flag was passed
@@ -62,13 +68,13 @@ int main(int argc, char **argv){
 	//read the contents of the cfg file; print help message if invalid
 	if(!cfg_interp(cfg_path)){
 		print_help(argv[0]);
-		return 0;
+		return 1;
 	}
 
 	//Remove Empty Groups from the Array
 	clean_groups();
 	g = get_groups(); //retrieve results of cfg_interp
-	g_count = get_gcount(g); //retrieve number of groups in g (only do this after removing empty groups)
+	g_count = get_gcount(); //retrieve number of groups in g (only do this after removing empty groups)
 
 	//check that there are is at least one valid group
 	if(g_count == 0){
@@ -186,31 +192,43 @@ bool *handle_args(int argc, char **argv, char **cfg_path){
 	// 1 -> -h|--help
 	// 2 -> -q|--quiet
 
+	int opt = 0;
+	struct option long_options[] = {
+		{"config", required_argument, NULL, 'c'}, 
+		{"help",   no_argument,       NULL, 'h'},
+		{"quiet",  no_argument,       NULL, 'q'},
+		{0,        0,                 0,    0}
+	};
 	bool *flags_set = calloc(FLAG_COUNT, sizeof(bool));
-	int i;
+	int i = 0;
 
-	for(i = 1; i < argc; ++i){
-		//-c
-		if(!strcmp(argv[i], "-c") || !strcmp(argv[i], "--config")){
-			++i;
-			if(i < argc){
-				strcpy(*cfg_path, argv[i]);
+	while(opt != -1){
+		opt = getopt_long(argc, argv, "c:hq", long_options, &i);
+		switch(opt){
+			case 0:
+				printf("Unknown long option '%s'", long_options[i].name);
+				if(optarg)
+					printf(" with arg '%s'", optarg);
+				printf("\n");
+				break;
+			case 'c':
+				strcpy(*cfg_path, optarg);
 				flags_set[0] = true;
-			}
-			continue;
-		}
-		
-		//-h
-		if(!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")){
-			print_help(argv[0]);
-			flags_set[1] = true;
-			break; //break rather than continue; program will quit if a help message is requested
-		}
-
-		//-q
-		if(!strcmp(argv[i], "-q") || !strcmp(argv[i], "--quiet")){
-			flags_set[2] = true;
-			continue;
+				break;
+			case 'h':
+				print_help(argv[0]);
+				flags_set[1] = true;
+				opt = -1; // break out of the while loop
+				break;
+			case 'q':
+				flags_set[2] = true;
+				break;
+			case '?':
+				return NULL; // error parsing arguments
+			case -1:
+				break; // don't print unknown option message if at the end of the list
+			default:
+				printf("Unknown short option: '%c'\n", opt);
 		}
 	}
 
@@ -218,12 +236,12 @@ bool *handle_args(int argc, char **argv, char **cfg_path){
 }
 
 void print_help(char *exec_name){
-	printf("Usage: %s [OPTION] [FILE]\n", exec_name);
+	printf("Usage: %s [OPTION]\n", exec_name);
 	printf("Draw an Ncurses Menu to Launch Media from\n\n");
 
-	printf(" -c, --config	Specify a configuration file path\n");
-	printf(" -h, --help 	Print this help message\n");
-	printf(" -q, --quiet	Suppress stdout messages\n");
+	printf(" -c, --config=FILE	Specify a configuration file path\n");
+	printf(" -h, --help 		Print this help message\n");
+	printf(" -q, --quiet		Suppress stdout messages\n");
 }
 
 void update_display(bool resize){
