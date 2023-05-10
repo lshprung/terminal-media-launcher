@@ -59,10 +59,14 @@ AC_ARG_ENABLE([embed_icon],
 							  [embed icon in windows executable (default is yes)])],
 							  [embed_icon=no])
 if test "x$embed_icon" = "xyes"; then
-	AC_CHECK_TOOL([WINDRES], [windres])
-	AS_VAR_IF([WINDRES], [],
-			  [AC_MSG_WARN([Cannot embed icon])
-			  embed_icon=no])
+	if test "x$build_windows" = "xyes"; then
+		AC_CHECK_TOOL([WINDRES], [windres])
+		AS_VAR_IF([WINDRES], [],
+				  [AC_MSG_WARN([Cannot embed icon])
+				  embed_icon=no])
+	else
+		embed_icon=no
+	fi
 fi
 AM_CONDITIONAL([EMBED_ICON], [test "$embed_icon" = "yes"])
 
