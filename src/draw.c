@@ -469,8 +469,6 @@ void trav_col(int new_i){
 		oob_flag = 2;
 	}
 
-	// rewrite to not rely on oob_flag semantics
-	//if(oob_flag > 0) (true_hover ? update_col(1, oob_flag-1, false) : update_col(0, oob_flag-1, false));
 	if(oob_flag > 0){
 		if(true_hover){
 			update_col(1, (oob_flag == 1 ? entry_win->_maxy-1 : 1), false);
@@ -484,8 +482,7 @@ void trav_col(int new_i){
 	mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
 	mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_DIM, (true_hover ? 1 : 2), NULL);
 	if(!true_hover){ //a little extra work regarding group hover
-		e_offset[g_hover] = 0;
-		update_col(1, e_hover[g_hover]+1, false);
+		update_col(1, e_hover[g_hover]+1, true);
 	}
 
 	wrefresh(group_win);
