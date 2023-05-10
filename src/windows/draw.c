@@ -8,7 +8,7 @@
 void launch(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
-	char *path = get_epath(e[e_hover]);
+	char *path = get_epath(e[e_hover[g_hover]]);
 	bool quotes = get_gquotes(g[g_hover]);
 	char file[BUF_LEN];
 	char params[BUF_LEN];

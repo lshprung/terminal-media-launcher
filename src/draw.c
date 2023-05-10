@@ -33,15 +33,15 @@ int locateChar(char input);
 WINDOW *group_win = NULL;
 WINDOW *entry_win = NULL;
 WINDOW *info_win = NULL;
-int g_hover;
-int e_hover;
-int true_hover; //0 = hovering on groups, 1 = hovering on entries
+int g_hover = 0;
+int *e_hover;
+int true_hover = 0; //0 = hovering on groups, 1 = hovering on entries
 GROUP **g;
 ENTRY **e;
 int g_count;
 int e_count;
 int g_offset = 0;
-int e_offset = 0;
+int *e_offset;
 
 int main(int argc, char **argv){
 	bool *flags_set = NULL;
@@ -82,8 +82,12 @@ int main(int argc, char **argv){
 		exit(0);
 	}
 
+	//initialize e_hover to track hover on each group
+	e_hover = calloc(g_count, sizeof(int));
+	e_offset = calloc(g_count, sizeof(int));
+
 	//load cached data
-	load_cache(&g_hover, &e_hover, &true_hover, cfg_path);
+	load_cache(g_count, &g_hover, &e_hover, &e_offset, &true_hover, cfg_path);
 
 	//reopen stdout for drawing menu
 	freopen("/dev/tty", "w", stdout);
@@ -109,7 +113,7 @@ int main(int argc, char **argv){
 
 	//update highlighting for loaded location
 	if(true_hover){
-		i = e_hover;
+		i = e_hover[g_hover];
 		true_hover = 0;
 		trav_col(g_hover);
 		switch_col();
@@ -131,11 +135,11 @@ int main(int argc, char **argv){
 				break;
 
 			case KEY_DOWN:
-				trav_col((true_hover ? e_hover : g_hover)+1);
+				trav_col((true_hover ? e_hover[g_hover] : g_hover)+1);
 				break;
 
 			case KEY_UP:
-				trav_col((true_hover ? e_hover : g_hover)-1);
+				trav_col((true_hover ? e_hover[g_hover] : g_hover)-1);
 				break;
 
 			case KEY_PPAGE:
@@ -160,7 +164,7 @@ int main(int argc, char **argv){
 
 			case 10: //enter key
 				//create a green highlight over the launched entry
-				mvwchgat(entry_win, 1+e_hover-e_offset, 1, entry_win->_maxx-1, A_DIM, 3, NULL);
+				mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, entry_win->_maxx-1, A_DIM, 3, NULL);
 				wrefresh(entry_win);
 
 				launch();
@@ -181,7 +185,7 @@ int main(int argc, char **argv){
 	endwin();
 
 	//save position data to cache
-	save_to_cache(g_hover, e_hover, true_hover, cfg_path);
+	save_to_cache(g_count, g_hover, e_hover, e_offset, true_hover, cfg_path);
 
 	return 0;
 }
@@ -312,7 +316,7 @@ void fill_col(int mode){
 	int i;
 	WINDOW *col = (mode ? entry_win : group_win);
 	int count = (mode ? e_count : g_count);
-	int offset = (mode ? e_offset : g_offset);
+	int offset = (mode ? e_offset[g_hover] : g_offset);
 	int max_len = col->_maxx-1; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
 	int max_y = HEIGHT-(6+GAP_SIZE);
@@ -406,7 +410,7 @@ void update_col(int mode, int hl_where, bool resize){
 			e = get_entries(get_ghead(g[g_hover]), e_count);
 			fill_col(1);
 			if(!resize) mvwchgat(entry_win, y_hl, 1, entry_win->_maxx-1, A_DIM, 1, NULL);
-			else mvwchgat(entry_win, 1+e_hover-e_offset, 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
+			else mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
 			break;
 
 		default:
@@ -429,11 +433,11 @@ void switch_col(){
 	true_hover = (true_hover+1) % 2;
 	if(true_hover){
 		mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx-1, A_DIM, 1, NULL); //adjust group light
-		mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx-1, A_DIM, 2, NULL); //adjust entry light
+		mvwchgat(entry_win, 1+e_hover[g_hover], 1, entry_win->_maxx-1, A_DIM, 2, NULL); //adjust entry light
 	}
 	else{
 		mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx-1, A_DIM, 2, NULL); //adjust group light
-		mvwchgat(entry_win, 1+e_hover, 1, entry_win->_maxx-1, A_DIM, 1, NULL); //adjust entry light
+		mvwchgat(entry_win, 1+e_hover[g_hover], 1, entry_win->_maxx-1, A_DIM, 1, NULL); //adjust entry light
 	}
 	move(3, (WIDTH/4)+10);
 
@@ -443,8 +447,8 @@ void switch_col(){
 }
 
 void trav_col(int new_i){
-	int *focus = (true_hover ? &e_hover : &g_hover); //make it easy to know which column we are looking at
-	int *offset = (true_hover ? &e_offset : &g_offset);
+	int *focus = (true_hover ? &(e_hover[g_hover]) : &g_hover); //make it easy to know which column we are looking at
+	int *offset = (true_hover ? &(e_offset[g_hover]) : &g_offset);
 	int count = (true_hover ? e_count : g_count);
 	int max_hl = HEIGHT-(3+GAP_SIZE); //for some reason, this works
 	int min_hl = 5;
@@ -455,7 +459,7 @@ void trav_col(int new_i){
 	if(new_i >= count) new_i = count-1;
 
 	//reset previously highlighted entry and group, change focus
-	mvwchgat(entry_win, 1+e_hover-e_offset, 1, entry_win->_maxx-1, A_NORMAL, 0, NULL);
+	mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, entry_win->_maxx-1, A_NORMAL, 0, NULL);
 	mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_NORMAL, 0, NULL);
 	*focus = new_i;
 
@@ -473,12 +477,11 @@ void trav_col(int new_i){
 	if(oob_flag > 0) (true_hover ? update_col(1, oob_flag-1, false) : update_col(0, oob_flag-1, false));
 
 	//highlight newly hovered upon entry/group
-	mvwchgat(entry_win, 1+e_hover-e_offset, 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
+	mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
 	mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_DIM, (true_hover ? 1 : 2), NULL);
 	if(!true_hover){ //a little extra work regarding group hover
-		e_offset = 0;
+		e_offset[g_hover] = 0;
 		update_col(1, 1, false);
-		e_hover = 0;
 	}
 
 	wrefresh(group_win);
@@ -488,7 +491,7 @@ void trav_col(int new_i){
 }
 
 int locateChar(char input){
-	int location = (true_hover ? e_hover : g_hover);
+	int location = (true_hover ? e_hover[g_hover] : g_hover);
 	bool fold_case = get_case_sensitivity();
 	char first_char;
 	int i;
@@ -523,7 +526,7 @@ int locateChar(char input){
 char *get_launch(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
-	char *path = get_epath(e[e_hover]);
+	char *path = get_epath(e[e_hover[g_hover]]);
 	bool quotes = get_gquotes(g[g_hover]);
 	char *full_command = malloc(sizeof(char) * BUF_LEN);
 

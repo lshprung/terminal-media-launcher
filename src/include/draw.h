@@ -6,7 +6,7 @@
 #define BUF_LEN 1024
 
 extern int g_hover;
-extern int e_hover;
+extern int *e_hover;
 extern struct group **g;
 extern struct entry **e;
 
