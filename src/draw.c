@@ -25,7 +25,7 @@ void draw_title();
 void draw_win(WINDOW *new, char *title);
 void fill_col(int mode); //0 = GROUP, 1 = ENTRY
 char *trim_name(char *name, char *path, int max_len);
-void update_col(int mode, int hl_where, bool resize); //0 = last, 1 = first; 0 = GROUP, 1 = ENTRY, 2 = INFO
+void update_col(int mode, int y_hl, bool resize); //mode: 0 = GROUP, 1 = ENTRY, 2 = INFO
 void switch_col();
 void trav_col(int new_i);
 int locateChar(char input);
@@ -112,14 +112,12 @@ int main(int argc, char **argv){
 	update_display(false);
 
 	//update highlighting for loaded location
-	if(true_hover){
-		i = e_hover[g_hover];
-		true_hover = 0;
-		trav_col(g_hover);
-		switch_col();
-		trav_col(i);
-	}
-	else trav_col(g_hover);
+	i = true_hover;
+	true_hover = 0;
+	trav_col(g_hover);
+	switch_col();
+	trav_col(e_hover[g_hover]);
+	true_hover = i;
 	update_display(true);
 
 	//drawing is done, now run a while loop to receive input (ESC ends this loop)
@@ -269,12 +267,12 @@ void update_display(bool resize){
 	draw_win(group_win, "GROUP");
 	draw_win(entry_win, "ENTRY");
 	draw_win(info_win, "INFO");
-	update_col(0, 1, resize);
+	update_col(0, group_win->_maxy-1, resize);
 
 	//start with hover on the first group, draw the entries from the selected group, true_hover is over the groups (rather than the entries) (do update after first draw, only after subsequent (resize) updates)
 	if(resize){
-		update_col(1, 1, resize);
-		update_col(2, 0, resize);
+		update_col(1, entry_win->_maxy-1, resize);
+		update_col(2, 1, resize);
 	}
 	curs_set(0); //hide the cursor
 	//move(3, (WIDTH/4)+10);
@@ -353,7 +351,7 @@ char *trim_name(char *name, char *path, int max_len){
 	return name;
 }
 
-void update_col(int mode, int hl_where, bool resize){
+void update_col(int mode, int y_hl, bool resize){
 	//mode 0 = group
 	//mode 1 = entry
 	//mode 2 = info
@@ -361,7 +359,6 @@ void update_col(int mode, int hl_where, bool resize){
 	WINDOW *col;
 	char *name;
 	int name_len;
-	int y_hl;
 	char *execution;
 
 	switch(mode){
@@ -387,8 +384,6 @@ void update_col(int mode, int hl_where, bool resize){
 		default:
 			return;
 	}
-
-	y_hl = (hl_where ? 1 : col->_maxy-1);
 
 	//reset the column window (including reboxing and redrawing the title)
 	wclear(col);
@@ -432,12 +427,12 @@ void update_col(int mode, int hl_where, bool resize){
 void switch_col(){
 	true_hover = (true_hover+1) % 2;
 	if(true_hover){
-		mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx-1, A_DIM, 1, NULL); //adjust group light
-		mvwchgat(entry_win, 1+e_hover[g_hover], 1, entry_win->_maxx-1, A_DIM, 2, NULL); //adjust entry light
+		mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_DIM, 1, NULL); //adjust group light
+		mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, entry_win->_maxx-1, A_DIM, 2, NULL); //adjust entry light
 	}
 	else{
-		mvwchgat(group_win, 1+g_hover, 1, group_win->_maxx-1, A_DIM, 2, NULL); //adjust group light
-		mvwchgat(entry_win, 1+e_hover[g_hover], 1, entry_win->_maxx-1, A_DIM, 1, NULL); //adjust entry light
+		mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_DIM, 2, NULL); //adjust group light
+		mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, entry_win->_maxx-1, A_DIM, 1, NULL); //adjust entry light
 	}
 	move(3, (WIDTH/4)+10);
 
@@ -474,19 +469,28 @@ void trav_col(int new_i){
 		oob_flag = 2;
 	}
 
-	if(oob_flag > 0) (true_hover ? update_col(1, oob_flag-1, false) : update_col(0, oob_flag-1, false));
+	// rewrite to not rely on oob_flag semantics
+	//if(oob_flag > 0) (true_hover ? update_col(1, oob_flag-1, false) : update_col(0, oob_flag-1, false));
+	if(oob_flag > 0){
+		if(true_hover){
+			update_col(1, (oob_flag == 1 ? entry_win->_maxy-1 : 1), false);
+		}
+		else{
+			update_col(0, (oob_flag == 1 ? entry_win->_maxy-1 : 1), false);
+		}
+	}
 
 	//highlight newly hovered upon entry/group
 	mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, entry_win->_maxx-1, A_DIM, (true_hover ? 2 : 1), NULL);
 	mvwchgat(group_win, 1+g_hover-g_offset, 1, group_win->_maxx-1, A_DIM, (true_hover ? 1 : 2), NULL);
 	if(!true_hover){ //a little extra work regarding group hover
 		e_offset[g_hover] = 0;
-		update_col(1, 1, false);
+		update_col(1, e_hover[g_hover]+1, false);
 	}
 
 	wrefresh(group_win);
 	wrefresh(entry_win);
-	update_col(2, 0, false);
+	update_col(2, 1, false);
 	return;
 }
 
