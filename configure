@@ -5755,7 +5755,8 @@ if test "${enable_embed_icon+set}" = set; then :
 fi
 
 if test "x$embed_icon" = "xyes"; then
-	if test -n "$ac_tool_prefix"; then
+	if test "x$build_windows" = "xyes"; then
+		if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}windres", so it can be a program name with args.
 set dummy ${ac_tool_prefix}windres; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -5847,11 +5848,14 @@ else
   WINDRES="$ac_cv_prog_WINDRES"
 fi
 
-	if ${WINDRES:+false} :; then :
+		if ${WINDRES:+false} :; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Cannot embed icon" >&5
 $as_echo "$as_me: WARNING: Cannot embed icon" >&2;}
-			  embed_icon=no
+				  embed_icon=no
 fi
+	else
+		embed_icon=no
+	fi
 fi
  if test "$embed_icon" = "yes"; then
   EMBED_ICON_TRUE=
