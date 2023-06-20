@@ -372,7 +372,7 @@ void update_col(int mode, int hl_where, bool resize){
 	wclear(col);
 	box(col, 0, 0);
 	wmove(col, 0, (col->_maxx - name_len)/2);
-	wprintw(col, name);
+	wprintw(col, "%s", name);
 	wrefresh(col);
 
 	//update certain info in the col only if not a resizing-related call
@@ -399,7 +399,7 @@ void update_col(int mode, int hl_where, bool resize){
 				execution[info_win->_maxx - 3] = '.';
 				execution[info_win->_maxx - 4] = '.';
 			}
-			mvwprintw(info_win, 1, 1, execution);
+			mvwprintw(info_win, 1, 1, "%s", execution);
 
 	}
 
