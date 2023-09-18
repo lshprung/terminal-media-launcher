@@ -342,7 +342,7 @@ char *trim_name(char *name, char *path, int max_len){
 	//group name and path are equivalent: special procedure
 	if(!(strcmp(name, path))){
 		//find relative path name
-		relative = strrchr(name, '/');
+		relative = strrchr(name, sep);
 		name = relative+1;
 		if(strlen(name) <= max_len) return name;
 	}
