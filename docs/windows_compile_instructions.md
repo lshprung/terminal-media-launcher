@@ -51,3 +51,13 @@ The resulting executable should launch without an error
 ---
 
 These instructions were written with 64-bit architecture in mind. Although I have not tested on a 32-bit architecture, I suppose these instructions would also work, as long as you replace every reference to `64` with `32`
+
+---
+
+## Building an Installer (WIP)
+
+Support for building an NSIS installer is in development (it currently will not work, as it is missing the installation of certain dependencies).
+
+1. Run `cd nsis`
+2. Run `makensis installer.nsi`
+3. Run the generated `terminal-media-launcher-Setup.exe` file

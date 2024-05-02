@@ -6133,7 +6133,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile docs/Makefile data/Makefile spec/Makefile spec/terminal-media-launcher.spec"
+ac_config_files="$ac_config_files Makefile src/Makefile docs/Makefile data/Makefile nsis/Makefile spec/Makefile spec/terminal-media-launcher.spec"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6892,6 +6892,7 @@ do
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "docs/Makefile") CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
     "data/Makefile") CONFIG_FILES="$CONFIG_FILES data/Makefile" ;;
+    "nsis/Makefile") CONFIG_FILES="$CONFIG_FILES nsis/Makefile" ;;
     "spec/Makefile") CONFIG_FILES="$CONFIG_FILES spec/Makefile" ;;
     "spec/terminal-media-launcher.spec") CONFIG_FILES="$CONFIG_FILES spec/terminal-media-launcher.spec" ;;
 
