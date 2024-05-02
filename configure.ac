@@ -1,4 +1,5 @@
 AC_INIT([terminal-media-launcher],[0.1])
+AC_SUBST([PACKAGE_TITLE], ["Terminal Media Launcher"])
 AC_CONFIG_SRCDIR([src/draw.c])
 #AC_CONFIG_HEADERS([config.h])
 
@@ -75,6 +76,7 @@ AC_CONFIG_FILES([Makefile
 			     docs/Makefile
 				 data/Makefile
 				 nsis/Makefile
+				 nsis/installer.nsi
 				 spec/Makefile
 				 spec/terminal-media-launcher.spec])
 AC_OUTPUT

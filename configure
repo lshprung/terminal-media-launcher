@@ -717,6 +717,7 @@ am__isrc
 INSTALL_DATA
 INSTALL_SCRIPT
 INSTALL_PROGRAM
+PACKAGE_TITLE
 target_alias
 host_alias
 build_alias
@@ -2536,6 +2537,8 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+
+PACKAGE_TITLE="Terminal Media Launcher"
 
 
 #AC_CONFIG_HEADERS([config.h])
@@ -6133,7 +6136,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile docs/Makefile data/Makefile nsis/Makefile spec/Makefile spec/terminal-media-launcher.spec"
+ac_config_files="$ac_config_files Makefile src/Makefile docs/Makefile data/Makefile nsis/Makefile nsis/installer.nsi spec/Makefile spec/terminal-media-launcher.spec"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6893,6 +6896,7 @@ do
     "docs/Makefile") CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
     "data/Makefile") CONFIG_FILES="$CONFIG_FILES data/Makefile" ;;
     "nsis/Makefile") CONFIG_FILES="$CONFIG_FILES nsis/Makefile" ;;
+    "nsis/installer.nsi") CONFIG_FILES="$CONFIG_FILES nsis/installer.nsi" ;;
     "spec/Makefile") CONFIG_FILES="$CONFIG_FILES spec/Makefile" ;;
     "spec/terminal-media-launcher.spec") CONFIG_FILES="$CONFIG_FILES spec/terminal-media-launcher.spec" ;;
 

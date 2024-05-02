@@ -27,4 +27,3 @@ desktop_DATA = $(PACKAGE_NAME).desktop
 icon_DATA = $(PACKAGE_NAME).svg
 
 endif
-

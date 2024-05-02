@@ -7,18 +7,18 @@
 
 ;-------------------------------------------------------------------------------
 ; Constants
-!define PRODUCT_NAME "Terminal Media Launcher"
+!define PRODUCT_NAME "@PACKAGE_TITLE@"
 !define PRODUCT_DESCRIPTION "TODO"
 !define COPYRIGHT "GNU GPLv3"
-!define PRODUCT_VERSION "0.1.0.0"
+!define PRODUCT_VERSION "@PACKAGE_VERSION@.0.0"
 !define SETUP_VERSION 1.0.0.0
 
 ;-------------------------------------------------------------------------------
 ; Attributes
-Name "terminal-media-launcher"
-OutFile "terminal-media-launcher-Setup.exe"
-InstallDir "$PROGRAMFILES\Terminal Media Launcher"
-InstallDirRegKey HKCU "Software\Louie S\Terminal Media Launcher" ""
+Name "@PACKAGE_NAME@"
+OutFile "@PACKAGE_NAME@-Setup.exe"
+InstallDir "$PROGRAMFILES\@PACKAGE_TITLE@"
+InstallDirRegKey HKCU "Software\Louie S\@PACKAGE_TITLE@" ""
 RequestExecutionLevel user ; user|highest|admin
 
 ;-------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ VIAddVersionKey "FileVersion" "${SETUP_VERSION}"
 ;-------------------------------------------------------------------------------
 ; Installer Pages
 !insertmacro MUI_PAGE_WELCOME
-;!insertmacro MUI_PAGE_LICENSE "${NSISDIR}\Docs\Modern UI\License.txt"
+!insertmacro MUI_PAGE_LICENSE "..\COPYING"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -62,7 +62,7 @@ VIAddVersionKey "FileVersion" "${SETUP_VERSION}"
 ; Installer Sections
 Section "My Application" MyApp
 	SetOutPath $INSTDIR
-	File "..\src\terminal-media-launcher.exe"
+	File "..\src\@PACKAGE_NAME@.exe"
 	;File "Readme.txt"
 	WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
@@ -70,7 +70,7 @@ SectionEnd
 ;-------------------------------------------------------------------------------
 ; Uninstaller Sections
 Section "Uninstall"
-	Delete "$INSTDIR\terminal-media-launcher.exe"
+	Delete "$INSTDIR\@PACKAGE_NAME@.exe"
 	Delete "$INSTDIR\Uninstall.exe"
 	; FIXME directory is not being uninstalled
 	RMDir "$INSTDIR"

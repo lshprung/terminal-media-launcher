@@ -58,6 +58,6 @@ These instructions were written with 64-bit architecture in mind. Although I hav
 
 Support for building an NSIS installer is in development (it currently will not work, as it is missing the installation of certain dependencies).
 
-1. Run `cd nsis`
-2. Run `makensis installer.nsi`
-3. Run the generated `terminal-media-launcher-Setup.exe` file
+1. First, follow the above instructions to compile the project
+2. Run `makensis nsis/installer.nsi`
+3. Run the generated `nsis/terminal-media-launcher-Setup.exe` file
