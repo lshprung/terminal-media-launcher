@@ -72,7 +72,6 @@ SectionEnd
 Section "Uninstall"
 	Delete "$INSTDIR\@PACKAGE_NAME@.exe"
 	Delete "$INSTDIR\Uninstall.exe"
-	; FIXME directory is not being uninstalled
 	RMDir "$INSTDIR"
 	;DeleteRegKey /ifempty HKCU "Software\Modern UI Test"
 SectionEnd
