@@ -222,7 +222,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = installer.nsi.in
-CLEANFILES = $(PACKAGE_NAME)-Setup.exe
+CLEANFILES = $(PACKAGE_NAME)-Setup.exe deps/*
+SEARCHPATH = $$PATH
+DEPENDENCIES = $(shell ./find_dlls.sh -q -s $(SEARCHPATH) '../src/$(PACKAGE_NAME).exe')
 all: all-am
 
 .SUFFIXES:
@@ -414,9 +416,11 @@ uninstall-am:
 
 
 .PHONY: installer
-$(PACKAGE_NAME)-Setup.exe: installer.nsi
-	makensis installer.nsi
 installer: $(PACKAGE_NAME)-Setup.exe
+$(PACKAGE_NAME)-Setup.exe: installer.nsi
+	mkdir -p deps
+	for file in $(DEPENDENCIES); do install "$$file" "deps/$$(basename "$$file")"; done
+	makensis installer.nsi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -54,10 +54,13 @@ These instructions were written with 64-bit architecture in mind. Although I hav
 
 ---
 
-## Building an Installer (WIP)
+## Building an Installer
 
 Support for building an NSIS installer is in development (it currently will not work, as it is missing the installation of certain dependencies).
 
 1. First, follow the above instructions to compile the project
 2. Run `cd nsis && make installer`
+    - You may want to specify a path to search for dlls that the project depends on. To do so, pass an argument to the make command, for example: `make installer SEARCHPATH="/usr/x86_64-w64-mingw32/bin"`
 3. Run the generated `nsis/terminal-media-launcher-Setup.exe` file
+
+Please note that support for building a Windows installer is still experimental!

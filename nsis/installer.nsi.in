@@ -63,7 +63,7 @@ VIAddVersionKey "FileVersion" "${SETUP_VERSION}"
 Section "My Application" MyApp
 	SetOutPath $INSTDIR
 	File "..\src\@PACKAGE_NAME@.exe"
-	;@DLL_DEPENDENCIES@
+	File "deps\*.*"
 	;File "Readme.txt"
 	WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
@@ -72,6 +72,7 @@ SectionEnd
 ; Uninstaller Sections
 Section "Uninstall"
 	Delete "$INSTDIR\@PACKAGE_NAME@.exe"
+	Delete "$INSTDIR\*.dll"
 	Delete "$INSTDIR\Uninstall.exe"
 	RMDir "$INSTDIR"
 	;DeleteRegKey /ifempty HKCU "Software\Modern UI Test"
