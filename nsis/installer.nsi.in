@@ -63,6 +63,7 @@ VIAddVersionKey "FileVersion" "${SETUP_VERSION}"
 Section "My Application" MyApp
 	SetOutPath $INSTDIR
 	File "..\src\@PACKAGE_NAME@.exe"
+	;@DLL_DEPENDENCIES@
 	;File "Readme.txt"
 	WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd

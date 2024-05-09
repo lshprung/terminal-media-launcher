@@ -413,6 +413,11 @@ uninstall-am:
 .PRECIOUS: Makefile
 
 
+.PHONY: installer
+$(PACKAGE_NAME)-Setup.exe: installer.nsi
+	makensis installer.nsi
+installer: $(PACKAGE_NAME)-Setup.exe
+
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
