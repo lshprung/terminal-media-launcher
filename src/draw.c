@@ -7,6 +7,7 @@
 
 #include <ncurses.h>
 
+#include "config.h"
 #include "include/cache.h"
 #include "include/draw.h"
 #include "include/entry.h"
@@ -20,6 +21,7 @@
 
 bool *handle_args(int argc, char **argv, char **cfg_path);
 void print_help(char *exec_name);
+void print_version();
 void update_display(bool resize);
 void draw_title();
 void draw_win(WINDOW *new, char *title);
@@ -62,6 +64,7 @@ int main(int argc, char **argv){
 	}
 	if(flags_set[1]) return(0);                         //exit if help flag was passed
 	if(flags_set[2]) freopen("/dev/null", "w", stdout); //turn off output if quiet flag was passed
+	if(flags_set[3]) return(0);                         // exit if version flag was passed
 	if(!flags_set[0]) strcpy(cfg_path, find_config());  //find_config if not config flag was passed
 
 	//Fill Groups
@@ -193,19 +196,21 @@ bool *handle_args(int argc, char **argv, char **cfg_path){
 	// 0 -> -c|--config
 	// 1 -> -h|--help
 	// 2 -> -q|--quiet
+	// 3 -> -v|--version
 
 	int opt = 0;
 	struct option long_options[] = {
-		{"config", required_argument, NULL, 'c'}, 
-		{"help",   no_argument,       NULL, 'h'},
-		{"quiet",  no_argument,       NULL, 'q'},
-		{0,        0,                 0,    0}
+		{"config",  required_argument, NULL, 'c'}, 
+		{"help",    no_argument,       NULL, 'h'},
+		{"quiet",   no_argument,       NULL, 'q'},
+		{"version", no_argument,       NULL, 'v'},
+		{0,         0,                 0,    0}
 	};
 	bool *flags_set = calloc(FLAG_COUNT, sizeof(bool));
 	int i = 0;
 
 	while(opt != -1){
-		opt = getopt_long(argc, argv, "c:hq", long_options, &i);
+		opt = getopt_long(argc, argv, "c:hqv", long_options, &i);
 		switch(opt){
 			case 0:
 				printf("Unknown long option '%s'", long_options[i].name);
@@ -225,6 +230,11 @@ bool *handle_args(int argc, char **argv, char **cfg_path){
 			case 'q':
 				flags_set[2] = true;
 				break;
+			case 'v':
+				print_version();
+				flags_set[3] = true;
+				opt = -1; // break out of the while loop
+				break;
 			case '?':
 				return NULL; // error parsing arguments
 			case -1:
@@ -241,9 +251,18 @@ void print_help(char *exec_name){
 	printf("Usage: %s [OPTION]\n", exec_name);
 	printf("Draw an Ncurses Menu to Launch Media from\n\n");
 
-	printf(" -c, --config=FILE	Specify a configuration file path\n");
-	printf(" -h, --help 		Print this help message\n");
-	printf(" -q, --quiet		Suppress stdout messages\n");
+	printf(" -c, --config=FILE    Specify a configuration file path\n");
+	printf(" -h, --help           Print this help message\n");
+	printf(" -q, --quiet          Suppress stdout messages\n");
+	printf(" -v, --version        Print version information and exit\n");
+}
+
+void print_version() {
+	printf("%s\n", PACKAGE_STRING);
+	printf("Copyright (C) Louie S.\n");
+	printf("License GPLv3: GNU GPL version 3 <https://gnu.org/licenses/gpl.html>\n");
+	printf("\n");
+	printf("Written by Louie S.\n");
 }
 
 void update_display(bool resize){
