@@ -23,7 +23,7 @@ On RHEL and RHEL-based systems:
 ```
 
 2. Download the latest `.tar.gz` release
-	- The source acquired from the source repository can also be compiled, but requires additional dependencies to build (`autoconf`, `automake`, `autoconf-archive`)
+	- The source can also be cloned down from git, but requires additional dependencies to build (`autoconf`, `automake`, `autoconf-archive`). Additionally, you must run `$ autoreconf -ivf` to generate the configure script.
 3. Run the commands below in the directory the repository was cloned into. This will build the binary `src/terminal-media-launcher`
 
 ```
