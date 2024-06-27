@@ -1,5 +1,6 @@
 #include <getopt.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -165,7 +166,7 @@ int main(int argc, char **argv){
 
 			case 10: //enter key
 				//create a green highlight over the launched entry
-				mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-1, A_DIM, 3, NULL);
+				mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-2, A_DIM, 3, NULL);
 				wrefresh(entry_win);
 
 				launch();
@@ -286,11 +287,11 @@ void update_display(bool resize){
 	draw_win(group_win, "GROUP");
 	draw_win(entry_win, "ENTRY");
 	draw_win(info_win, "INFO");
-	update_col(0, getmaxy(group_win)-1, resize);
+	update_col(0, getmaxy(group_win)-2, resize);
 
 	//start with hover on the first group, draw the entries from the selected group, true_hover is over the groups (rather than the entries) (do update after first draw, only after subsequent (resize) updates)
 	if(resize){
-		update_col(1, getmaxy(entry_win)-1, resize);
+		update_col(1, getmaxy(entry_win)-2, resize);
 		update_col(2, 1, resize);
 	}
 	curs_set(0); //hide the cursor
@@ -318,7 +319,7 @@ void draw_win(WINDOW *new, char *title){
 
 	box(new, 0, 0);
 	attron(A_UNDERLINE);
-	wmove(new, 0, (getmaxx(new) - title_len)/2);
+	wmove(new, 0, (getmaxx(new)-1 - title_len)/2);
 	wprintw(new, "%s", title);
 	attroff(A_UNDERLINE);
 	wrefresh(new);
@@ -334,7 +335,7 @@ void fill_col(int mode){
 	WINDOW *col = (mode ? entry_win : group_win);
 	int count = (mode ? e_count : g_count);
 	int offset = (mode ? e_offset[g_hover] : g_offset);
-	int max_len = getmaxx(col)-1; //longest possible string length that can be displayed in the window
+	int max_len = getmaxx(col)-2; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
 	int max_y = HEIGHT-(6+GAP_SIZE);
 	char *name;
@@ -407,7 +408,7 @@ void update_col(int mode, int y_hl, bool resize){
 	//reset the column window (including reboxing and redrawing the title)
 	wclear(col);
 	box(col, 0, 0);
-	wmove(col, 0, (getmaxx(col) - name_len)/2);
+	wmove(col, 0, (getmaxx(col)-1 - name_len)/2);
 	wprintw(col, "%s", name);
 	wrefresh(col);
 
@@ -415,25 +416,25 @@ void update_col(int mode, int y_hl, bool resize){
 	switch(mode){
 		case 0:
 			fill_col(0);
-			if(!resize) mvwchgat(group_win, y_hl, 1, getmaxx(group_win)-1, A_DIM, 2, NULL);
-			else mvwchgat(group_win, 1+g_hover-g_offset, 1, getmaxx(group_win)-1, A_DIM, (true_hover ? 1 : 2), NULL);
+			if(!resize) mvwchgat(group_win, y_hl, 1, getmaxx(group_win)-2, A_DIM, 2, NULL);
+			else mvwchgat(group_win, 1+g_hover-g_offset, 1, getmaxx(group_win)-2, A_DIM, (true_hover ? 1 : 2), NULL);
 			break;
 
 		case 1:
 			e_count = get_ecount(g[g_hover]);
 			e = get_entries(get_ghead(g[g_hover]), e_count);
 			fill_col(1);
-			if(!resize) mvwchgat(entry_win, y_hl, 1, getmaxx(entry_win)-1, A_DIM, 1, NULL);
-			else mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-1, A_DIM, (true_hover ? 2 : 1), NULL);
+			if(!resize) mvwchgat(entry_win, y_hl, 1, getmaxx(entry_win)-2, A_DIM, 1, NULL);
+			else mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-2, A_DIM, (true_hover ? 2 : 1), NULL);
 			break;
 
 		default:
 			execution = get_launch();
-			if(strlen(execution) >= getmaxx(info_win)){
-				execution[getmaxx(info_win) - 1] = '\0';
-				execution[getmaxx(info_win) - 2] = '.';
+			if(strlen(execution) >= getmaxx(info_win)-1){
+				execution[getmaxx(info_win) - 2] = '\0';
 				execution[getmaxx(info_win) - 3] = '.';
 				execution[getmaxx(info_win) - 4] = '.';
+				execution[getmaxx(info_win) - 5] = '.';
 			}
 			mvwprintw(info_win, 1, 1, "%s", execution);
 
@@ -446,12 +447,12 @@ void update_col(int mode, int y_hl, bool resize){
 void switch_col(){
 	true_hover = (true_hover+1) % 2;
 	if(true_hover){
-		mvwchgat(group_win, 1+g_hover-g_offset, 1, getmaxx(group_win)-1, A_DIM, 1, NULL); //adjust group light
-		mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-1, A_DIM, 2, NULL); //adjust entry light
+		mvwchgat(group_win, 1+g_hover-g_offset, 1, getmaxx(group_win)-2, A_DIM, 1, NULL); //adjust group light
+		mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-2, A_DIM, 2, NULL); //adjust entry light
 	}
 	else{
-		mvwchgat(group_win, 1+g_hover-g_offset, 1, getmaxx(group_win)-1, A_DIM, 2, NULL); //adjust group light
-		mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-1, A_DIM, 1, NULL); //adjust entry light
+		mvwchgat(group_win, 1+g_hover-g_offset, 1, getmaxx(group_win)-2, A_DIM, 2, NULL); //adjust group light
+		mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-2, A_DIM, 1, NULL); //adjust entry light
 	}
 	move(3, (WIDTH/4)+10);
 
@@ -473,8 +474,8 @@ void trav_col(int new_i){
 	if(new_i >= count) new_i = count-1;
 
 	//reset previously highlighted entry and group, change focus
-	mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-1, A_NORMAL, 0, NULL);
-	mvwchgat(group_win, 1+g_hover-g_offset, 1, getmaxx(group_win)-1, A_NORMAL, 0, NULL);
+	mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-2, A_NORMAL, 0, NULL);
+	mvwchgat(group_win, 1+g_hover-g_offset, 1, getmaxx(group_win)-2, A_NORMAL, 0, NULL);
 	*focus = new_i;
 
 
@@ -490,16 +491,16 @@ void trav_col(int new_i){
 
 	if(oob_flag > 0){
 		if(true_hover){
-			update_col(1, (oob_flag == 1 ? getmaxy(entry_win)-1 : 1), false);
+			update_col(1, (oob_flag == 1 ? getmaxy(entry_win)-2 : 1), false);
 		}
 		else{
-			update_col(0, (oob_flag == 1 ? getmaxy(entry_win)-1 : 1), false);
+			update_col(0, (oob_flag == 1 ? getmaxy(entry_win)-2 : 1), false);
 		}
 	}
 
 	//highlight newly hovered upon entry/group
-	mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-1, A_DIM, (true_hover ? 2 : 1), NULL);
-	mvwchgat(group_win, 1+g_hover-g_offset, 1, getmaxx(group_win)-1, A_DIM, (true_hover ? 1 : 2), NULL);
+	mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-2, A_DIM, (true_hover ? 2 : 1), NULL);
+	mvwchgat(group_win, 1+g_hover-g_offset, 1, getmaxx(group_win)-2, A_DIM, (true_hover ? 1 : 2), NULL);
 	if(!true_hover){ //a little extra work regarding group hover
 		update_col(1, e_hover[g_hover]+1, true);
 	}
