@@ -73,6 +73,7 @@ AM_CONDITIONAL([EMBED_ICON], [test "$embed_icon" = "yes"])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+                 actions/Makefile
 			     docs/Makefile
 				 data/Makefile
 				 nsis/Makefile

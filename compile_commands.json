@@ -1,0 +1,154 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-DHAVE_CONFIG_H",
+      "-I.",
+      "-I..",
+      "-D_DEFAULT_SOURCE",
+      "-D_XOPEN_SOURCE=600",
+      "-g",
+      "-O2",
+      "-c",
+      "-o",
+      "terminal_media_launcher-cache.o",
+      "cache.c"
+    ],
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/cache.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/terminal_media_launcher-cache.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-DHAVE_CONFIG_H",
+      "-I.",
+      "-I..",
+      "-D_DEFAULT_SOURCE",
+      "-D_XOPEN_SOURCE=600",
+      "-g",
+      "-O2",
+      "-c",
+      "-o",
+      "terminal_media_launcher-draw.o",
+      "draw.c"
+    ],
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/draw.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/terminal_media_launcher-draw.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-DHAVE_CONFIG_H",
+      "-I.",
+      "-I..",
+      "-D_DEFAULT_SOURCE",
+      "-D_XOPEN_SOURCE=600",
+      "-g",
+      "-O2",
+      "-c",
+      "-o",
+      "terminal_media_launcher-read_cfg.o",
+      "read_cfg.c"
+    ],
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/read_cfg.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/terminal_media_launcher-read_cfg.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-DHAVE_CONFIG_H",
+      "-I.",
+      "-I..",
+      "-D_DEFAULT_SOURCE",
+      "-D_XOPEN_SOURCE=600",
+      "-g",
+      "-O2",
+      "-c",
+      "-o",
+      "terminal_media_launcher-group.o",
+      "group.c"
+    ],
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/group.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/terminal_media_launcher-group.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-DHAVE_CONFIG_H",
+      "-I.",
+      "-I..",
+      "-D_DEFAULT_SOURCE",
+      "-D_XOPEN_SOURCE=600",
+      "-g",
+      "-O2",
+      "-c",
+      "-o",
+      "terminal_media_launcher-entry.o",
+      "entry.c"
+    ],
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/entry.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/terminal_media_launcher-entry.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-DHAVE_CONFIG_H",
+      "-I.",
+      "-I..",
+      "-D_DEFAULT_SOURCE",
+      "-D_XOPEN_SOURCE=600",
+      "-g",
+      "-O2",
+      "-c",
+      "-o",
+      "unix/terminal_media_launcher-cache.o",
+      "unix/cache.c"
+    ],
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/cache.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/terminal_media_launcher-cache.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-DHAVE_CONFIG_H",
+      "-I.",
+      "-I..",
+      "-D_DEFAULT_SOURCE",
+      "-D_XOPEN_SOURCE=600",
+      "-g",
+      "-O2",
+      "-c",
+      "-o",
+      "unix/terminal_media_launcher-draw.o",
+      "unix/draw.c"
+    ],
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/draw.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/terminal_media_launcher-draw.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-DHAVE_CONFIG_H",
+      "-I.",
+      "-I..",
+      "-D_DEFAULT_SOURCE",
+      "-D_XOPEN_SOURCE=600",
+      "-g",
+      "-O2",
+      "-c",
+      "-o",
+      "unix/terminal_media_launcher-read_cfg.o",
+      "unix/read_cfg.c"
+    ],
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/read_cfg.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/terminal_media_launcher-read_cfg.o"
+  }
+]
