@@ -1,4 +1,4 @@
-AC_INIT([terminal-media-launcher],[0.1])
+AC_INIT([terminal-media-launcher],[0.1.1])
 AC_SUBST([PACKAGE_TITLE], ["Terminal Media Launcher"])
 AC_CONFIG_SRCDIR([src/draw.c])
 AC_CONFIG_HEADERS([config.h])
