@@ -21,3 +21,21 @@ actions_build_deb: ../$(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
 	mkdir -p "build/$@/$(IMAGE_NAME)-$(IMAGE_VERSION)"
 	podman cp "$(CONTAINER_NAME)":/tmp/build/. "build/$@/$(IMAGE_NAME)-$(IMAGE_VERSION)/"
 	if [ "$(SAVE_CONTAINER)" = "no" ]; then podman kill "$(CONTAINER_NAME)" && podman rm "$(CONTAINER_NAME)"; fi
+
+.PHONY: actions_build_rpm
+actions_build_rpm: IMAGE_NAME = fedora
+actions_build_rpm: IMAGE_VERSION = rawhide
+actions_build_rpm: CONTAINER_NAME = $(PACKAGE_NAME)_$@_$(IMAGE_NAME)-$(IMAGE_VERSION)
+actions_build_rpm: DEPENDENCY_LIST = gcc ncurses-devel rpmdevtools rpmlint
+actions_build_rpm: ../$(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
+	podman pull docker.io/library/$(IMAGE_NAME):$(IMAGE_VERSION)
+	podman container exists "$(CONTAINER_NAME)" || podman run -itd --name "$(CONTAINER_NAME)" "$(IMAGE_NAME):$(IMAGE_VERSION)"
+	podman exec "$(CONTAINER_NAME)" yum makecache
+	podman exec "$(CONTAINER_NAME)" yum install -y $(DEPENDENCY_LIST)
+	podman exec "$(CONTAINER_NAME)" rpmdev-setuptree
+	podman cp "../$(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz" "$(CONTAINER_NAME)":/root/rpmbuild/SOURCES/
+	podman cp "../spec/$(PACKAGE_NAME).spec" "$(CONTAINER_NAME)":/root/rpmbuild/SPECS/
+	podman exec "$(CONTAINER_NAME)" rpmbuild -ba /root/rpmbuild/SPECS/$(PACKAGE_NAME).spec
+	mkdir -p "build/$@/$(IMAGE_NAME)-$(IMAGE_VERSION)"
+	podman cp "$(CONTAINER_NAME)":/root/rpmbuild/. "build/$@/$(IMAGE_NAME)-$(IMAGE_VERSION)/"
+	if [ "$(SAVE_CONTAINER)" = "no" ]; then podman kill "$(CONTAINER_NAME)" && podman rm "$(CONTAINER_NAME)"; fi

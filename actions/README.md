@@ -7,6 +7,7 @@ Usage: make TARGET [OPTIONS]
 
 targets:
   actions_build_deb    build a deb package
+  actions_build_rpm    build a rpm package
 
 options:
   CONTAINER_NAME=...         specify a container name
