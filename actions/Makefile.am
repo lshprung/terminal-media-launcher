@@ -20,4 +20,4 @@ actions_build_deb: ../$(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
 	podman exec -w /tmp/build "$(CONTAINER_NAME)" debmake -y -a $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz -i debuild $(DEBUILD_ARGS)
 	mkdir -p "build/$@/$(IMAGE_NAME)-$(IMAGE_VERSION)"
 	podman cp "$(CONTAINER_NAME)":/tmp/build/. "build/$@/$(IMAGE_NAME)-$(IMAGE_VERSION)/"
-	test "$(SAVE_CONTAINER)" = "no" && (podman kill "$(CONTAINER_NAME)" && podman rm "$(CONTAINER_NAME)")
+	if [ "$(SAVE_CONTAINER)" = "no" ]; then podman kill "$(CONTAINER_NAME)" && podman rm "$(CONTAINER_NAME)"; fi
