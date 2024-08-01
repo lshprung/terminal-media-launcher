@@ -4,7 +4,7 @@
 terminal-media-launcher \- terminal media launcher
 
 .SH SYNOPSIS
-terminal-media-launcher [-c|--config PATH]
+terminal-media-launcher [OPTION]...
 
 .SH DESCRIPTION
 \fBterminal-media-launcher\fR is a TUI application designed to help streamline launching applications and other media. It aims to be a fast and minimal command line frontend with a Unix-like approach to setup and configuration. The program looks for a configuration file listing different groups of media and creates an ncurses menu from which the user can launch their media files.
@@ -25,6 +25,11 @@ Print a help message
 \fB-q\fR, \fB--quiet\fR
 .RS
 Suppress stdout messages
+.RE
+
+\fB-v\fR, \fB--version\fR
+.RS
+Print version information and exit
 .RE
 
 .SH KEY BINDINGS
