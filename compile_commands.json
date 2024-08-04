@@ -7,6 +7,7 @@
       "-I..",
       "-D_DEFAULT_SOURCE",
       "-D_XOPEN_SOURCE=600",
+      "-I/usr/include/lua5.1",
       "-g",
       "-O2",
       "-c",
@@ -14,9 +15,9 @@
       "terminal_media_launcher-cache.o",
       "cache.c"
     ],
-    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
-    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/cache.c",
-    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/terminal_media_launcher-cache.o"
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/src/cache.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/src/terminal_media_launcher-cache.o"
   },
   {
     "arguments": [
@@ -26,6 +27,7 @@
       "-I..",
       "-D_DEFAULT_SOURCE",
       "-D_XOPEN_SOURCE=600",
+      "-I/usr/include/lua5.1",
       "-g",
       "-O2",
       "-c",
@@ -33,9 +35,9 @@
       "terminal_media_launcher-draw.o",
       "draw.c"
     ],
-    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
-    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/draw.c",
-    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/terminal_media_launcher-draw.o"
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/src/draw.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/src/terminal_media_launcher-draw.o"
   },
   {
     "arguments": [
@@ -45,6 +47,7 @@
       "-I..",
       "-D_DEFAULT_SOURCE",
       "-D_XOPEN_SOURCE=600",
+      "-I/usr/include/lua5.1",
       "-g",
       "-O2",
       "-c",
@@ -52,9 +55,9 @@
       "terminal_media_launcher-read_cfg.o",
       "read_cfg.c"
     ],
-    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
-    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/read_cfg.c",
-    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/terminal_media_launcher-read_cfg.o"
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/src/read_cfg.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/src/terminal_media_launcher-read_cfg.o"
   },
   {
     "arguments": [
@@ -64,6 +67,7 @@
       "-I..",
       "-D_DEFAULT_SOURCE",
       "-D_XOPEN_SOURCE=600",
+      "-I/usr/include/lua5.1",
       "-g",
       "-O2",
       "-c",
@@ -71,9 +75,9 @@
       "terminal_media_launcher-group.o",
       "group.c"
     ],
-    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
-    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/group.c",
-    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/terminal_media_launcher-group.o"
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/src/group.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/src/terminal_media_launcher-group.o"
   },
   {
     "arguments": [
@@ -83,6 +87,7 @@
       "-I..",
       "-D_DEFAULT_SOURCE",
       "-D_XOPEN_SOURCE=600",
+      "-I/usr/include/lua5.1",
       "-g",
       "-O2",
       "-c",
@@ -90,9 +95,9 @@
       "terminal_media_launcher-entry.o",
       "entry.c"
     ],
-    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
-    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/entry.c",
-    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/terminal_media_launcher-entry.o"
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/src/entry.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/src/terminal_media_launcher-entry.o"
   },
   {
     "arguments": [
@@ -102,6 +107,7 @@
       "-I..",
       "-D_DEFAULT_SOURCE",
       "-D_XOPEN_SOURCE=600",
+      "-I/usr/include/lua5.1",
       "-g",
       "-O2",
       "-c",
@@ -109,9 +115,9 @@
       "unix/terminal_media_launcher-cache.o",
       "unix/cache.c"
     ],
-    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
-    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/cache.c",
-    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/terminal_media_launcher-cache.o"
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/src/unix/cache.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/src/unix/terminal_media_launcher-cache.o"
   },
   {
     "arguments": [
@@ -121,6 +127,7 @@
       "-I..",
       "-D_DEFAULT_SOURCE",
       "-D_XOPEN_SOURCE=600",
+      "-I/usr/include/lua5.1",
       "-g",
       "-O2",
       "-c",
@@ -128,9 +135,9 @@
       "unix/terminal_media_launcher-draw.o",
       "unix/draw.c"
     ],
-    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
-    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/draw.c",
-    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/terminal_media_launcher-draw.o"
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/src/unix/draw.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/src/unix/terminal_media_launcher-draw.o"
   },
   {
     "arguments": [
@@ -140,6 +147,7 @@
       "-I..",
       "-D_DEFAULT_SOURCE",
       "-D_XOPEN_SOURCE=600",
+      "-I/usr/include/lua5.1",
       "-g",
       "-O2",
       "-c",
@@ -147,8 +155,8 @@
       "unix/terminal_media_launcher-read_cfg.o",
       "unix/read_cfg.c"
     ],
-    "directory": "/home/louie/Documents/code/terminal-media-launcher/source/src",
-    "file": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/read_cfg.c",
-    "output": "/home/louie/Documents/code/terminal-media-launcher/source/src/unix/terminal_media_launcher-read_cfg.o"
+    "directory": "/home/louie/Documents/code/terminal-media-launcher/src",
+    "file": "/home/louie/Documents/code/terminal-media-launcher/src/unix/read_cfg.c",
+    "output": "/home/louie/Documents/code/terminal-media-launcher/src/unix/terminal_media_launcher-read_cfg.o"
   }
 ]

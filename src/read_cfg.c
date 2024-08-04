@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <lua.h>
+#include <lauxlib.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,12 +45,31 @@ bool cfg_interp(char *path){
 	int i=0;
 	int j;
 
+	// check if file path exists
 	fp = fopen(path, "r");
 	if(fp == NULL){
 		printf("Error: Invalid Configuration Path \"%s\"\n", path);
 		return false;
 	}
+	fclose(fp);
 
+	// load lua configuration
+	lua_State *L = luaL_newstate();
+	int config_load_status = luaL_dofile(L, path);
+	if(config_load_status != 0) {
+		printf("Error: could not load configuration \"%s\"\nis there a syntax error?\n", path);
+		return false;
+	}
+
+	// demo
+	lua_getglobal(L, "Message");
+	const char *message = lua_tostring(L, -1);
+	printf("message: %s\n", message);
+
+	lua_close(L);
+	return true;
+
+	/* --- Old code --- */
 	//build the options array
 	char **options = malloc(sizeof(char *) * OPTION_CNT);
 	options[0] = "add";

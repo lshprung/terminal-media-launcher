@@ -20,7 +20,7 @@ char *find_config(){
 	char choices[check_count][BUF_LEN];
 	int i;
 
-	sprintf(choices[0], "%s%cterminal-media-launcher%cconfig", appdata, sep, sep);
+	sprintf(choices[0], "%s%cterminal-media-launcher%cconfig.lua", appdata, sep, sep);
 
 	for(i = 0; i < check_count; i++){
 		strcpy(path, choices[i]);
@@ -72,7 +72,7 @@ void mkconfig_wizard(char *path){
 	sprintf(path, "%s%cterminal-media-launcher%c", appdata, sep, sep);
 	mkdir(path);
 
-	sprintf(path, "%s%cterminal-media-launcher%cconfig", appdata, sep, sep);
+	sprintf(path, "%s%cterminal-media-launcher%cconfig.lua", appdata, sep, sep);
 
 	//open file for writing, make sure non-NULL
 	fp = fopen(path, "w");
