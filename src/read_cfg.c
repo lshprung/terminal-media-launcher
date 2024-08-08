@@ -78,8 +78,16 @@ bool cfg_interp(char *path){
 		if(lua_type(L, -2) != LUA_TSTRING) continue; // skip if invalid key
 		group_name = lua_tostring(L, -2);
 		group_add(group_name, NULL);
-		// add each entry
+		// check for a launcher
 		if(lua_type(L, -1) != LUA_TTABLE) continue;  // skip if invalid value
+		lua_pushstring(L, "Launcher");
+		lua_gettable(L, -2);
+		if(lua_type(L, -1) == LUA_TSTRING) {
+			// FIXME the groups '''API''' I built might need some improvements in order for this to not be a headache
+			//set_gprog(GROUP *g, lua_tostring(L, -1))
+		}
+		lua_pop(L, 1);
+		// add each entry
 		lua_pushstring(L, "Entries");
 		lua_gettable(L, -2);
 		j = lua_gettop(L);
