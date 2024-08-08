@@ -55,16 +55,51 @@ bool cfg_interp(char *path){
 
 	// load lua configuration
 	lua_State *L = luaL_newstate();
-	int config_load_status = luaL_dofile(L, path);
+	int config_load_status = luaL_loadfile(L, path);
 	if(config_load_status != 0) {
 		printf("Error: could not load configuration \"%s\"\nis there a syntax error?\n", path);
 		return false;
 	}
 
+	// set up base configuration variables
+	// TODO set helper variables and functions (e.g., so that Groups table doesn't need to be manually created in the user's config)
+	//lua_newtable(L);
+	//lua_setglobal(L, "Groups");
+	lua_pcall(L, 0, 0, 0);
+
 	// demo
-	lua_getglobal(L, "Message");
-	const char *message = lua_tostring(L, -1);
-	printf("message: %s\n", message);
+	lua_getglobal(L, "Groups");
+	i = lua_gettop(L);
+	// add each group
+	const char *group_name;
+	lua_pushnil(L);
+	while(lua_next(L, i)) {
+		// the key is index -2, value is -1
+		if(lua_type(L, -2) != LUA_TSTRING) continue; // skip if invalid key
+		group_name = lua_tostring(L, -2);
+		group_add(group_name, NULL);
+		// add each entry
+		if(lua_type(L, -1) != LUA_TTABLE) continue;  // skip if invalid value
+		lua_pushstring(L, "Entries");
+		lua_gettable(L, -2);
+		j = lua_gettop(L);
+		lua_pushnil(L);
+		while(lua_next(L, j)) {
+			if(lua_type(L, -1) != LUA_TSTRING) continue; // skip if invalid value
+			handle_fname(lua_tostring(L, -1), group_name, false, true, NULL, -1);
+			lua_pop(L, 1);
+		}
+		lua_pop(L, 2);
+	}
+
+	//lua_getfield(L, -1, "Pictures");
+	//lua_getfield(L, -1, "Entries");
+	//lua_rawgeti(L, -1, 1);
+	//printf("message: %d\n", (int)lua_tonumber(L, -1));
+	//lua_rawgeti(L, -2, 2);
+	//printf("message: %d\n", (int)lua_tonumber(L, -1));
+	//lua_rawgeti(L, -3, 3);
+	//printf("message: %d\n", (int)lua_tonumber(L, -1));
 
 	lua_close(L);
 	return true;
@@ -89,6 +124,7 @@ bool cfg_interp(char *path){
 
 	//Read each line of "config"
 	while(fgets(buffer, BUF_LEN, fp)){
+		printf("%d\n", i);
 		i++;
 		check_line(buffer, options, i);
 	}

@@ -1,6 +1,8 @@
 #ifndef READ_CFG_H
 #define READ_CFG_H
 
+#include <stdbool.h>
+
 #define BUF_LEN 1024
 
 bool cfg_interp(char *path);
