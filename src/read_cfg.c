@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <lua.h>
+#include <lualib.h>
 #include <lauxlib.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -55,9 +56,11 @@ bool cfg_interp(char *path){
 
 	// load lua configuration
 	lua_State *L = luaL_newstate();
-	int config_load_status = luaL_loadfile(L, path);
+	luaL_openlibs(L); // allow for standard library to be used
+	int config_load_status = luaL_dofile(L, path);
 	if(config_load_status != 0) {
-		printf("Error: could not load configuration \"%s\"\nis there a syntax error?\n", path);
+		printf("Error: could not load configuration \"%s\"\n", path);
+		lua_error(L);
 		return false;
 	}
 
@@ -65,11 +68,15 @@ bool cfg_interp(char *path){
 	// TODO set helper variables and functions (e.g., so that Groups table doesn't need to be manually created in the user's config)
 	//lua_newtable(L);
 	//lua_setglobal(L, "Groups");
-	lua_pcall(L, 0, 0, 0);
+	//lua_pcall(L, 0, 0, 0);
 
 	// demo
 	lua_getglobal(L, "Groups");
 	i = lua_gettop(L);
+	if(lua_type(L, i) != LUA_TTABLE) {
+		printf("Error in config: 'Groups' should be Table, is actually %s\n", lua_typename(L, lua_type(L, i)));
+		return 1;
+	}
 	// add each group
 	const char *group_name;
 	lua_pushnil(L);
