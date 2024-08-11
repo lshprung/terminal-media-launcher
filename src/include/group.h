@@ -1,17 +1,13 @@
 #ifndef GROUP_H
 #define GROUP_H
 
+#include <stdbool.h>
+
+#include "entry.h"
+
 typedef struct group GROUP;
 
-GROUP *create_group(char *new_name);
-
-void group_add(char *gname, ENTRY *addme);
-
-void group_rm(GROUP *g);
-
-void clean_groups(); //remove empty groups from linked list
-
-GROUP **get_groups();
+GROUP *create_group(const char *new_name, const int entry_count);
 
 char *get_gname(GROUP *g);
 
@@ -23,18 +19,12 @@ char *get_gflags(GROUP *g);
 
 void set_gflags(GROUP *g, char *p);
 
-ENTRY *get_ghead(GROUP *g);
+ENTRY **get_gentries(GROUP *g);
+
+void set_gentry(GROUP *g, int entry_index, ENTRY *new_entry);
 
 int get_ecount(GROUP *g);
 
 void set_ecount(GROUP *g, int new_count); //for use in hiding entries
-
-void set_gquotes(GROUP *g, bool b);
-
-bool get_gquotes(GROUP *g);
-
-int get_gcount();
-
-void group_debug(); //debug function to output all groups
 
 #endif 
