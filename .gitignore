@@ -58,7 +58,10 @@ Makefile
 config.h
 nsis/installer.nsi
 spec/terminal-media-launcher.spec
+src/icon/*.res
 src/terminal-media-launcher
+src/*.dll
+src/*.exe
 src/*.o
 src/unix/*.o
 src/windows/*.o

@@ -6,10 +6,10 @@
 #include "../include/group.h"
 
 void launch(){
+	ENTRY **e = get_gentries(g[g_hover]);
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
 	char *path = get_epath(e[e_hover[g_hover]]);
-	bool quotes = get_gquotes(g[g_hover]);
 	char file[BUF_LEN];
 	char params[BUF_LEN];
 
@@ -24,9 +24,7 @@ void launch(){
 	}
 
 	else{
-		if(quotes) strcat(file, "\"");
 		strcat(file, program);
-		if(quotes) strcat(file, "\"");
 
 		params[0] = '\0';
 		if(flags[0] != '\0'){
