@@ -24,9 +24,11 @@
 //private
 //void check_line(char *buffer, char **options, int ln);
 //int check_option(char *arg, char **options);
-int key_count(lua_State *L, int table_stack_index); // counts the number of keys in a table
+int get_group_count(lua_State *L, int table_stack_index); // counts the number of valid groups
+int get_entry_count(lua_State *L, int table_stack_index); // counts the number of valid entries for a group
 void add_groups(lua_State *L, int table_stack_index, GROUP ***g);
 void add_entries(lua_State *L, int table_stack_index, GROUP *g);
+void stack_debug(lua_State *L);
 
 //turn on or off sorting (A-Z); On by default
 bool sort = true;
@@ -80,7 +82,7 @@ GROUP **cfg_interp(char *path, int *group_count){
 	}
 
 	// create the group array
-	*group_count = key_count(L, i);
+	*group_count = get_group_count(L, i);
 	g = malloc(sizeof(GROUP *) * (*group_count));
 
 	// add each group (which also adds each entry to each group)
@@ -102,15 +104,43 @@ void refer_to_doc(){
 	return;
 }
 
-int key_count(lua_State *L, int table_stack_index) {
+int get_group_count(lua_State *L, int table_stack_index) {
 	int output = 0;
+	int entry_table_stack_index;
+	const char *group_name;
 
 	lua_pushnil(L);
 	while(lua_next(L, table_stack_index)) {
 		// uses 'key' (at index -2) and 'value' (at index -1)
-		if(lua_type(L, -2) == LUA_TSTRING) ++output;
-		lua_pop(L, 1);
+		if(lua_type(L, -2) == LUA_TSTRING && lua_type(L, -1) == LUA_TTABLE) {
+			// check validity of this group
+			group_name = lua_tostring(L, -2);
+			if(group_name != NULL) {
+				// check that the Entries table for this group is not empty
+				lua_pushstring(L, "Entries");
+				lua_gettable(L, -2);
+				entry_table_stack_index = lua_gettop(L);
+				if(lua_type(L, entry_table_stack_index) == LUA_TTABLE
+						&& get_entry_count(L, entry_table_stack_index) > 0)
+					++output;
+			}
+		}
+		// pop the top of the stack down to the key of the group
+		lua_pop(L, lua_gettop(L)-table_stack_index-1);
 	}
+
+	return output;
+}
+
+int get_entry_count(lua_State *L, int table_stack_index) {
+	int i = 1;
+	int output = 0;
+
+	do {
+		lua_rawgeti(L, table_stack_index, i);
+		if(lua_type(L, -1) == LUA_TSTRING) ++output;
+		++i;
+	} while(lua_type(L, -1) != LUA_TNIL);
 
 	return output;
 }
@@ -118,6 +148,7 @@ int key_count(lua_State *L, int table_stack_index) {
 void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 	const char *group_name;
 	int entry_table_stack_index;
+	int entry_count;
 	int i;
 
 	lua_pushnil(L);
@@ -130,20 +161,31 @@ void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 			if(group_name != NULL) {
 				// push the Entries table on the stack (to get entry information)
 				lua_pushstring(L, "Entries");
+
 				// get table Groups.TABLE_NAME.Entries
 				lua_gettable(L, -2);
 				entry_table_stack_index = lua_gettop(L);
+
 				// check that 'Entries' is a table
 				if(lua_type(L, entry_table_stack_index) != LUA_TTABLE) {
 					printf("Error in config: 'Entries' should be Table, is actually %s\n", lua_typename(L, lua_type(L, entry_table_stack_index)));
 					exit(1);
 				}
-				(*g)[i] = create_group(group_name, key_count(L, entry_table_stack_index));
-				// add entries to this group
-				add_entries(L, entry_table_stack_index, (*g)[i]);
+
+				entry_count = get_entry_count(L, entry_table_stack_index);
+				// check that the group has at least 1 entry
+				if(entry_count <= 0)
+					printf("Skipping empty group '%s'\n", group_name);
+					
+				else {
+					(*g)[i] = create_group(group_name, entry_count);
+					// add entries to this group
+					add_entries(L, entry_table_stack_index, (*g)[i]);
+				}
 			}
 		}
-		lua_pop(L, 1);
+		// pop the top of the stack down to the key of the group
+		lua_pop(L, lua_gettop(L)-table_stack_index-1);
 		++i;
 	}
 }
@@ -166,7 +208,13 @@ void add_entries(lua_State *L, int table_stack_index, GROUP *g) {
 		lua_pop(L, 1);
 		++i;
 	}
+}
 
-	// one last pop to pop the key off
-	lua_pop(L, 1);
+void stack_debug(lua_State *L) {
+	int i;
+
+	printf("DEBUGGING STACK:\n");
+	for(i = 1; i <= lua_gettop(L); ++i) {
+		printf("\t%d - %s\n", i, lua_typename(L, lua_type(L, i)));
+	}
 }

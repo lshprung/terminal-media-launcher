@@ -80,16 +80,9 @@ void set_ecount(GROUP *g, int new_count){
 	g->entry_count = new_count;
 }
 
-/*
-void group_debug(){
-	GROUP *trav = groups_head;
-	
-	while(trav != NULL){
-		entry_debug(trav->head);
-		printf("\tfrom group %s\n", trav->name);
-		trav = trav->next;
-	}
-
-	return;
+void group_debug(GROUP *g){
+	printf("Entering group: %s\n", get_gname(g));
+	printf("\tProgram:     %s\n", get_gprog(g));
+	printf("\tFlags:       %s\n", get_gflags(g));
+	printf("\tEntry Count: %d\n", get_ecount(g));
 }
-*/

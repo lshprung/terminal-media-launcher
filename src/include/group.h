@@ -27,4 +27,7 @@ int get_ecount(GROUP *g);
 
 void set_ecount(GROUP *g, int new_count); //for use in hiding entries
 
+// print all group and entry information
+void group_debug(GROUP *g);
+
 #endif 
