@@ -147,7 +147,8 @@ int get_entry_count(lua_State *L, int table_stack_index) {
 
 void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 	const char *group_name;
-	int entry_table_stack_index;
+	int group_table_index;       // index of Groups.TABLE_NAME
+	int entry_table_stack_index; // index of Groups.TABLE_NAME.Entries
 	int entry_count;
 	int i;
 
@@ -158,12 +159,13 @@ void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 		// looking at Groups.TABLE_NAME
 		if(lua_type(L, -2) == LUA_TSTRING && lua_type(L, -1) == LUA_TTABLE) {
 			group_name = lua_tostring(L, -2);
+			group_table_index = lua_gettop(L);
 			if(group_name != NULL) {
 				// push the Entries table on the stack (to get entry information)
 				lua_pushstring(L, "Entries");
 
 				// get table Groups.TABLE_NAME.Entries
-				lua_gettable(L, -2);
+				lua_gettable(L, group_table_index);
 				entry_table_stack_index = lua_gettop(L);
 
 				// check that 'Entries' is a table
@@ -181,6 +183,14 @@ void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 					(*g)[i] = create_group(group_name, entry_count);
 					// add entries to this group
 					add_entries(L, entry_table_stack_index, (*g)[i]);
+				}
+
+				// set the launcher, if applicable
+				lua_pushstring(L, "Launcher");
+				lua_gettable(L, group_table_index);
+				printf("Found launcher: %s\n", lua_tostring(L, -1));
+				if(lua_type(L, -1) == LUA_TSTRING) {
+					set_gprog((*g)[i], lua_tostring(L, -1));
 				}
 			}
 		}

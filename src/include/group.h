@@ -13,7 +13,7 @@ char *get_gname(GROUP *g);
 
 char *get_gprog(GROUP *g);
 
-void set_gprog(GROUP *g, char *p);
+void set_gprog(GROUP *g, const char *p);
 
 char *get_gflags(GROUP *g);
 

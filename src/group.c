@@ -44,7 +44,7 @@ char *get_gprog(GROUP *g){
 	return g->program;
 }
 
-void set_gprog(GROUP *g, char *p){
+void set_gprog(GROUP *g, const char *p){
 	assert(g != NULL);
 	strcpy(g->program, p);
 	return;
