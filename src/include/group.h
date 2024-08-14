@@ -17,7 +17,7 @@ void set_gprog(GROUP *g, const char *p);
 
 char *get_gflags(GROUP *g);
 
-void set_gflags(GROUP *g, char *p);
+void set_gflags(GROUP *g, const char *p);
 
 ENTRY **get_gentries(GROUP *g);
 

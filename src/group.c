@@ -55,7 +55,7 @@ char *get_gflags(GROUP *g){
 	return g->flags;
 }
 
-void set_gflags(GROUP *g, char *p){
+void set_gflags(GROUP *g, const char *p){
 	assert(g != NULL);
 	strcpy(g->flags, p);
 }

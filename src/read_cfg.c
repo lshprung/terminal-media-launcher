@@ -188,9 +188,15 @@ void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 				// set the launcher, if applicable
 				lua_pushstring(L, "Launcher");
 				lua_gettable(L, group_table_index);
-				printf("Found launcher: %s\n", lua_tostring(L, -1));
 				if(lua_type(L, -1) == LUA_TSTRING) {
 					set_gprog((*g)[i], lua_tostring(L, -1));
+				}
+
+				// set the launcher flags, if applicable
+				lua_pushstring(L, "Flags");
+				lua_gettable(L, group_table_index);
+				if(lua_type(L, -1) == LUA_TSTRING) {
+					set_gflags((*g)[i], lua_tostring(L, -1));
 				}
 			}
 		}
