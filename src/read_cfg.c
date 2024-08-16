@@ -31,7 +31,7 @@ void add_groups(lua_State *L, int table_stack_index, GROUP ***g);
 void add_entries(lua_State *L, int table_stack_index, GROUP *g);
 void stack_debug(lua_State *L);
 
-//turn on or off sorting (A-Z); On by default
+//turn on or off sorting for entries (A-Z); On by default
 // TODO allow specifying whether to sort groups or entries (or both, or none)
 bool sort = true;
 
@@ -82,6 +82,7 @@ GROUP **cfg_interp(char *path, int *group_count){
 		// parse settings
 		get_settings(L, i);
 	}
+	lua_pop(L, lua_gettop(L));
 
 	// open Groups table
 	lua_getglobal(L, "Groups");
@@ -93,7 +94,10 @@ GROUP **cfg_interp(char *path, int *group_count){
 
 	// create the group array
 	*group_count = get_group_count(L, i);
-	if(*group_count <= 0) g = NULL;
+	if(*group_count <= 0) {
+		printf("Error: No Groups!\n");
+		g = NULL;
+	}
 	else {
 		g = malloc(sizeof(GROUP *) * (*group_count));
 
@@ -146,30 +150,34 @@ void get_settings(lua_State *L, int table_stack_index) {
 }
 
 int get_group_count(lua_State *L, int table_stack_index) {
+	int i = 1;
 	int output = 0;
+	int group_table_stack_index;
 	int entry_table_stack_index;
 	const char *group_name;
 
-	lua_pushnil(L);
-	while(lua_next(L, table_stack_index)) {
-		// uses 'key' (at index -2) and 'value' (at index -1)
-		if(lua_type(L, -2) == LUA_TSTRING && lua_type(L, -1) == LUA_TTABLE) {
+	do {
+		lua_rawgeti(L, table_stack_index, i);
+		group_table_stack_index = lua_gettop(L);
+		if(lua_type(L, group_table_stack_index) == LUA_TTABLE) {
 			// check validity of this group
-			group_name = lua_tostring(L, -2);
+			lua_pushstring(L, "name");
+			lua_gettable(L, group_table_stack_index);
+			group_name = lua_tostring(L, -1);
 			if(group_name != NULL) {
 				// check that the Entries table for this group is not empty
 				lua_pushstring(L, "Entries");
-				lua_gettable(L, -2);
+				lua_gettable(L, group_table_stack_index);
 				entry_table_stack_index = lua_gettop(L);
 				if(lua_type(L, entry_table_stack_index) == LUA_TTABLE
 						&& get_entry_count(L, entry_table_stack_index) > 0)
 					++output;
 			}
 		}
-		// pop the top of the stack down to the key of the group
-		lua_pop(L, lua_gettop(L)-table_stack_index-1);
-	}
+		++i;
+	} while(lua_type(L, group_table_stack_index) != LUA_TNIL);
 
+	lua_pop(L, lua_gettop(L)-table_stack_index-1);
 	return output;
 }
 
@@ -183,35 +191,38 @@ int get_entry_count(lua_State *L, int table_stack_index) {
 		++i;
 	} while(lua_type(L, -1) != LUA_TNIL);
 
+	lua_pop(L, lua_gettop(L)-table_stack_index-1);
 	return output;
 }
 
 void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 	const char *group_name;
-	int group_table_index;       // index of Groups.TABLE_NAME
+	int group_table_stack_index; // index of Groups.TABLE_NAME
 	int entry_table_stack_index; // index of Groups.TABLE_NAME.Entries
 	int entry_count;
-	int i;
+	char sort_cmd_lua[BUF_LEN]; // used to store the lua call to table.sort
+	int i = 1; // index in lua table
+	int count = 0; // index in C struct
 
 	// sort the groups, if necessary
-	//if(sort) {
-	//	luaL_dostring(L, "table.sort(Groups)");
-	//}
+	if(sort) {
+		luaL_dostring(L, "table.sort(Groups)");
+	}
 
-	lua_pushnil(L);
-	i = 0;
-	while(lua_next(L, table_stack_index)) {
-		// uses 'key' (at index -2) and 'value' (at index -1)
-		// looking at Groups.TABLE_NAME
-		if(lua_type(L, -2) == LUA_TSTRING && lua_type(L, -1) == LUA_TTABLE) {
-			group_name = lua_tostring(L, -2);
-			group_table_index = lua_gettop(L);
+	do {
+		lua_rawgeti(L, table_stack_index, i);
+		group_table_stack_index = lua_gettop(L);
+		if(lua_type(L, group_table_stack_index) == LUA_TTABLE) {
+			// check validity of this group
+			lua_pushstring(L, "name");
+			lua_gettable(L, group_table_stack_index);
+			group_name = lua_tostring(L, -1);
 			if(group_name != NULL) {
 				// push the Entries table on the stack (to get entry information)
 				lua_pushstring(L, "Entries");
 
-				// get table Groups.TABLE_NAME.Entries
-				lua_gettable(L, group_table_index);
+				// get table Groups[i].Entries
+				lua_gettable(L, group_table_stack_index);
 				entry_table_stack_index = lua_gettop(L);
 
 				// check that 'Entries' is a table
@@ -226,58 +237,59 @@ void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 					printf("Skipping empty group '%s'\n", group_name);
 					
 				else {
-					(*g)[i] = create_group(group_name, entry_count);
+					(*g)[count] = create_group(group_name, entry_count);
 
 					// sort the entries if necessary
 					if(sort) {
-						lua_pushfstring(L, "table.sort(Groups['%s'].Entries)", group_name);
-						luaL_dostring(L, lua_tostring(L, -1));
+						sprintf(sort_cmd_lua, "table.sort(Groups[%d].Entries)", i);
+						luaL_dostring(L, sort_cmd_lua);
 					}
 
 					// add entries to this group
-					add_entries(L, entry_table_stack_index, (*g)[i]);
+					add_entries(L, entry_table_stack_index, (*g)[count]);
 
 					// set the launcher, if applicable
 					lua_pushstring(L, "Launcher");
-					lua_gettable(L, group_table_index);
+					lua_gettable(L, group_table_stack_index);
 					if(lua_type(L, -1) == LUA_TSTRING) {
-						set_gprog((*g)[i], lua_tostring(L, -1));
+						set_gprog((*g)[count], lua_tostring(L, -1));
 					}
 
 					// set the launcher flags, if applicable
 					lua_pushstring(L, "Flags");
-					lua_gettable(L, group_table_index);
+					lua_gettable(L, group_table_stack_index);
 					if(lua_type(L, -1) == LUA_TSTRING) {
-						set_gflags((*g)[i], lua_tostring(L, -1));
+						set_gflags((*g)[count], lua_tostring(L, -1));
 					}
 
-					++i;
+					++count;
 				}
 			}
 		}
-		// pop the top of the stack down to the key of the group
-		lua_pop(L, lua_gettop(L)-table_stack_index-1);
-	}
+		++i;
+	} while(lua_type(L, group_table_stack_index) != LUA_TNIL);
+
+	lua_pop(L, lua_gettop(L)-table_stack_index-1);
 }
 
 void add_entries(lua_State *L, int table_stack_index, GROUP *g) {
 	const char *entry_name;
-	int i;
+	int i = 1; // index in lua table
+	int count = 0; // index in C struct
 
-	lua_pushnil(L);
-	i = 0;
-	while(lua_next(L, table_stack_index)) {
-		// uses 'key' (at index -2) and 'value' (at index -1)
-		// looking at Groups.TABLE_NAME.Entries[i]
+	do {
+		lua_rawgeti(L, table_stack_index, i);
 		if(lua_type(L, -1) == LUA_TSTRING) {
 			entry_name = lua_tostring(L, -1);
 			if(entry_name != NULL) {
-				set_gentry(g, i, create_entry(entry_name, entry_name, true));
+				set_gentry(g, count, create_entry(entry_name, entry_name, true));
+				++count;
 			}
 		}
-		lua_pop(L, 1);
 		++i;
-	}
+	} while(lua_type(L, -1) != LUA_TNIL);
+
+	lua_pop(L, lua_gettop(L)-table_stack_index-1);
 }
 
 void stack_debug(lua_State *L) {

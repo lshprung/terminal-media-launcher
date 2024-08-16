@@ -78,6 +78,7 @@ int main(int argc, char **argv){
 	//for(i = 0; i < g_count; ++i) {
 	//	group_debug(g[i]);
 	//}
+	//return 0;
 
 	/*
 	//Remove Empty Groups from the Array
