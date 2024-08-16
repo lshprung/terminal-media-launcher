@@ -24,6 +24,7 @@
 //private
 //void check_line(char *buffer, char **options, int ln);
 //int check_option(char *arg, char **options);
+void get_settings(lua_State *L, int table_stack_index); // gets settings from Settings global variable
 int get_group_count(lua_State *L, int table_stack_index); // counts the number of valid groups
 int get_entry_count(lua_State *L, int table_stack_index); // counts the number of valid entries for a group
 void add_groups(lua_State *L, int table_stack_index, GROUP ***g);
@@ -31,6 +32,7 @@ void add_entries(lua_State *L, int table_stack_index, GROUP *g);
 void stack_debug(lua_State *L);
 
 //turn on or off sorting (A-Z); On by default
+// TODO allow specifying whether to sort groups or entries (or both, or none)
 bool sort = true;
 
 //set to true to automatically try to create a human readable name for an entry
@@ -73,7 +75,15 @@ GROUP **cfg_interp(char *path, int *group_count){
 	//lua_setglobal(L, "Groups");
 	//lua_pcall(L, 0, 0, 0);
 
-	// demo
+	// open Settings table
+	lua_getglobal(L, "Settings");
+	i = lua_gettop(L);
+	if(lua_type(L, i) == LUA_TTABLE) {
+		// parse settings
+		get_settings(L, i);
+	}
+
+	// open Groups table
 	lua_getglobal(L, "Groups");
 	i = lua_gettop(L);
 	if(lua_type(L, i) != LUA_TTABLE) {
@@ -105,6 +115,34 @@ bool get_case_sensitivity(){
 void refer_to_doc(){
 	printf("Refer to documentation on how to create terminal-media-launcher config file\n");
 	return;
+}
+
+void get_settings(lua_State *L, int table_stack_index) {
+	bool *setting_vars[] = {
+		&hr,
+		&fold_case,
+		&sort
+	};
+
+	char *setting_strings[] = {
+		"autoAlias",
+		"foldCase",
+		"sort"
+	};
+
+	int count = 3;
+	int i;
+
+	// looking at table Settings
+
+	// check if autoAlias is set
+	for(i = 0; i < count; ++i) {
+		lua_pushstring(L, setting_strings[i]);
+		lua_gettable(L, table_stack_index);
+		if(lua_type(L, -1) == LUA_TBOOLEAN) {
+			*(setting_vars[i]) = lua_toboolean(L, -1);
+		}
+	}
 }
 
 int get_group_count(lua_State *L, int table_stack_index) {
@@ -155,6 +193,11 @@ void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 	int entry_count;
 	int i;
 
+	// sort the groups, if necessary
+	//if(sort) {
+	//	luaL_dostring(L, "table.sort(Groups)");
+	//}
+
 	lua_pushnil(L);
 	i = 0;
 	while(lua_next(L, table_stack_index)) {
@@ -184,6 +227,13 @@ void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 					
 				else {
 					(*g)[i] = create_group(group_name, entry_count);
+
+					// sort the entries if necessary
+					if(sort) {
+						lua_pushfstring(L, "table.sort(Groups['%s'].Entries)", group_name);
+						luaL_dostring(L, lua_tostring(L, -1));
+					}
+
 					// add entries to this group
 					add_entries(L, entry_table_stack_index, (*g)[i]);
 
