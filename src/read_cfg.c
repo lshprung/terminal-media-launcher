@@ -83,10 +83,13 @@ GROUP **cfg_interp(char *path, int *group_count){
 
 	// create the group array
 	*group_count = get_group_count(L, i);
-	g = malloc(sizeof(GROUP *) * (*group_count));
+	if(*group_count <= 0) g = NULL;
+	else {
+		g = malloc(sizeof(GROUP *) * (*group_count));
 
-	// add each group (which also adds each entry to each group)
-	add_groups(L, i, &g);
+		// add each group (which also adds each entry to each group)
+		add_groups(L, i, &g);
+	}
 	lua_close(L);
 	return g;
 }
@@ -170,7 +173,7 @@ void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 
 				// check that 'Entries' is a table
 				if(lua_type(L, entry_table_stack_index) != LUA_TTABLE) {
-					printf("Error in config: 'Entries' should be Table, is actually %s\n", lua_typename(L, lua_type(L, entry_table_stack_index)));
+					printf("Error in config: in group '%s': 'Entries' should be Table, is actually %s\n", group_name, lua_typename(L, lua_type(L, entry_table_stack_index)));
 					exit(1);
 				}
 
@@ -183,26 +186,27 @@ void add_groups(lua_State *L, int table_stack_index, GROUP ***g) {
 					(*g)[i] = create_group(group_name, entry_count);
 					// add entries to this group
 					add_entries(L, entry_table_stack_index, (*g)[i]);
-				}
 
-				// set the launcher, if applicable
-				lua_pushstring(L, "Launcher");
-				lua_gettable(L, group_table_index);
-				if(lua_type(L, -1) == LUA_TSTRING) {
-					set_gprog((*g)[i], lua_tostring(L, -1));
-				}
+					// set the launcher, if applicable
+					lua_pushstring(L, "Launcher");
+					lua_gettable(L, group_table_index);
+					if(lua_type(L, -1) == LUA_TSTRING) {
+						set_gprog((*g)[i], lua_tostring(L, -1));
+					}
 
-				// set the launcher flags, if applicable
-				lua_pushstring(L, "Flags");
-				lua_gettable(L, group_table_index);
-				if(lua_type(L, -1) == LUA_TSTRING) {
-					set_gflags((*g)[i], lua_tostring(L, -1));
+					// set the launcher flags, if applicable
+					lua_pushstring(L, "Flags");
+					lua_gettable(L, group_table_index);
+					if(lua_type(L, -1) == LUA_TSTRING) {
+						set_gflags((*g)[i], lua_tostring(L, -1));
+					}
+
+					++i;
 				}
 			}
 		}
 		// pop the top of the stack down to the key of the group
 		lua_pop(L, lua_gettop(L)-table_stack_index-1);
-		++i;
 	}
 }
 

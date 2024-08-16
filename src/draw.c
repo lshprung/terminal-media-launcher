@@ -214,7 +214,7 @@ bool *handle_args(int argc, char **argv, char **cfg_path){
 		{"version", no_argument,       NULL, 'v'},
 		{0,         0,                 0,    0}
 	};
-	bool *flags_set = calloc(FLAG_COUNT, sizeof(bool));
+	bool *flags_set = calloc(FLAG_COUNT+1, sizeof(bool));
 	int i = 0;
 
 	while(opt != -1){
