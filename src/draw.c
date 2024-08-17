@@ -520,7 +520,7 @@ void trav_col(int new_i){
 int locateChar(char input){
 	ENTRY **entries = get_gentries(g[g_hover]);
 	int location = (true_hover ? e_hover[g_hover] : g_hover);
-	bool fold_case = get_case_sensitivity();
+	bool fold_case = true;
 	char first_char;
 	int i;
 

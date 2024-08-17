@@ -35,12 +35,6 @@ void stack_debug(lua_State *L);
 // TODO allow specifying whether to sort groups or entries (or both, or none)
 bool sort = true;
 
-//set to true to automatically try to create a human readable name for an entry
-bool hr = false;
-
-//turn foldCase (insensitive case searching) on or off; On by default
-bool fold_case = true;
-
 //return false if invalid path
 GROUP **cfg_interp(char *path, int *group_count){
 	FILE *fp;
@@ -108,14 +102,6 @@ GROUP **cfg_interp(char *path, int *group_count){
 	return g;
 }
 
-bool get_sort(){
-	return sort;
-}
-
-bool get_case_sensitivity(){
-	return fold_case;
-}
-
 void refer_to_doc(){
 	printf("Refer to documentation on how to create terminal-media-launcher config file\n");
 	return;
@@ -123,18 +109,14 @@ void refer_to_doc(){
 
 void get_settings(lua_State *L, int table_stack_index) {
 	bool *setting_vars[] = {
-		&hr,
-		&fold_case,
 		&sort
 	};
 
 	char *setting_strings[] = {
-		"autoAlias",
-		"foldCase",
 		"sort"
 	};
 
-	int count = 3;
+	int count = 1;
 	int i;
 
 	// looking at table Settings
