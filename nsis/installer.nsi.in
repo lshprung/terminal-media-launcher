@@ -69,7 +69,9 @@ Var StartMenuFolder
 
 ;-------------------------------------------------------------------------------
 ; Installer Sections
-Section "My Application" MyApp
+Section "Core" MyApp
+	; Don't allow this section to be deselected
+	SectionIn RO
 	SetOutPath $INSTDIR
 	File "..\src\@PACKAGE_NAME@.exe"
 	File "deps\*.*"
@@ -80,6 +82,11 @@ Section "My Application" MyApp
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 	!insertmacro MUI_STARTMENU_WRITE_END
 	WriteUninstaller "$INSTDIR\Uninstall.exe"
+SectionEnd
+
+Section "lua-filesystem" lfs
+	SetOutPath $INSTDIR
+	File "deps_luarocks\lfs.dll"
 SectionEnd
 
 Function installDesktopShortcut
