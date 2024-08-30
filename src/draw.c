@@ -556,28 +556,21 @@ char *get_launch(){
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
 	char *path = get_epath(entries[e_hover[g_hover]]);
-	bool quotes = false;
 	char *full_command = calloc(BUF_LEN, sizeof(char));
 
 	//if the entry is an executable file (doesn't have a launcher)
 	if(!(strcmp(program, "./"))){
-		strcat(full_command, "\"");
 		strcat(full_command, path);
-		strcat(full_command, "\"");
 	}
 
 	else{
-		if(quotes) strcat(full_command, "\"");
 		strcat(full_command, program);
-		if(quotes) strcat(full_command, "\"");
 		if(flags[0] !='\0'){
 			strcat(full_command, " ");
 			strcat(full_command, flags);
 		}
 		strcat(full_command, " ");
-		strcat(full_command, "\"");
 		strcat(full_command, path);
-		strcat(full_command, "\"");
 	}
 
 	return full_command;
