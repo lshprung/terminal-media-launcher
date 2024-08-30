@@ -1,5 +1,6 @@
 AC_INIT([terminal-media-launcher],[0.2])
 AC_SUBST([PACKAGE_TITLE], ["Terminal Media Launcher"])
+AC_SUBST([NSIS_PRODUCT_VERSION], ["$PACKAGE_VERSION.0.0"])
 AC_CONFIG_SRCDIR([src/draw.c])
 AC_CONFIG_HEADERS([config.h])
 
