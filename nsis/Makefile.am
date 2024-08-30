@@ -1,4 +1,4 @@
-EXTRA_DIST = installer.nsi.in
+EXTRA_DIST = find_dlls.sh installer.nsi.in
 
 CLEANFILES = $(PACKAGE_NAME)-Setup.exe deps/*
 
