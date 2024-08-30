@@ -5,11 +5,14 @@
 
 #define BUF_LEN 1024
 
+// currently selected group
 extern int g_hover;
+// array of currently selected entries for each group
 extern int *e_hover;
+// array of groups (as loaded from the config)
 extern struct group **g;
-extern struct entry **e;
 
+// returns the command to run for the current entry
 char *get_launch();
 
 //functions that differ between os

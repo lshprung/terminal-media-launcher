@@ -3,8 +3,8 @@ EXTRA_DIST = include unix windows
 
 bin_PROGRAMS = terminal-media-launcher
 terminal_media_launcher_SOURCES = cache.c draw.c read_cfg.c group.c entry.c $(PLATFORM)/cache.c $(PLATFORM)/draw.c $(PLATFORM)/read_cfg.c
-terminal_media_launcher_LDADD = @CURSES_LIBS@
-terminal_media_launcher_CPPFLAGS = @CURSES_CFLAGS@
+terminal_media_launcher_LDADD = @CURSES_LIBS@ @LUA_LIB@
+terminal_media_launcher_CPPFLAGS = @CURSES_CFLAGS@ @LUA_INCLUDE@
 
 if WINDOWS
 PLATFORM=windows

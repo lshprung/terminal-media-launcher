@@ -8,6 +8,7 @@ URL:            https://github.com/lshprung/terminal-media-launcher
 Source0:        %{name}-%{version}.tar.gz
 
 Requires:       glibc >= 2.7, ncurses >= 6
+Recommends:     lua-filesystem
 
 %description
 Terminal Media Launcher is a command line utility to help streamline
@@ -37,7 +38,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_docdir}/terminal-media-launcher/terminal-media-launcher-config.md
 %{_docdir}/terminal-media-launcher/windows_compile_instructions.md
 %{_mandir}/man1/terminal-media-launcher.1.gz
-%{_mandir}/man5/terminal-media-launcher-config.5.gz
 %{_mandir}/man5/terminal-media-launcher-config.5.gz
 %{_datadir}/applications/terminal-media-launcher.desktop
 %{_datadir}/pixmaps/terminal-media-launcher.svg

@@ -1,132 +1,219 @@
-.TH TERMINAL-MEDIA-LAUNCHER-CONFIG 5
+.\" generated with Ronn-NG/v0.9.1
+.TH "TERMINAL\-MEDIA\-LAUNCHER\-CONFIG" 5
 
-.SH NAME
+.SH "NAME"
 terminal-media-launcher-config - terminal-media-launcher configuration file
 
 .SH SYNOPSIS
-~/.config/terminal-media-launcher/config (or ~/.terminal-media-launcher/config)
+~/.config/terminal-media-launcher/config.lua (or ~/.terminal-media-launcher/config.lua)
 
 .SH DESCRIPTION
-The configuration file for terminal-media-launcher is a plain text file where commands regarding media groups and entries, along with various settings regarding layout, are specified. These commands are described in the next section. Each line is evaluated on its own, while empty lines and lines beginning with # are ignored.
-
-A configuration file can be automatically generated if no such file is found. An automatically generated configuration file will create groups for Music, Pictures, and Videos, and add entries to each group from the respective directory in the user's home directory. It is highly recommended that the user edit the configuration file manually.
+Starting in version 0\.2, Terminal Media Launcher is configured via a lua \fIhttps://www\.lua\.org/\fR script\. This project assumes the configuration will adhere to lua 5\.1, but is written to be as agnostic as possbile\. The general format of the configuration is outlined below:
+.P
+.nf
+.BI "Groups = { "
+.BI "    { "
+.BI "        name = <string>, "
+.BI "        Launcher = <string>, "
+.BI "        Flags = <string>, 
+.BI "        Entries = { "
+.BI "            { "
+.BI "                name = <string>, "
+.BI "                path = <string> "
+.BI "            }, "
+.BI "            ... "
+.BI "        } "
+.BI "    }, "
+.BI "    ... "
+.BI "}"
 
 .SH COMMANDS
-.SS Creating a Group
-\fIterminal-media-launcher-config\fR requires at least one group.
+.SS "Creating a Group"
+The config must contain at least one valid group\. Groups are to be inserted in the \fBGroups\fR global variable\. \fBGroups\fR is an array of tables\. Each group is a table containing the following keys:
 
-\fBaddGroup\fR <name>
-.RS
-This command will create a new group with a specified name. By default, a new group is empty, with zero entries, no launching application specified, and no flags specified. If their is a space in the name, it must be written in quotes (ex. "TV Shows").
-.RE
+.IP "Mandatory keys:"
+.IP "\[ci]" 4
+\fBname\fR \fIstring\fR \- a name for the group
+.IP "\[ci]" 4
+\fBEntries\fR \fItable\fR \- an array of tables\. Each table represents an entry\.
+.IP "" 0
 
-\fBsetLauncher\fR <group> <path>
-.RS
-This command will set a group's launching application. If no launching application is specified for a group, terminal-media-launcher will treat each entry in that group as an executable file. If their is a space in the path to the launching application, it must be written in quotes (ex. "/usr/bin/my launcher"). The path to the launching application should be absolute.
-.RE
+.IP "Optional keys:"
+.IP "\[ci]" 4
+\fBLauncher\fR \fIstring\fR \- the path for a program that launches the entries of this group\. If not set, it assumes the entries in this group are executables (and have no launching program)
+.IP "\[ci]" 4
+\fBFlags\fR \fIstring\fR \- flags to pass to the launching program\. If not set, no flags are passed
+.IP "" 0
 
-\fBsetLauncherRaw\fR <group> <path>
-.RS
-This command is identical to \fIsetLauncher\fR with the exception that the launcher application specified will not be wrapped in quotes for the system call when a member of the group is launched. This can be used to specify more complex launching instructions.
-.RE
+.IP "" 0
+.P
+Here is a helper function you can use in your config to add a group
+.P
+\fB
+.EX
+local function addGroup(name, launcher, flags)
+	assert(type(name) == "string")
 
-\fBsetFlags\fR <group> <flags>
-.RS
-This command will set the flags to be specified for the launching application. If no launching application is specified, any specified flags are ignored. If the specified flags contain a space, they must be written in quotes.
-.RE
+    -- create Groups table if needed
+    if Groups == nil then
+        Groups = {}
+    end
 
-.SS Adding Entries
-In order for a created group to be valid, it must contain at least one entry.
+    local new_group = {}
+    new_group.name = name
+	new_group.Entries = {}
+    if launcher ~= nil then
+        new_group.Launcher = launcher
+    end
+    if flags ~= nil then
+        new_group.Flags = flags
+    end
 
-\fBadd\fR <path> <group>
-.RS
-This command will add a file to a specified group if the path exists. It can also be used to add mutiple files to a group in one line using the '*' operator (ex. add /home/john/Pictures/* Pictures). If the path to the file(s) contains space(s), it must be written in quotes.
-.RE
+    table.insert(Groups, new_group)
+    return new_group
+end
+\fR
 
-\fBaddF\fR <new entry> <group>
-.RS
-This command will force an entry to be added to a specified group, regardless as to whether it is a valid file or not. Unlike \fIadd\fR, \fIaddF\fR's argument does not need to be a valid file, but \fIaddF\fR can only specify a single entry and does not support the '*' operator. If the arg has a space in it, it must be written in quotes.
-.RE
 
-\fBaddName\fR <name> <path> <group>
-.RS
-This command, like \fIadd\fR, will add an entry to a specified group if the path exists. \fIaddName\fR allows for a name to be specified for this entry (by default, the name is the same as the file name). Unlike \fIadd\fR, only one entry can be added per line, as \fIaddName\fR does not support the '*' operator. If either the name or file path contain a space, they must be written in quotes.
-.RE
+.SS "Adding Entries"
+For a group to be valid, it must contain at least one valid entry\. Entries are to be inserted in the \fBEntries\fR key of a group table\. \fBEntries\fR is an array of tables\. Each entry is a table containing the following keys:
+.IP "Mandatory keys:"
+.IP "\[ci]" 4
+\fBname\fR \fIstring\fR \- a name for the entry
+.IP "" 0
 
-\fBaddNameF\fR <name> <new-entry> <group>
-.RS
-This command can be used in place of \fIaddF\fR if you want the forced argument to have a different name displayed for the entry than is called in the system call to launch the entry. Otherwise, it is effectively the same as \fIaddF\fR.
-.RE
+.IP "Optional keys:"
+.IP "\[ci]" 4
+\fBpath\fR \fIstring\fR \- a path to the file associated with this entry\. If not set, the path is the same as the name
+.IP "" 0
 
-\fBaddR\fR <path> <group>
-.RS
-This command will recursively add entries to a group. \fIaddR\fR functions like \fIadd\fR, but will also search sub-directories for matches. 
-.RE
+.IP "" 0
+.P
+Here is a helper function you can use in your config to add an entry to a group
+.P
+\fB
+.EX
+local function addEntry(parentGroup, name, path)
+	assert(type(parentGroup) == "table")
+	assert(type(parentGroup.Entries) == "table")
+	assert(type(name) == "string")
 
-\fBhide\fR <entry> <group>
-.RS
-This command will remove a specified entry from a specified group. The entry argument should refer to the entry's name, rather than the entry's path. This option may be useful to hide certain entries after adding many entries with the '*' operator.
-.RE
+	local new_entry = {}
+	new_entry.name = name
+	if path ~= nil then
+		new_entry.path = path
+	end
 
-\fBhideFile\fR <path> <group>
-.RS
-This command has the exact same functionality as \fIhide\fR, but takes the absolute path of the entry to hide as the first argument, instead of the name.
-.RE
+	table.insert(parentGroup.Entries, new_entry)
+	return new_entry
+end
+\fR
 
-.SS Settings
-Settings should be specified at the top of \fIterminal-media-launcher-config\fR
+.IP "" 0
+.SS "Adding Entries using lfs module"
+It is recommended to install the lua\-filesystem \fIhttps://github\.com/lunarmodules/luafilesystem\fR module and use it to add entries more efficiently\. This example can be used to descend into a directory and add files matching a \fBstring\.match\fR pattern to a group\.
+\fB
+.EX
+local lfs = require "lfs"
 
-\fBautoAlias\fR on|off
-.RS
-This setting will attempt to automatically give entries more human-readable names by:
+local function addEntries(parentGroup, startDir, filePattern, recursive)
+	-- recursive arg is a boolean for whether or not to descend into subdirectories (false by default)
+	assert(type(parentGroup) == "table")
+	assert(type(parentGroup.Entries) == "table")
+	assert(type(startDir) == "string")
+	assert(type(filePattern) == "string")
 
- 1. Removing any characters inside parenthesis (including parenthesis)
- 2. Replacing '-' and '\_' with a space character
- 3. Replacing cases of multiple spaces in a row with only one space
- 4. Removing file extensions (if the file has an extension) 
+	for file in lfs.dir(startDir) do
+		local fullFilePath = startDir .. "/" .. file
+		if file ~= "." and file ~= ".." then
+			-- descend into subdirectory if recursive is set to true
+			if lfs.attributes(fullFilePath).mode == "directory" and recursive == true then
+				addEntries(parentGroup, fullFilePath, filePattern, recursive)
+			elseif lfs.attributes(fullFilePath).mode == "file" then
+				if string.match(file, filePattern) then
+					table.insert(parentGroup.Entries, {
+						name = file,
+						path = fullFilePath
+					})
+				end
+			end
+		end
+	end
+end
+\fR
 
-\fIautoAlias\fR is turned off by default.
-.RE
+.SS "Settings"
+Settings can be set via the \fBSettings\fR global variable\.
+.P
+.nf
+.BI "Settings = {} "
+.BI "Settings\.sort = <boolean>"
 
-\fBfoldCase\fR on|off
-.RS
-Entering any non-traversal input in terminal-media-launcher can be used to jump to a group or entry. For instance, hitting 'f' on the keyboard will jump the cursor to the next group or entry that starts with an 'f'. This setting determines whether or not this functionality is case insensitive (on) or case sensitive (off). \fIfoldCase\fR is turned on by default.
-.RE
-
-\fBsort\fR on|off
-.RS
-This setting will sort entries of each group in alphabetical order (though not the list of groups). Turning off \fIsort\fR is only recommended when adding one item per line to a group. \fIsort\fR is turned on by default.
-.RE
+\fBsort\fR will sort entries of each group in alphabetical order (though not the list of groups)\. \fBsort\fR is true by default\.
 
 .SH EXAMPLE
+Here is an example \fBconfig\.lua\fR which creates a Music, Pictures, and, Videos group, and adds all the files from the user's Music, Pictures, and Videos home folders to each group\.
 
-.nf
-autoAlias on
+\fB
+.EX
+local lfs = require "lfs"
 
-# Adding a Group of Various Applications
+local function addGroup(name, launcher, flags)
+	assert(type(name) == "string")
 
-addGroup Applications
-addName GIMP /usr/bin/gimp Applications
-addName Chromium /usr/bin/chromium-browser Applications
-addName Thunderbird /usr/bin/thunderbird Applications
+    -- create Groups table if needed
+    if Groups == nil then
+        Groups = {}
+    end
 
-# Adding a Videos Group that contains mp4 files
+    local new_group = {}
+    new_group.name = name
+	new_group.Entries = {}
+    if launcher ~= nil then
+        new_group.Launcher = launcher
+    end
+    if flags ~= nil then
+        new_group.Flags = flags
+    end
 
-addGroup Videos
-setLauncher Videos /usr/bin/vlc
-add /home/john/Videos/*mp4 Videos
+    table.insert(Groups, new_group)
+    return new_group
+end
 
-.fi
-# Adding a Pictures Group that contains only jpg and png files as well as all files from an external drive and a single desktop wallpaper
-.nf
+local function addEntries(parentGroup, startDir, filePattern, recursive)
+	-- recursive arg is a boolean for whether or not to descend into subdirectories (false by default)
+	assert(type(parentGroup) == "table")
+	assert(type(parentGroup.Entries) == "table")
+	assert(type(startDir) == "string")
+	assert(type(filePattern) == "string")
 
-addGroup Pictures
-setLauncher Pictures /usr/bin/sxiv
-setFlags Pictures "-s f"
-add /home/john/Pictures/*jpg Pictures
-add /home/john/Pictures/*png Pictures
-addR "/mnt/External_Drive/Johns Photos/*" Pictures
-addName "My Desktop Background" "/mnt/External_Drive/desktop wallpaper.jpg" Pictures
+	for file in lfs.dir(startDir) do
+		local fullFilePath = startDir .. "/" .. file
+		if file ~= "." and file ~= ".." then
+			-- descend into subdirectory if recursive is set to true
+			if lfs.attributes(fullFilePath).mode == "directory" and recursive == true then
+				addEntries(parentGroup, fullFilePath, filePattern, recursive)
+			elseif lfs.attributes(fullFilePath).mode == "file" then
+				if string.match(file, filePattern) then
+					table.insert(parentGroup.Entries, {
+						name = file,
+						path = fullFilePath
+					})
+				end
+			end
+		end
+	end
+end
+
+local music = addGroup("Music", "xdg-open")
+addEntries(music, os.getenv("HOME") .. "/Music", ".*", true)
+
+local pictures = addGroup("Pictures", "xdg-open")
+addEntries(pictures, os.getenv("HOME") .. "/Pictures", ".*", true)
+
+local videos = addGroup("Videos", "xdg-open")
+addEntries(videos, os.getenv("HOME") .. "/Videos", ".*", true)
+\fR
 
 .fi
 .SH SEE ALSO

@@ -8,7 +8,7 @@ clean-local:
 actions_build_deb: IMAGE_NAME = debian
 actions_build_deb: IMAGE_VERSION = unstable
 actions_build_deb: CONTAINER_NAME = $(PACKAGE_NAME)_$@_$(IMAGE_NAME)-$(IMAGE_VERSION)
-actions_build_deb: DEPENDENCY_LIST = autoconf-archive debmake devscripts ncurses-dev pkg-config
+actions_build_deb: DEPENDENCY_LIST = autoconf-archive debmake devscripts liblua5.1-0-dev lua5.1 ncurses-dev pkg-config
 actions_build_deb: ../$(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
 	podman pull docker.io/library/$(IMAGE_NAME):$(IMAGE_VERSION)
 	podman container exists "$(CONTAINER_NAME)" || podman run -itd --name "$(CONTAINER_NAME)" "$(IMAGE_NAME):$(IMAGE_VERSION)"
@@ -26,7 +26,7 @@ actions_build_deb: ../$(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
 actions_build_rpm: IMAGE_NAME = fedora
 actions_build_rpm: IMAGE_VERSION = rawhide
 actions_build_rpm: CONTAINER_NAME = $(PACKAGE_NAME)_$@_$(IMAGE_NAME)-$(IMAGE_VERSION)
-actions_build_rpm: DEPENDENCY_LIST = gcc make ncurses-devel rpmdevtools rpmlint
+actions_build_rpm: DEPENDENCY_LIST = gcc lua lua-devel make ncurses-devel rpmdevtools rpmlint
 actions_build_rpm: ../$(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
 	podman pull docker.io/library/$(IMAGE_NAME):$(IMAGE_VERSION)
 	podman container exists "$(CONTAINER_NAME)" || podman run -itd --name "$(CONTAINER_NAME)" "$(IMAGE_NAME):$(IMAGE_VERSION)"

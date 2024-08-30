@@ -13,164 +13,25 @@ typedef struct group{
 	char name[BUF_LEN];
 	char program[BUF_LEN];
 	char flags[BUF_LEN];
-	struct entry *head;
-	struct entry *tail;
-	struct group *next;
+	struct entry **entries;
 	int entry_count;
-	bool launcher_quotes; //set by a group option whether or not the launcher should be wrapped by quotes
+	//bool launcher_quotes; //set by a group option whether or not the launcher should be wrapped by quotes
 } GROUP;
 
-GROUP *groups_head;
-GROUP *gp; //pointer to remember last group that was looked at
 int group_count = 0;
 int total_count = 0;
 
-GROUP *create_group(char *new_name){
+GROUP *create_group(const char *new_name, const int entry_count){
 	GROUP *new = malloc(sizeof(GROUP));
 
 	strcpy(new->name, new_name); //by default, group name is equivalent to the path
 	strcpy(new->program, "./");  //by default, launch an entry by executing it
 	new->flags[0] = '\0';      //by default, no command line flags
-	new->head = NULL;
-	new->tail = NULL;
-	new->next = NULL;
-	new->entry_count = 0;
-	new->launcher_quotes = true;
+	new->entries = malloc(sizeof(ENTRY *) * entry_count);
+	new->entry_count = entry_count;
 
 	group_count++;
 	return new;
-}
-
-//add an entry to a group or add a new empty group
-//FIXME maybe make this function part of a seperate file to handle a tree (AVL?)
-//for now, simple linked list implementation
-void group_add(char *gname, ENTRY *addme){
-	int i;
-	GROUP *new;
-	GROUP *last = NULL; //last element in an existing group list (NULL to start)
-
-	//only adding a new group
-	if(addme == NULL){
-		gp = groups_head;
-		while(gp != NULL){
-			if(!(strcmp(gp->name, gname))){
-				printf("config error: %s is already a group!\n", gname);
-				return;
-			}
-
-			last = gp;
-			gp = gp->next;
-		}
-	}
-
-	//The previous group is not the same as the new group to add to
-	if(!(gp != NULL && (!(strcmp(gp->name, gname))))){
-		gp = groups_head;
-		while(gp != NULL){
-			//gname matches groups[i]'s name, add entry here
-			if(!(strcmp(gp->name, gname))) break;
-
-			last = gp;
-			gp = gp->next;
-		}
-	}
-
-	//was unable to find a matching existing group
-	//need to create new group to insert the entry into
-	if(gp == NULL){
-		new = create_group(gname);
-
-		//first group
-		if(last == NULL) groups_head = new;
-
-		//add to the end of the groups
-		else last->next = new;
-
-		gp = new;
-	}
-
-	//add the entry to the list of entries in the group
-	if(addme != NULL){
-		i = entry_add(gp->head, gp->tail, addme);
-		switch(i){
-			case 1:
-				gp->head = addme;
-				break;
-
-			case 2:
-				gp->tail = addme;
-				break;
-
-			case 3:
-				gp->head = addme;
-				gp->tail = addme;
-				break;
-
-			}
-
-		gp->entry_count++;
-		total_count++;
-	}
-
-	return;
-}
-
-void group_rm(GROUP *g){
-
-	clear_entries(g->head);
-
-	free(g);
-	group_count--;
-	return;
-}
-
-void clean_groups(){
-	GROUP *dummy_head;
-	GROUP *trav;
-	GROUP *hold;
-
-	if(group_count == 0){
-		printf("Error: no groups! ");
-		refer_to_doc();
-		exit(0);
-	}
-
-	else{
-		dummy_head = create_group("dummy");
-		dummy_head->next = groups_head;
-		trav = dummy_head;
-
-		while(trav != NULL){
-			//found empty group for removal
-			if(trav->next != NULL && trav->next->entry_count < 1){
-				printf("Omitting empty group \"%s\"\n", trav->next->name);
-				hold = trav->next;
-				trav->next = trav->next->next;
-				group_rm(hold);
-			}
-			else trav = trav->next;
-		}
-	}
-
-	//ensure groups->head is still correct
-	groups_head = dummy_head->next;
-	group_rm(dummy_head);
-	return;
-
-}
-
-
-GROUP **get_groups(){
-	GROUP **arr = malloc(sizeof(GROUP *) * group_count);
-	GROUP *trav = groups_head;
-	int i;
-
-	for(i = 0; i < group_count; i++){
-		arr[i] = trav;
-		trav = trav->next;
-	}
-
-	return arr;
 }
 
 char *get_gname(GROUP *g){
@@ -183,7 +44,7 @@ char *get_gprog(GROUP *g){
 	return g->program;
 }
 
-void set_gprog(GROUP *g, char *p){
+void set_gprog(GROUP *g, const char *p){
 	assert(g != NULL);
 	strcpy(g->program, p);
 	return;
@@ -194,14 +55,19 @@ char *get_gflags(GROUP *g){
 	return g->flags;
 }
 
-void set_gflags(GROUP *g, char *p){
+void set_gflags(GROUP *g, const char *p){
 	assert(g != NULL);
 	strcpy(g->flags, p);
 }
 
-ENTRY *get_ghead(GROUP *g){
+ENTRY **get_gentries(GROUP *g) {
 	assert(g != NULL);
-	return g->head;
+	return g->entries;
+}
+
+void set_gentry(GROUP *g, int entry_index, ENTRY *new_entry) {
+	assert(g != NULL);
+	g->entries[entry_index] = new_entry;
 }
 
 int get_ecount(GROUP *g){
@@ -214,27 +80,9 @@ void set_ecount(GROUP *g, int new_count){
 	g->entry_count = new_count;
 }
 
-void set_gquotes(GROUP *g, bool b){
-	assert(g != NULL);
-	g->launcher_quotes = b;
-}
-
-bool get_gquotes(GROUP *g){
-	return g->launcher_quotes;
-}
-
-int get_gcount(){
-	return group_count;
-}
-
-void group_debug(){
-	GROUP *trav = groups_head;
-	
-	while(trav != NULL){
-		entry_debug(trav->head);
-		printf("\tfrom group %s\n", trav->name);
-		trav = trav->next;
-	}
-
-	return;
+void group_debug(GROUP *g){
+	printf("Entering group: %s\n", get_gname(g));
+	printf("\tProgram:     %s\n", get_gprog(g));
+	printf("\tFlags:       %s\n", get_gflags(g));
+	printf("\tEntry Count: %d\n", get_ecount(g));
 }

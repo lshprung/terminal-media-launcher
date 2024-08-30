@@ -6,20 +6,18 @@
 
 ## Compiling and Running
 
-For Windows instructions, see [here](windows_compile_instructions.md)
-
-terminal-media-launcher can be compiled on any system with make, gcc, and the ncurses development library installed. It can be compiled and installed on any Linux distribution, and can also be compiled and run on Microsoft Windows. To compile and run terminal-media-launcher:
+terminal-media-launcher can be compiled on any system with make, gcc, and the ncurses development library installed. It can be compiled and installed on any Linux distribution, and can also be compiled and run on Microsoft Windows using MinGW (e.g., via [MSYS2](https://www.msys2.org/)). To compile and run terminal-media-launcher:
 
 1. Install dependencies. 
 
 On Debian and Debian-based systems:
 ```
-# apt install gcc libncurses-dev make
+# apt install gcc liblua5.1-0-dev lua5.1 make ncurses-dev pkg-config
 ```
 
 On RHEL and RHEL-based systems:
 ```
-# dnf install gcc ncurses-devel
+# dnf install gcc lua lua-devel make ncurses-devel
 ```
 
 2. Download the latest `.tar.gz` release
@@ -76,12 +74,12 @@ By default, terminal-media-launcher searches in the following order for a config
 
 ### Linux
 
-1. `$HOME/.config/terminal-media-launcher/config`
-2. `$HOME/.terminal-media-launcher/config`
+1. `$HOME/.config/terminal-media-launcher/config.lua`
+2. `$HOME/.terminal-media-launcher/config.lua`
 
 ### Windows
 
-1. `%APPDATA%\terminal-media-launcher\config`
+1. `%APPDATA%\terminal-media-launcher\config.lua`
 
 A different configuration file location can also be specified with the `-c` flag:
 

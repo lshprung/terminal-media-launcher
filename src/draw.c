@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <getopt.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -40,9 +41,7 @@ int g_hover = 0;
 int *e_hover;
 int true_hover = 0; //0 = hovering on groups, 1 = hovering on entries
 GROUP **g;
-ENTRY **e;
 int g_count;
-int e_count;
 int g_offset = 0;
 int *e_offset;
 
@@ -70,15 +69,23 @@ int main(int argc, char **argv){
 
 	//Fill Groups
 	//read the contents of the cfg file; print help message if invalid
-	if(!cfg_interp(cfg_path)){
+	g = cfg_interp(cfg_path, &g_count);
+	if(g == NULL) {
 		print_help(argv[0]);
 		return 1;
 	}
+	// DEBUG
+	//for(i = 0; i < g_count; ++i) {
+	//	group_debug(g[i]);
+	//}
+	//return 0;
 
+	/*
 	//Remove Empty Groups from the Array
 	clean_groups();
 	g = get_groups(); //retrieve results of cfg_interp
 	g_count = get_gcount(); //retrieve number of groups in g (only do this after removing empty groups)
+	*/
 
 	//check that there are is at least one valid group
 	if(g_count == 0){
@@ -90,7 +97,7 @@ int main(int argc, char **argv){
 	e_hover = calloc(g_count, sizeof(int));
 	e_offset = calloc(g_count, sizeof(int));
 
-	//load cached data
+	// load cached data
 	load_cache(g_count, &g_hover, &e_hover, &e_offset, &true_hover, cfg_path);
 
 	//reopen stdout for drawing menu
@@ -125,6 +132,7 @@ int main(int argc, char **argv){
 	update_display(true);
 
 	//drawing is done, now run a while loop to receive input (ESC ends this loop)
+	input = 0;
 	while(input != 27){
 		input = getch();
 
@@ -151,12 +159,12 @@ int main(int argc, char **argv){
 
 			case KEY_NPAGE:
 			//case KEY_SDOWN:
-				trav_col((true_hover ? e_count : g_count)-1);
+				trav_col((true_hover ? get_ecount(g[g_hover]) : g_count)-1);
 				break;
 
 			case KEY_F(3):
 			//jump to random group/entry
-				trav_col(rand() % (true_hover ? e_count : g_count));
+				trav_col(rand() % (true_hover ? get_ecount(g[g_hover]) : g_count));
 				break;
 
 			case KEY_F(5):
@@ -207,7 +215,7 @@ bool *handle_args(int argc, char **argv, char **cfg_path){
 		{"version", no_argument,       NULL, 'v'},
 		{0,         0,                 0,    0}
 	};
-	bool *flags_set = calloc(FLAG_COUNT, sizeof(bool));
+	bool *flags_set = calloc(FLAG_COUNT+1, sizeof(bool));
 	int i = 0;
 
 	while(opt != -1){
@@ -332,8 +340,9 @@ void fill_col(int mode){
 	//mode 1 = entry
 
 	int i;
+	ENTRY **entries = get_gentries(g[g_hover]);
 	WINDOW *col = (mode ? entry_win : group_win);
-	int count = (mode ? e_count : g_count);
+	int count = (mode ? get_ecount(g[g_hover]) : g_count);
 	int offset = (mode ? e_offset[g_hover] : g_offset);
 	int max_len = getmaxx(col)-2; //longest possible string length that can be displayed in the window
 	int ycoord = 1;
@@ -342,10 +351,10 @@ void fill_col(int mode){
 
 	for(i = 0+offset; i < count; i++){
 		if(ycoord >= max_y) break; //reached the bottom of the terminal window, stop drawing
-		name = (mode ? get_ename(e[i]) : get_gname(g[i]));
+		name = (mode ? get_ename(entries[i]) : get_gname(g[i]));
 
 		//the name is too long, take the group to the trimming function
-		if(strlen(name) > max_len) name = trim_name(name, (mode ? get_epath(e[i]) : get_gname(g[i])), max_len);
+		if(strlen(name) > max_len) name = trim_name(name, (mode ? get_epath(entries[i]) : get_gname(g[i])), max_len);
 		wmove(col, ycoord, 1);
 		wprintw(col, "%s", name);
 		ycoord++;
@@ -421,8 +430,6 @@ void update_col(int mode, int y_hl, bool resize){
 			break;
 
 		case 1:
-			e_count = get_ecount(g[g_hover]);
-			e = get_entries(get_ghead(g[g_hover]), e_count);
 			fill_col(1);
 			if(!resize) mvwchgat(entry_win, y_hl, 1, getmaxx(entry_win)-2, A_DIM, 1, NULL);
 			else mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-2, A_DIM, (true_hover ? 2 : 1), NULL);
@@ -464,7 +471,7 @@ void switch_col(){
 void trav_col(int new_i){
 	int *focus = (true_hover ? &(e_hover[g_hover]) : &g_hover); //make it easy to know which column we are looking at
 	int *offset = (true_hover ? &(e_offset[g_hover]) : &g_offset);
-	int count = (true_hover ? e_count : g_count);
+	int count = (true_hover ? get_ecount(g[g_hover]) : g_count);
 	int max_hl = HEIGHT-(3+GAP_SIZE); //for some reason, this works
 	int min_hl = 5;
 	int oob_flag = 0; //0 = none, 1 = bottom, 2 = top
@@ -477,7 +484,6 @@ void trav_col(int new_i){
 	mvwchgat(entry_win, 1+e_hover[g_hover]-e_offset[g_hover], 1, getmaxx(entry_win)-2, A_NORMAL, 0, NULL);
 	mvwchgat(group_win, 1+g_hover-g_offset, 1, getmaxx(group_win)-2, A_NORMAL, 0, NULL);
 	*focus = new_i;
-
 
 	//check offsets relating to new highlight, make sure highlight did not go oob
 	while(*focus-*offset+5 > max_hl){
@@ -512,16 +518,17 @@ void trav_col(int new_i){
 }
 
 int locateChar(char input){
+	ENTRY **entries = get_gentries(g[g_hover]);
 	int location = (true_hover ? e_hover[g_hover] : g_hover);
-	bool fold_case = get_case_sensitivity();
+	bool fold_case = true;
 	char first_char;
 	int i;
 
 	if(fold_case && input >= 97 && input <= 122) input -= 32;
 
 	if(true_hover){ //hovering on entries
-		for(i = location+1; i < e_count; i++){
-			first_char = get_ename(e[i])[0];
+		for(i = location+1; i < get_ecount(g[g_hover]); i++){
+			first_char = get_ename(entries[i])[0];
 			if(fold_case && first_char >= 97 && first_char <= 122) first_char -= 32;
 			if(input == first_char){
 				location = i;
@@ -545,33 +552,25 @@ int locateChar(char input){
 }
 
 char *get_launch(){
+	ENTRY **entries = get_gentries(g[g_hover]);
 	char *program = get_gprog(g[g_hover]);
 	char *flags = get_gflags(g[g_hover]);
-	char *path = get_epath(e[e_hover[g_hover]]);
-	bool quotes = get_gquotes(g[g_hover]);
-	char *full_command = malloc(sizeof(char) * BUF_LEN);
-
-	full_command[0] = '\0';
+	char *path = get_epath(entries[e_hover[g_hover]]);
+	char *full_command = calloc(BUF_LEN, sizeof(char));
 
 	//if the entry is an executable file (doesn't have a launcher)
 	if(!(strcmp(program, "./"))){
-		strcat(full_command, "\"");
 		strcat(full_command, path);
-		strcat(full_command, "\"");
 	}
 
 	else{
-		if(quotes) strcat(full_command, "\"");
 		strcat(full_command, program);
-		if(quotes) strcat(full_command, "\"");
 		if(flags[0] !='\0'){
 			strcat(full_command, " ");
 			strcat(full_command, flags);
 		}
 		strcat(full_command, " ");
-		strcat(full_command, "\"");
 		strcat(full_command, path);
-		strcat(full_command, "\"");
 	}
 
 	return full_command;

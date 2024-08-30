@@ -1,106 +1,146 @@
 ## Introduction
 
-**config** specifies settings for Terminal Media Launcher, including preferences, groups, entries, and file locations. Each line of `config` is read by terminal-media-launcher unless the line is empty or the line begins with a '#'. terminal-media-launcher can automatically generate a configuration file if no such file is found. An automatically  generated  configuration file will create groups for Music, Pictures, and Videos, and add entries to each group from the respective directory in the user's home directory. It is highly recommended that the user edit the configuration file manually.
+Starting in version 0.2, Terminal Media Launcher is configured via a [lua](https://www.lua.org/) script. This project assumes the configuration will adhere to lua 5.1, but is written to be as agnostic as possbile. The general format of the configuration is outlined below:
+
+```lua
+Groups = {
+    {
+        name = <string>,
+        Launcher = <string>,
+        Flags = <string>,
+        Entries = {
+            {
+                name = <string>,
+                path = <string>
+            },
+            ...
+        }
+    },
+    ...
+}
+```
+
+<!--
+**`config.lua`** specifies settings for Terminal Media Launcher, including preferences, groups, entries, and file locations. Each line of `config` is read by terminal-media-launcher unless the line is empty or the line begins with a '#'. terminal-media-launcher can automatically generate a configuration file if no such file is found. An automatically  generated  configuration file will create groups for Music, Pictures, and Videos, and add entries to each group from the respective directory in the user's home directory. It is highly recommended that the user edit the configuration file manually.
+-->
 
 ## Table of Contents
 
 - [Creating a Group](#CreatingAGroup)
-	- [addGroup](#addgroup)
-	- [setLauncher](#setlauncher)
-	- [setLauncherRaw](#setlauncherraw)
-	- [setFlags](#setflags)
 - [Adding Entries](#AddingEntries)
-	- [add](#add)
-	- [addF](#addf)
-	- [addName](#addname)
-	- [addNameF](#addnamef)
-	- [addR](#addr)
-	- [hide](#hide)
-	- [hideFile](#hidefile)
+    - [Adding Entries using lfs module](#AddingEntriesLfs)
 - [Settings](#settings)
-	- [autoAlias](#autoalias)
-	- [foldCase](#foldcase)
 	- [sort](#sort)
 - [Example](#example)
 
 ## Creating a Group <a name="CreatingAGroup"></a>
 
-terminal-media-launcher will not work without any groups, so you will need to know how to create a group.
+The config must contain at least one valid group. Groups are to be inserted in the `Groups` global variable. `Groups` is an array of tables. Each group is a table containing the following keys:
 
-### addGroup
+- Mandatory keys:
+    - `name` *string* - a name for the group
+    - `Entries` *table* - an array of tables. Each table represents an entry.
+- Optional keys:
+    - `Launcher` *string* - the path for a program that launches the entries of this group. If not set, it assumes the entries in this group are executables (and have no launching program)
+    - `Flags` *string* - flags to pass to the launching program. If not set, no flags are passed
 
-- **addGroup** *name*
+Here is a helper function you can use in your config to add a group
 
-`addGroup` will create a new group with a specified name. By default this group is empty, with zero entries, no launching application specified, and no flags specified. If there is a space in the name, it must be written in quotes (ex. "TV Shows")
+```lua
+local function addGroup(name, launcher, flags)
+	assert(type(name) == "string")
 
-### setLauncher
+    -- create Groups table if needed
+    if Groups == nil then
+        Groups = {}
+    end
 
-- **setLauncher** *group* */path/to/launcher*
+    local new_group = {}
+    new_group.name = name
+	new_group.Entries = {}
+    if launcher ~= nil then
+        new_group.Launcher = launcher
+    end
+    if flags ~= nil then
+        new_group.Flags = flags
+    end
 
-`setLauncher` will set a group's launching application. If no launching application is specified for a group, terminal-media-launcher will treat each entry in that group as an executable file. If there is a space in the path to the launching application, it must be written in quotes (ex. "/usr/bin/my launcher"). *Keep in mind that the path to the launching application should be absolute*.
-
-### setLauncherRaw
-
-- **setLauncherRaw** *group* */path/to/launcher*
-
-`setLauncherRaw` is identical to `setLauncher` with the exception that the launcher application specified will not be wrapped in quotes for the system call when a member of the group is launched. This can be used to specify more complex launching instructions.
-
-### setFlags
-
-- **setFlags** *group* *flags*
-
-`setFlags` will set the flags to be specified for the launching application. If no launching application is specified, any specified flags are ignored. If the specified flags contain a space, they must be written in quotes.
+    table.insert(Groups, new_group)
+    return new_group
+end
+```
 
 ## Adding Entries <a name=AddingEntries></a>
 
-terminal-media-launcher will hide empty groups, so you will need to know how to add entries to a group.
+For a group to be valid, it must contain at least one valid entry. Entries are to be inserted in the `Entries` key of a group table. `Entries` is an array of tables. Each entry is a table containing the following keys:
 
-### add
+- Mandatory keys:
+    - `name` *string* - a name for the entry
+- Optional keys:
+    - `path` *string* - a path to the file associated with this entry. If not set, the path is the same as the name
 
-- **add** *path/to/file(s)* *group*
+Here is a helper function you can use in your config to add an entry to a group
 
-`add` will add a file to a specified group if the path exists. It can also be used to add mutiple files to a group in one line using the '\*' operator (ex. `add /home/john/Pictures/* Pictures`). If the path to the file(s) contains space(s), it must be written in quotes.
+```lua
+local function addEntry(parentGroup, name, path)
+	assert(type(parentGroup) == "table")
+	assert(type(parentGroup.Entries) == "table")
+	assert(type(name) == "string")
 
-### addF
+	local new_entry = {}
+	new_entry.name = name
+	if path ~= nil then
+		new_entry.path = path
+	end
 
-- **addF** *new-entry* *group*
+	table.insert(parentGroup.Entries, new_entry)
+	return new_entry
+end
+```
 
-`addF` will force an entry to be added to a specified group, regardless as to whether it is a valid file or not. Unlike `add`, `addF`'s argument does not need to be a valid file, but `addF` can only specify a single entry and does not support the '\*' operator. If the arg has a space in it, it must be written in quotes.
+### Adding Entries using lfs module <a name=AddingEntriesLfs></a>
 
-### addName
+It is recommended to install the [lua-filesystem](https://github.com/lunarmodules/luafilesystem) module and use it to add entries more efficiently. This example can be used to descend into a directory and add files matching a `string.match` pattern to a group.
 
-- **addName** *name* *path/to/file* *group*
+```lua
+local lfs = require "lfs"
 
-`addName`, like `add`, will add an entry to a specified group if the path exists. `addName` allows for a name to be specified for this entry (by default, the name is the same as the file name). Unlike `add`, only one entry can be added per line, as `addName` does not support the '\*' operator. If either the name or file path contain a space, they must be written in quotes.
+local function addEntries(parentGroup, startDir, filePattern, recursive)
+	-- recursive arg is a boolean for whether or not to descend into subdirectories (false by default)
+	assert(type(parentGroup) == "table")
+	assert(type(parentGroup.Entries) == "table")
+	assert(type(startDir) == "string")
+	assert(type(filePattern) == "string")
 
-### addNameF
-
-- **addNameF** *name* *new-entry* *group*
-
-`addNameF` can be used in place of `addF` if you want the forced argument to have a different name displayed for the entry than is called in the system call to launch the entry. Otherwise, it is effectively the same as `addF`
-
-### addR
-
-- **addR** *path/to/files* *group*
-
-`addR` will recursively add entries to a group. `addR` functions like `add`, but will also search sub-directories for matches. 
-
-### hide
-
-- **hide** *entry* *group*
-
-`hide` will remove a specified entry from a specified group. The entry argument should refer to the entry's name, rather than the entry's path. This option may be useful to hide certain entries after adding entries with the '\*' operator. *At the moment, hide can only hide a single entry*.
-
-### hideFile
-
-- **hideFile** *path* *group*
-
-`hideFile` has the exact same functionality as `hide`, but takes the absolute path of the entry to hide as the first argument, instead of the name.
+	for file in lfs.dir(startDir) do
+		local fullFilePath = startDir .. "/" .. file
+		if file ~= "." and file ~= ".." then
+			-- descend into subdirectory if recursive is set to true
+			if lfs.attributes(fullFilePath).mode == "directory" and recursive == true then
+				addEntries(parentGroup, fullFilePath, filePattern, recursive)
+			elseif lfs.attributes(fullFilePath).mode == "file" then
+				if string.match(file, filePattern) then
+					table.insert(parentGroup.Entries, {
+						name = file,
+						path = fullFilePath
+					})
+				end
+			end
+		end
+	end
+end
+```
 
 ## Settings
 
-If any of the following settings are specified, they should be at the top of the config file.
+Settings can be set via the `Settings` global variable.
 
+```lua
+Settings = {}
+Settings.sort = <boolean>
+```
+
+<!--
 ### autoAlias
 
 - **autoAlias** *on/off*
@@ -119,38 +159,72 @@ If any of the following settings are specified, they should be at the top of the
 - **foldCase** *on/off*
 
 Entering any non-traversal input in terminal-media-launcher can be used to jump to a group or entry. For instance, hitting 'f' on the keyboard will jump the cursor to the next group or entry that starts with an 'f'. *foldCase* determines whether or not this functionality is **case insensitive (on)** or **case sensitive (off)**. *foldCase* is turned on by default.
+-->
 
 ### sort
 
-- **sort** *on/off*
-
-`sort` will sort entries of each group in alphabetical order (though not the list of groups). Turning off `sort` is only recommended when adding one item per line to a group. `sort` is turned on by default.
+`sort` will sort entries of each group in alphabetical order (though not the list of groups). `sort` is true by default.
 
 ## Example
 
-```
-autoAlias on
+Here is an example `config.lua` which creates a Music, Pictures, and, Videos group, and adds all the files from the user's Music, Pictures, and Videos home folders to each group.
 
-# Adding a Group of Various Applications
+```lua
+local lfs = require "lfs"
 
-addGroup Applications
-addName GIMP /usr/bin/gimp Applications
-addName Chromium /usr/bin/chromium-browser Applications
-addName Thunderbird /usr/bin/thunderbird Applications
+local function addGroup(name, launcher, flags)
+	assert(type(name) == "string")
 
-# Adding a Videos Group that contains mp4 files
+    -- create Groups table if needed
+    if Groups == nil then
+        Groups = {}
+    end
 
-addGroup Videos
-setLauncher Videos /usr/bin/vlc
-add /home/john/Videos/*mp4 Videos
+    local new_group = {}
+    new_group.name = name
+	new_group.Entries = {}
+    if launcher ~= nil then
+        new_group.Launcher = launcher
+    end
+    if flags ~= nil then
+        new_group.Flags = flags
+    end
 
-# Adding a Pictures Group that contains only jpg and png files as well as all files from an external drive and a single desktop wallpaper
+    table.insert(Groups, new_group)
+    return new_group
+end
 
-addGroup Pictures
-setLauncher Pictures /usr/bin/sxiv
-setFlags Pictures "-s f"
-add /home/john/Pictures/*jpg Pictures
-add /home/john/Pictures/*png Pictures
-addR "/mnt/External_Drive/Johns Photos/*" Pictures
-addName "My Desktop Background" "/mnt/External_Drive/desktop wallpaper.jpg" Pictures
+local function addEntries(parentGroup, startDir, filePattern, recursive)
+	-- recursive arg is a boolean for whether or not to descend into subdirectories (false by default)
+	assert(type(parentGroup) == "table")
+	assert(type(parentGroup.Entries) == "table")
+	assert(type(startDir) == "string")
+	assert(type(filePattern) == "string")
+
+	for file in lfs.dir(startDir) do
+		local fullFilePath = startDir .. "/" .. file
+		if file ~= "." and file ~= ".." then
+			-- descend into subdirectory if recursive is set to true
+			if lfs.attributes(fullFilePath).mode == "directory" and recursive == true then
+				addEntries(parentGroup, fullFilePath, filePattern, recursive)
+			elseif lfs.attributes(fullFilePath).mode == "file" then
+				if string.match(file, filePattern) then
+					table.insert(parentGroup.Entries, {
+						name = file,
+						path = fullFilePath
+					})
+				end
+			end
+		end
+	end
+end
+
+local music = addGroup("Music", "xdg-open")
+addEntries(music, os.getenv("HOME") .. "/Music", ".*", true)
+
+local pictures = addGroup("Pictures", "xdg-open")
+addEntries(pictures, os.getenv("HOME") .. "/Pictures", ".*", true)
+
+local videos = addGroup("Videos", "xdg-open")
+addEntries(videos, os.getenv("HOME") .. "/Videos", ".*", true)
 ```

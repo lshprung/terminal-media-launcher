@@ -1,4 +1,7 @@
 #include <assert.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,87 +22,87 @@
 #define OPTION_CNT 14
 
 //private
-void check_line(char *buffer, char **options, int ln);
-int check_option(char *arg, char **options);
-char *autoAlias(char *path);
+//void check_line(char *buffer, char **options, int ln);
+//int check_option(char *arg, char **options);
+void get_settings(lua_State *L); // gets settings from Settings global variable
+int get_group_count(lua_State *L); // counts the number of valid groups
+int get_entry_count(lua_State *L); // counts the number of valid entries for a group
+void add_groups(lua_State *L, GROUP ***g);
+void add_entries(lua_State *L, GROUP *g);
+void stack_debug(lua_State *L);
+void table_debug(lua_State *L, int print_depth);
 
-//turn on or off sorting (A-Z); On by default
+//turn on or off sorting for entries (A-Z); On by default
+// TODO allow specifying whether to sort groups or entries (or both, or none)
 bool sort = true;
 
-//set to true to automatically try to create a human readable name for an entry
-bool hr = false;
-
-//turn foldCase (insensitive case searching) on or off; On by default
-bool fold_case = true;
-
 //return false if invalid path
-bool cfg_interp(char *path){
+GROUP **cfg_interp(char *path, int *group_count){
 	FILE *fp;
 	char buffer[BUF_LEN];
 	GROUP **g;
-	ENTRY **e;
-	int count;
-	int e_count;
-	int i=0;
+	const char *group_name;
+	//ENTRY **e;
+	int i;
 	int j;
 
+	// check if file path exists
 	fp = fopen(path, "r");
 	if(fp == NULL){
 		printf("Error: Invalid Configuration Path \"%s\"\n", path);
-		return false;
+		return NULL;
 	}
-
-	//build the options array
-	char **options = malloc(sizeof(char *) * OPTION_CNT);
-	options[0] = "add";
-	options[1] = "addF";
-	options[2] = "addGroup";
-	options[3] = "addName";
-	options[4] = "addNameF";
-	options[5] = "addR";
-	options[6] = "autoAlias";
-	options[7] = "foldCase";
-	options[8] = "hide";
-	options[9] = "hideFile";
-	options[10] = "setFlags";
-	options[11] = "setLauncher";
-	options[12] = "setLauncherRaw";
-	options[13] = "sort";
-
-	//Read each line of "config"
-	while(fgets(buffer, BUF_LEN, fp)){
-		i++;
-		check_line(buffer, options, i);
-	}
-
-	//cleanup
-	free(options);
-
-	/*
-	//DEBUG: test to see if the list was added to properly
-	g = get_groups();
-	count = get_gcount();
-	for(i = 0; i < count; i++){
-		printf("Looking at group %s\n", get_gname(g[i]));
-		e_count = get_ecount(g[i]);
-		e = get_entries(get_ghead(g[i]), e_count);
-		for(j = 0; j < e_count; j++){
-			printf("\t%s\n", get_ename(e[j]));
-		}
-	}
-	//END DEBUG
-	*/
-
 	fclose(fp);
-	return true;
-}
 
-bool get_sort(){
-	return sort;
-}
+	// load lua configuration
+	lua_State *L = luaL_newstate();
+	// new lua stack
+	luaL_openlibs(L); // allow for standard library to be used
+	int config_load_status = luaL_dofile(L, path);
+	if(config_load_status != 0) {
+		printf("Error: could not load configuration \"%s\"\n", path);
+		lua_error(L);
+		exit(1);
+	}
 
-bool get_case_sensitivity(){
-	return fold_case;
+	// set up base configuration variables
+	// TODO set helper variables and functions (e.g., so that Groups table doesn't need to be manually created in the user's config)
+	//lua_newtable(L);
+	//lua_setglobal(L, "Groups");
+	//lua_pcall(L, 0, 0, 0);
+
+	// open Settings table
+	lua_getglobal(L, "Settings");
+	// stack now contains: -1 => Settings
+	if(lua_type(L, -1) == LUA_TTABLE) {
+		// parse settings
+		get_settings(L);
+	}
+	lua_pop(L, 1);
+	// empty stack
+
+	// open Groups table
+	lua_getglobal(L, "Groups");
+	// stack now contains: -1 => Groups
+	if(lua_type(L, -1) != LUA_TTABLE) {
+		printf("Error in config: 'Groups' should be Table, is actually %s\n", lua_typename(L, lua_type(L, -1)));
+		exit(1);
+	}
+
+	// create the group array
+	*group_count = get_group_count(L);
+	if(*group_count <= 0) {
+		printf("Error: No Groups!\n");
+		g = NULL;
+	}
+	else {
+		g = malloc(sizeof(GROUP *) * (*group_count));
+
+		// add each group (which also adds each entry to each group)
+		add_groups(L, &g);
+	}
+	lua_close(L);
+	return g;
 }
 
 void refer_to_doc(){
@@ -107,409 +110,298 @@ void refer_to_doc(){
 	return;
 }
 
-void addme(char *path, char *group, bool force, char *name){
-	ENTRY *new;
-	char auto_name[BUF_LEN];
+void get_settings(lua_State *L) {
+	// stack now contains: -1 => table
 
-	//check if a name was given as argument
-	if(name != NULL){
-		//strip quotes from the name
-		name = strip_quotes(name);
-		new = create_entry(name, path, force);
-	}
+	bool *setting_vars[] = {
+		&sort
+	};
 
-	//check if autoAlias is on. If it is, go to the autoAlias function
-	else if(hr){
-		strcpy(auto_name, autoAlias(path));
-		new = create_entry(auto_name, path, force);
-	}
+	char *setting_strings[] = {
+		"sort"
+	};
 
-	else new = create_entry(path, path, force);
-	if(new != NULL) group_add(group, new);
-
-	return;
-}
-
-int search_ch(char *str, char c){
-	int i = 0;
-
-	while(str[i] != '\0'){
-		if(str[i] == c) return i;
-		i++;
-	}
-
-	return -1;
-}
-
-int search_last_ch(char *str, char c){
-	int i = 0;
-	int last_i = -1;
-
-	while(str[i] != '\0'){
-		if(str[i] == c) last_i = i;
-		i++;
-	}
-
-	return last_i;
-}
-
-//return 0 if match, 1 if not
-//TODO only supports one wildcard per entry
-int wild_cmp(char *wild, char *literal){
+	int count = 1;
 	int i;
-	
-	while(*wild != '\0'){
-		//traverse until wildcard
-		if(*wild != '*'){
-			if(*wild != *literal) return 1;
-			wild++;
-			literal++;
+
+	// looking at table Settings
+
+	// check if autoAlias is set
+	for(i = 0; i < count; ++i) {
+		lua_pushstring(L, setting_strings[i]);
+		// stack now contains: -1 => setting_string; -2 => table
+		lua_gettable(L, -2);
+		// stack now contains: -1 => string_value; -2 => table
+		if(lua_type(L, -1) == LUA_TBOOLEAN) {
+			*(setting_vars[i]) = lua_toboolean(L, -1);
 		}
-
-		//found wildcard, find the end of both names and comapre from the back
-		else{
-			i = 0;
-			wild++;
-			while(*wild != '\0'){
-				i++;
-				wild++;
-			}
-			while(*literal != '\0'){
-				literal++;
-			}
-
-			while(i > 0){
-				wild--;
-				literal--;
-				if(*wild != *literal) return 1;
-				i--;
-			}
-
-			return 0;
-		}
+		lua_pop(L, 1);
+		// stack now contains: -1 => table
 	}
-
-	return 0;
 }
 
+int get_group_count(lua_State *L) {
+	int output = 0;
 
-char *strip_quotes(char *str){
-	char *stripped_str = malloc(sizeof(char) * BUF_LEN);
-	
-	if(str[0] == '"'){
-		stripped_str = &str[1];
-		stripped_str[strlen(stripped_str) - 1] = '\0';
-		return stripped_str;
-	}
-
-	return str;
-}
-
-void error_mes(int ln, char *message){
-
-	assert(message != NULL);
-
-	printf("Configuration File Error:\nOn line %d: %s\n\n", ln, message);
-
-	return;
-}
-
-//TODO add support for "addR" recursive adding (still needs work...)
-//TODO add support for "alias" option
-//TODO add support for "hide" option
-void check_line(char *buffer, char **options, int ln){
-	char *delims = " \t\n";
-	char *tok = strtok(buffer, delims);
-	char args[MAX_ARGS][BUF_LEN];
-	GROUP **g;
-	ENTRY **e;
-	char *tok_p;
-	char *arg_p;
-	int g_count;
-	int e_count;
-	int search_res;
-	int i, j;
-	char *error_p; //helper for complex error messages
-
-	//ensure line is not blank or commented out
-	if(tok != NULL && tok[0] != '#' && tok[0] != '\0'){
-		//initialize args to 0
-		for(i = 0; i < MAX_ARGS; i++){
-			args[i][0] = '\0';
-		}
-
-		i = 0;
-		//record all arguments in the line
-		while(tok != NULL){
-			if(i >= MAX_ARGS){
-				error_mes(ln, "Too many arguments");
-				return;
+	// stack now contains: -1 => table
+	lua_pushnil(L);
+	// stack now contains: -1 => nil; -2 => table
+	while (lua_next(L, -2)) {
+		// stack now contains: -1 => value; -2 => key; -3 => table
+		// copy the key so that lua_tostring does not modify the original
+		lua_pushvalue(L, -2);
+		// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+		if(lua_type(L, -1) == LUA_TNUMBER && lua_type(L, -2) == LUA_TTABLE) {
+			lua_pushstring(L, "name");
+			// stack now contains: -1 => "name"; -2 => key; -3 => value; -4 => key; -5 => table
+			lua_gettable(L, -3);
+			// stack now contains: -1 => name; -2 => key; -3 => value; -4 => key; -5 => table
+			if(lua_type(L, -1) == LUA_TSTRING) {
+				// check that the Entries table for this group is not empty
+				lua_pushstring(L, "Entries");
+				// stack now contains: -1 => "Entries"; -2 => name; -3 => key; -4 => value; -5 => key; -6 => table
+				lua_gettable(L, -4);
+				// stack now contains: -1 => Entries; -2 => name; -3 => key; -4 => value; -5 => key; -6 => table
+				if(lua_type(L, -1) == LUA_TTABLE && get_entry_count(L) > 0)
+					++output;
+				lua_pop(L, 1);
+				// stack now contains: -1 => name; -2 => key; -3 => value; -4 => key; -5 => table
 			}
-			strcpy(args[i], tok);
-			//handle if an argument has spaces and is wrapped in quotes
-			if(tok[0] == '"'){
-				arg_p = &args[i][0];
-				tok_p = &tok[1];
+			lua_pop(L, 1);
+			// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+		}
+		lua_pop(L, 2);
+		// stack now contains: -1 => key; -2 => table
+	}
+	// stack now contains: -1 => table (when lua_next returns 0 it pops the key
+	// but does not push anything.)
 
-				while(*tok_p != '"'){
-					switch(*tok_p){
+	return output;
+}
 
+int get_entry_count(lua_State *L) {
+	int output = 0;
 
-						case '\0':
-							tok = strtok(NULL, delims);
-							tok_p = &tok[0];
-							*arg_p = ' ';
-							arg_p++;
-							break;
+	// stack now contains: -1 => table
+	lua_pushnil(L);
+	// stack now contains: -1 => nil; -2 => table
+	while (lua_next(L, -2)) {
+		// stack now contains: -1 => value; -2 => key; -3 => table
+		// copy the key so that lua_tostring does not modify the original
+		lua_pushvalue(L, -2);
+		// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+		if(lua_type(L, -1) == LUA_TNUMBER && lua_type(L, -2) == LUA_TTABLE) {
+			// check that the entry has a valid name
+			lua_pushstring(L, "name");
+			// stack now contains: -1 => "name"; -2 => key; -3 => value; -4 => key; -5 => table
+			lua_gettable(L, -3);
+			// stack now contains: -1 => name; -2 => key; -3 => value; -4 => key; -5 => table
+			if(lua_type(L, -1) == LUA_TSTRING) ++output;
+			lua_pop(L, 1);
+			// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+		}
+		lua_pop(L, 2);
+		// stack now contains: -1 => key; -2 => table
+	}
+	// stack now contains: -1 => table (when lua_next returns 0 it pops the key
+	// but does not push anything.)
 
-						case '\\':
-							tok_p++;
+	return output;
+}
 
-						default:
-							*arg_p = *tok_p;
-							tok_p++;
-							arg_p++;
+void add_groups(lua_State *L, GROUP ***g) {
+	const char *group_name;
+	int group_table_stack_index; // index of Groups.TABLE_NAME
+	int entry_table_stack_index; // index of Groups.TABLE_NAME.Entries
+	int entry_count;
+	char sort_cmd_lua[BUF_LEN]; // used to store the lua call to table.sort
+	int i = 1; // index in lua table
+	int count = 0; // index in C struct
 
-					}
+	// stack now contains: -1 => table
+	lua_pushnil(L);
+	// stack now contains: -1 => nil; -2 => table
+	while (lua_next(L, -2)) {
+		// stack now contains: -1 => value; -2 => key; -3 => table
+		// copy the key so that lua_tostring does not modify the original
+		lua_pushvalue(L, -2);
+		// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+		if(lua_type(L, -1) == LUA_TNUMBER && lua_type(L, -2) == LUA_TTABLE) {
+			lua_pushstring(L, "name");
+			// stack now contains: -1 => "name"; -2 => key; -3 => value; -4 => key; -5 => table
+			lua_gettable(L, -3);
+			// stack now contains: -1 => name; -2 => key; -3 => value; -4 => key; -5 => table
+			group_name = lua_tostring(L, -1);
+			lua_pop(L, 1);
+			// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+			if(group_name != NULL) {
+				// push the Entries table on the stack (to get entry information)
+				lua_pushstring(L, "Entries");
+				// stack now contains: -1 => "Entries"; -2 => key; -3 => value; -4 => key; -5 => table
+				lua_gettable(L, -3);
+				// stack now contains: -1 => Entries; -2 => key; -3 => value; -4 => key; -5 => table
+				if(lua_type(L, -1) != LUA_TTABLE) {
+					printf("Error in config: in group '%s': 'Entries' should be Table, is actually %s\n", group_name, lua_typename(L, lua_type(L, -1)));
+					exit(1);
 				}
 
-				*arg_p = '\0';
-					
+				entry_count = get_entry_count(L);
+
+				// check that the group has at least 1 entry
+				if(entry_count <= 0) {
+					printf("Skipping empty group '%s'\n", group_name);
+					lua_pop(L, 1);
+					// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+				}
+				else {
+					(*g)[count] = create_group(group_name, entry_count);
+
+					// sort the entries if necessary
+					if(sort) {
+						sprintf(sort_cmd_lua, "table.sort(Groups[%d].Entries, function(a, b) return a.name < b.name end)", i);
+						luaL_dostring(L, sort_cmd_lua);
+					}
+
+					// add entries to this group
+					add_entries(L, (*g)[count]);
+					lua_pop(L, 1);
+					// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+
+					// set the launcher, if applicable
+					lua_pushstring(L, "Launcher");
+					// stack now contains: -1 => "Launcher"; -2 => key; -3 => value; -4 => key; -5 => table
+					lua_gettable(L, -3);
+					// stack now contains: -1 => Launcher; -2 => key; -3 => value; -4 => key; -5 => table
+					if(lua_type(L, -1) == LUA_TSTRING) {
+						set_gprog((*g)[count], lua_tostring(L, -1));
+					}
+					lua_pop(L, 1);
+					// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+
+					// set the launcher flags, if applicable
+					lua_pushstring(L, "Flags");
+					// stack now contains: -1 => "Flags"; -2 => key; -3 => value; -4 => key; -5 => table
+					lua_gettable(L, -3);
+					// stack now contains: -1 => Flags; -2 => key; -3 => value; -4 => key; -5 => table
+					if(lua_type(L, -1) == LUA_TSTRING) {
+						set_gflags((*g)[count], lua_tostring(L, -1));
+					}
+					lua_pop(L, 1);
+					// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+
+					++count;
+				}
 			}
-
-			tok = strtok(NULL, delims);
-			i++;
 		}
+		lua_pop(L, 2);
+		// stack now contains: -1 => key; -2 => table
+		++i;
+	}
+	// stack now contains: -1 => table (when lua_next returns 0 it pops the key
+	// but does not push anything.)
+	// Pop table
+	lua_pop(L, 1);
+	// Stack is now the same as it was on entry to this function	
+}
 
-		//optimally check which option was specified
-		search_res = check_option(args[0], options);
+void add_entries(lua_State *L, GROUP *g) {
+	const char *entry_name;
+	const char *entry_path;
+	int entry_table_stack_index;
+	int i = 1; // index in lua table
+	int count = 0; // index in C struct
 
-		switch(search_res){
+	// stack now contains: -1 => table
+	lua_pushnil(L);
+	// stack now contains: -1 => nil; -2 => table
+	while (lua_next(L, -2)) {
+		// stack now contains: -1 => value; -2 => key; -3 => table
+		// copy the key so that lua_tostring does not modify the original
+		lua_pushvalue(L, -2);
+		// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+		if(lua_type(L, -1) == LUA_TNUMBER && lua_type(L, -2) == LUA_TTABLE) {
+			// check that the entry has a valid name
+			lua_pushstring(L, "name");
+			// stack now contains: -1 => "name"; -2 => key; -3 => value; -4 => key; -5 => table
+			lua_gettable(L, -3);
+			// stack now contains: -1 => name; -2 => key; -3 => value; -4 => key; -5 => table
+			entry_name = lua_tostring(L, -1);
+			lua_pop(L, 1);
+			// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
 
-			case 0: //add
-				//add entry(ies) to a group: first arg is the file(s), second arg is the group to add to
-				//TODO add sorting functionality
-				handle_fname(args[1], args[2], 0, 0, NULL, ln);
+			if(entry_name != NULL) {
+				// get this entry's path, if applicable
+				lua_pushstring(L, "path");
+				// stack now contains: -1 => "path"; -2 => key; -3 => value; -4 => key; -5 => table
+				lua_gettable(L, -3);
+				// stack now contains: -1 => path; -2 => key; -3 => value; -4 => key; -5 => table
+				if(lua_type(L, -1) == LUA_TSTRING) entry_path = lua_tostring(L, -1);
+				else entry_path = entry_name;
+				lua_pop(L, 1);
+				// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+
+				set_gentry(g, count, create_entry(entry_name, entry_path, true));
+				++count;
+			}
+		}
+		lua_pop(L, 2);
+		// stack now contains: -1 => key; -2 => table
+	}
+	// stack now contains: -1 => table (when lua_next returns 0 it pops the key
+}
+
+void stack_debug(lua_State *L) {
+	int i;
+
+	printf("DEBUGGING STACK:\n");
+	for(i = 1; i <= lua_gettop(L); ++i) {
+		printf("\t%d - %s", i, lua_typename(L, lua_type(L, i)));
+
+		switch(lua_type(L, i)) {
+			case LUA_TSTRING:
+				printf(" - %s\n", lua_tostring(L, i));
 				break;
 				
-			case 1: //addF
-				//force add entry to a group: first arg is the file(s), second arg is the group to add to
-				handle_fname(args[1], args[2], 0, 1, NULL, ln);
-				break;
-
-			case 2: //addGroup
-				//create a new group
-				group_add(strip_quotes(args[1]), NULL);
-				break;
-
-			case 3: //addName
-				//add entry to a group: first arg is the name, second arg is the file, and third arg is the group to add to
-				handle_fname(args[2], args[3], 0, 0, args[1], ln);
-				break;
-
-			case 4: //addNameF
-				//same as addName, but with force on
-				handle_fname(args[2], args[3], 0, 1, args[1], ln);
-				break;
-
-			case 5: //addR
-				//recursively add: that is, also search directories in the given path
-				//NOTE: experimental
-				handle_fname(args[1], args[2], 1, 0, NULL, ln);
-				break;
-				
-			case 6: //autoAlias
-				if(!(strcmp(args[1], "on"))) hr = true;
-				else if(!(strcmp(args[1], "off"))) hr = false;
-				break;
-
-			case 7: //foldCase (case insensitive)
-				if(!(strcmp(args[1], "on"))) fold_case = true;
-				else if(!(strcmp(args[1], "off"))) fold_case = false;
-				break;
-
-			//TODO consider having this call handle_fname instead so that '*' can be used
-			case 8: //hide
-			case 9: //hideFile
-				//args[2] is referring to a group
-				g = get_groups();
-				g_count = get_gcount();
-
-				//look for matching existing group
-				for(i = 0; i < g_count; i++){
-					if(!(strcmp(get_gname(g[i]), args[2]))) break;
-				}
-
-				if(i < g_count){
-					e_count = get_ecount(g[i]);
-					e = get_entries(get_ghead(g[i]), e_count);
-
-					for(j = 0; j < e_count; j++){
-						if(!strcmp((search_res == 8 ? get_ename(e[j]) : get_epath(e[j])), strip_quotes(args[1]))) break;
-					}
-
-					if(j < e_count){
-						set_hide(e[j], true);
-						set_ecount(g[i], get_ecount(g[i])-1);
-					}
-					else{
-						error_p = malloc(sizeof(char) * 1024);
-						sprintf(error_p, "Entry \"%s\" does not exist", args[1]);
-						error_mes(ln, error_p);
-						free(error_p);
-					}
-				}
-
-				else{
-					error_p = malloc(sizeof(char) * 1024);
-					sprintf(error_p, "Group \"%s\" does not exist", args[2]);
-					error_mes(ln, error_p);
-					free(error_p);
-				}
-				break;
-
-			case 10: //setFlags
-				//args[1] is referring to a group
-				g = get_groups();
-				g_count = get_gcount();
-
-				//look for matching existing group
-				for(i = 0; i < g_count; i++){
-					if(!(strcmp(get_gname(g[i]), args[1]))) break;
-				}
-
-				//set a group's launcher flags (like ./program -f file for fullscreen)
-				//assert that a matching group was found
-				if(i < g_count) set_gflags(g[i], strip_quotes(args[2]));
-				else{
-					error_p = malloc(sizeof(char) * 1024);
-					sprintf(error_p, "Group \"%s\" does not exist", args[1]);
-					error_mes(ln, error_p);
-					free(error_p);
-				}
-				break;
-
-			case 11: //setLauncher
-			case 12: //setLauncherRaw
-				//args[1] is referring to a group
-				g = get_groups();
-				g_count = get_gcount();
-
-				//look for matching existing group
-				for(i = 0; i < g_count; i++){
-					if(!(strcmp(get_gname(g[i]), args[1]))) break;
-				}
-
-				//set a group's launcher (this requires pulling down the existing groups and finding the one that args[1] mentions)
-				//assert that a matching group was found
-				if(i < g_count){
-					set_gprog(g[i], strip_quotes(args[2]));
-					if(search_res == 12) set_gquotes(g[i], false); //FIXME don't forget to change this line if adding more options!!!
-				}
-				else{
-					error_p = malloc(sizeof(char) * 1024);
-					sprintf(error_p, "Group \"%s\" does not exist", args[1]);
-					error_mes(ln, error_p);
-					free(error_p);
-				}
-				break;
-
-			case 13: //sort
-				if(!(strcmp(args[1], "on"))) sort = true;
-				else if(!(strcmp(args[1], "off"))) sort = false;
-				break;
+			//case LUA_TTABLE:
+			//	printf("\n");
+			//	table_debug(L, 2);
+			//	break;
 
 			default:
-				error_p = malloc(sizeof(char) * 1024);
-				sprintf(error_p, "Unknown config option \"%s\"", args[0]);
-				error_mes(ln, error_p);
-				free(error_p);
-
+				printf("\n");
 		}
-
 	}
-
-	return;
 }
 
-int check_option(char *arg, char **options){
-	int min = 0;
-	int max = OPTION_CNT-1;
-	int hover;
-	int comp_res;
+// FIXME WIP debugging function
+void table_debug(lua_State *L, int print_depth) {
+	int i;
 
-	while(max - min > 1){
-		hover = min + (max-min)/2;
-		comp_res = strcmp(arg, options[hover]);
-
-		if(comp_res > 0) min = hover;
-		else if(comp_res < 0) max = hover;
-		else return hover;
-	}
-
-	if(max == OPTION_CNT-1 && strcmp(arg, options[max]) == 0) return max;
-	else if(min == 0 && strcmp(arg, options[min]) == 0) return min;
-
-	return -1;
-}
-
-
-char *autoAlias(char *path){
-	char *hr_name = malloc(sizeof(char) * BUF_LEN);
-	char *p = hr_name;
-	char *rpath; //necessary so as not to touch the actual path
-	char *last_dot = NULL; //used to trim the file extension (if there is one)
-	bool stop = false; //stop when you don't want to add a series of chars to the output
-
-	//get to the relative path name
-	rpath = strrchr(path, sep);
-	if(rpath == NULL) rpath = path;
-	else rpath++;
-
-	while(*rpath != '\0'){
-		switch(*rpath){
-			case '(':
-				stop = true;
-				break;
-
-			case ')':
-				stop = false;
-				break;
-
-			case '-':
-			case '_':
-				if(*(p-1) != ' ' && !stop){
-					*p = ' ';
-					*p++;
-				}
-				break;
-
-			case ' ':
-				if(*(p-1) != ' ' && !stop){
-					*p = *rpath;
-					*p++;
-				}
-				break;
-
-			case '.':
-				last_dot = p;
-
-			default:
-				if(!stop){
-					*p = *rpath;
-					*p++;
-				}
+	// stack now contains: -1 => table
+	lua_pushnil(L);
+	// stack now contains: -1 => nil; -2 => table
+	while (lua_next(L, -2)) {
+		// stack now contains: -1 => value; -2 => key; -3 => table
+		// copy the key so that lua_tostring does not modify the original
+		lua_pushvalue(L, -2);
+		// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+		const char *key = lua_tostring(L, -1);
+		const char *value = lua_typename(L, lua_type(L, -2));
+		for(i = 0; i < print_depth; ++i) {
+			printf("\t");
 		}
-		*rpath++;
+		printf("%s => %s", key, value);
+		if(lua_type(L, -2) == LUA_TSTRING) {
+			printf(" - %s", lua_tostring(L, -2));
+		}
+		printf("\n");
+		// pop value + copy of key, leaving original key
+		lua_pop(L, 2);
+		// stack now contains: -1 => key; -2 => table
 	}
-	
-	//close the name
-	if(last_dot != NULL) *last_dot = '\0';
-	else if(*path == '"') *(p-1) = '\0'; //close early to avoid including closing quote
-	else *p = '\0';
-
-	return hr_name;
+	// stack now contains: -1 => table (when lua_next returns 0 it pops the key
+	// but does not push anything.)
+	// Pop table
+	lua_pop(L, 1);
+	// Stack is now the same as it was on entry to this function	
 }
-
-
-

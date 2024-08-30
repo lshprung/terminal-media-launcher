@@ -1,4 +1,4 @@
-AC_INIT([terminal-media-launcher],[0.1.1a])
+AC_INIT([terminal-media-launcher],[0.2])
 AC_SUBST([PACKAGE_TITLE], ["Terminal Media Launcher"])
 AC_CONFIG_SRCDIR([src/draw.c])
 AC_CONFIG_HEADERS([config.h])
@@ -7,12 +7,15 @@ AM_INIT_AUTOMAKE([foreign])
 
 # Checks for programs.
 AC_PROG_CC
+AX_PROG_LUA(,,,[AC_MSG_ERROR([requires lua])])
 
 # Checks for libraries.
 AC_CHECK_LIB([ncurses], [initscr])
+AX_LUA_LIBS
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
+AX_LUA_HEADERS
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL

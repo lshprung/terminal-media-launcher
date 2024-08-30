@@ -1,5 +1,7 @@
 # Windows Compilation Instructions
 
+**NOTE: Outdated. Windows users should be just fine following along with instructions on the main README.**
+
 Compiling on Windows requires access to the MinGW toolchain. The easiest way to get the necessary libraries is by installing [MSYS2](https://www.msys2.org/) which provides a package manager: pacman.
 
 1. Download the latest version of MSYS2 from [here](https://www.msys2.org/).
