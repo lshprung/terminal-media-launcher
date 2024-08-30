@@ -1,13 +1,12 @@
-EXTRA_DIST = find_dlls.sh installer.nsi.in
+EXTRA_DIST = installer.nsi.in
 
-CLEANFILES = $(PACKAGE_NAME)-Setup.exe deps/*
+CLEANFILES = *Setup.exe deps/*
 
 SEARCHPATH=$$PATH
-DEPENDENCIES = $(shell ./find_dlls.sh -q -s $(SEARCHPATH) '../src/$(PACKAGE_NAME).exe')
+DLLS = $(shell ntldd -R ../src/$(PACKAGE_NAME).exe | sed 's/.*=> //g' | grep -v "not found" | sed 's/ (.*)$$//g' | sed 's/\\/\\\\/g' | xargs cygpath -u | grep "$$MINGW_PREFIX")
 
 .PHONY: installer
-installer: $(PACKAGE_NAME)-Setup.exe
-$(PACKAGE_NAME)-Setup.exe: installer.nsi
+installer: installer.nsi
 	mkdir -p deps
-	for file in $(DEPENDENCIES); do install "$$file" "deps/$$(basename "$$file")"; done
+	for file in $(DLLS); do install "$$file" "deps/$$(basename "$$file")"; done
 	makensis installer.nsi
