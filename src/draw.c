@@ -97,8 +97,8 @@ int main(int argc, char **argv){
 	e_hover = calloc(g_count, sizeof(int));
 	e_offset = calloc(g_count, sizeof(int));
 
-	//load cached data
-	//load_cache(g_count, &g_hover, &e_hover, &e_offset, &true_hover, cfg_path);
+	// load cached data
+	load_cache(g_count, &g_hover, &e_hover, &e_offset, &true_hover, cfg_path);
 
 	//reopen stdout for drawing menu
 	freopen("/dev/tty", "w", stdout);
