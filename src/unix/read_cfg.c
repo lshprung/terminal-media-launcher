@@ -122,7 +122,7 @@ void mkconfig_wizard(char *path){
 		"				if string.match(file, filePattern) then\n"
 		"					table.insert(parentGroup.Entries, {\n"
 		"						name = file,\n"
-		"						path = fullFilePath\n"
+		"						path = '\"' .. fullFilePath .. '\"'\n"
 		"					})\n"
 		"				end\n"
 		"			end\n"

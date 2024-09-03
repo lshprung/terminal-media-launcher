@@ -122,7 +122,7 @@ local function addEntries(parentGroup, startDir, filePattern, recursive)
 				if string.match(file, filePattern) then
 					table.insert(parentGroup.Entries, {
 						name = file,
-						path = fullFilePath
+						path = '"' .. fullFilePath .. '"'
 					})
 				end
 			end
@@ -211,7 +211,7 @@ local function addEntries(parentGroup, startDir, filePattern, recursive)
 				if string.match(file, filePattern) then
 					table.insert(parentGroup.Entries, {
 						name = file,
-						path = fullFilePath
+						path = '"' .. fullFilePath .. '"'
 					})
 				end
 			end
