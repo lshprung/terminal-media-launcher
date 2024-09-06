@@ -55,6 +55,7 @@ Makefile
 .cache
 *~
 *.tar.gz
+*.exe
 config.h
 actions/build
 nsis/installer.nsi
